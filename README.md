@@ -25,6 +25,9 @@ Access http://localhost:17682 and enter a password(an initial password is `passw
 ## Demo
 Please see `debugspace/debuggerDemo.ipynb`.
 
+## See also
+- JISD's javadoc: https://sakupo.github.io/JISD-doc/
+
 ## Restart & Stop
 ### Restart
 ```bash
