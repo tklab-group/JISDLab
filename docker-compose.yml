@@ -1,0 +1,15 @@
+version: '3'
+services:
+  jisd:
+    build: ./
+    restart: always
+    image: jisd
+    command: "jupyter lab --allow-root"
+    container_name: JISD
+    ports:
+      - 17682:17682
+    volumes:
+      - ./JISD:/workspaces/JISD/JISD
+      - ./debugspace:/workspaces/debugspace
+      - ./sample:/workspaces/sample
+    working_dir: /workspaces

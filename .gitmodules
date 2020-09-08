@@ -1,0 +1,6 @@
+[submodule "IJava"]
+	path = IJava
+	url = https://github.com/sakupo/IJava.git
+[submodule "jdiscript"]
+	path = jdiscript
+	url = https://github.com/sakupo/jdiscript.git
