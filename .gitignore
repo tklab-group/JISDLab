@@ -1,4 +1,4 @@
 .ipynb_checkpoints
-.vscode
-.metadata
+.vscode/
+.metadata/
 /JISD-doc*
