@@ -2,4 +2,6 @@
 .project
 .settings
 .gradle
+build.xml
 /bin/
+/.externalToolBuilders/
