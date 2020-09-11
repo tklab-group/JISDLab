@@ -22,7 +22,7 @@ public class Debugger {
 	/** Target class setting items */
 	String main, options;
 	Thread jdiThread;
-	JDIManager jdiManager;
+	VMManager vmManager;
 	
 	/**
 	 * Constructor
@@ -103,8 +103,8 @@ public class Debugger {
 		j = new JDIScript(new VMLauncher(options, main).start());
 		bpm.setJDI(j);
 		OnVMStart start = prepareStart();
-		jdiManager = new JDIManager(j, start);
-		jdiThread = new Thread(jdiManager);
+		vmManager = new VMManager(j, start);
+		jdiThread = new Thread(vmManager);
 	}
 	
 	/**
@@ -125,7 +125,7 @@ public class Debugger {
 	 * Shutdown the debugger.
 	 */
 	public void exit() {
-		jdiManager.shutdown();
+		vmManager.shutdown();
 	}
 	
 	/**

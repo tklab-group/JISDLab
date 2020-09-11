@@ -10,7 +10,7 @@ import com.sun.jdi.VMDisconnectedException;
  * @author sugiyama
  *
  */
-class JDIManager implements Runnable {
+class VMManager implements Runnable {
 	/** JDI */
 	JDIScript j;
 	/** A procedure before the debugger runs  */
@@ -21,7 +21,7 @@ class JDIManager implements Runnable {
 	 * @param j JDI
 	 * @param start A procedure before the debugger runs
 	 */
-	JDIManager(JDIScript j, OnVMStart start) {
+	VMManager(JDIScript j, OnVMStart start) {
 		this.j = j;
 		this.start = start;
 	}
