@@ -10,7 +10,7 @@ First of all, you should clone this repository with a `--recursive` option.
 ```
 git clone --recursive https://github.com/tklab-group/JISD.git
 ```
-And then, you can set your Java application's classpaths in `ARG cp3` of [Dockerfile](./Dockerfile).
+And then, you can set your Java application's classpaths in `ARG cp3` of [Dockerfile](./Dockerfile).Concerning local and container path  relations, see [docker-compose.yml](./docker-compose.yml). 
 ```bash:Dockerfile
 # your application's absolute classpaths in a container(classpath1:classpath2:...)
 ARG cp3=${ws_dir}/sample
