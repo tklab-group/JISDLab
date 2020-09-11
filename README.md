@@ -37,3 +37,6 @@ docker-compose restart
 ```bash
 docker-compose down -v
 ```
+
+## Trouble Shooting
+Please see https://github.com/tklab-group/JISD/wiki/Trouble-Shooting (Japanese only)
