@@ -12,16 +12,20 @@ public class BreakPoint {
 	String className;
 	int lineNumber;
 	String methodName;
+	String[] varNames;
 	
-	BreakPoint(String className, int lineNumber) {
+	BreakPoint(String className, int lineNumber, String[] varNames) {
 		this.className = className;
 		this.lineNumber = lineNumber;
+		this.methodName = "";
+		this.varNames = varNames;
 	}
 	
-	BreakPoint(String className, String methodName) {
+	BreakPoint(String className, String methodName, String[] varNames) {
 		this.className = className;
 		this.lineNumber = 0;
 		this.methodName = methodName;
+		this.varNames = varNames;
 	}
 	
 	public String getClassName() {
@@ -34,6 +38,10 @@ public class BreakPoint {
 	
 	public String getMethodName() {
 		return methodName; 
+	}
+	
+	public String[] getVarNames() {
+		return varNames;
 	}
 
 	@Override

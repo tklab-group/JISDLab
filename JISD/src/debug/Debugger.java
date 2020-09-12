@@ -41,11 +41,19 @@ public class Debugger {
      * @param lineNumber A line number in a target java file 
      */
 	public void setBreakPoint(int lineNumber) {
-		bpm.setBreakPoint(main, lineNumber);
+		setBreakPoint(main, lineNumber);
+	}
+	
+	public void setBreakPoint(int lineNumber, String[] varName) {
+		setBreakPoint(main, lineNumber, varName);
 	}
 	
 	public void setBreakPoint(String className, int lineNumber) {
-		bpm.setBreakPoint(className, lineNumber);
+		setBreakPoint(className, lineNumber, new String[0]);
+	}
+	
+	public void setBreakPoint(String className, int lineNumber, String[] varNames) {
+		bpm.setBreakPoint(className, lineNumber, varNames);
 	}
 	
 	/**
@@ -53,12 +61,20 @@ public class Debugger {
 	 * @param methodName A method name in a target java file 
 	 */
 	public void setBreakPoint(String methodName) {
-		bpm.setBreakPoint(main, methodName);
+		setBreakPoint(main, methodName);
+	}
+	
+	public void setBreakPoint(String methodName, String[] varNames) {
+		setBreakPoint(main, methodName, varNames);
 	}
 	
 	public void setBreakPoint(String className, String methodName) {
-		bpm.setBreakPoint(className, methodName);
+		setBreakPoint(className, methodName, new String[0]);
 	}
+	
+	public void setBreakPoint(String className, String methodName, String[] varName) {
+		bpm.setBreakPoint(className, methodName, varName);
+	}	
 	
 	/**
 	 * Remove breakpoint with a line number.
