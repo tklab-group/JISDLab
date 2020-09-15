@@ -44,15 +44,15 @@ public class Debugger {
 		setBreakPoint(main, lineNumber);
 	}
 	
-	public void setBreakPoint(int lineNumber, String[] varName) {
+	public void setBreakPoint(int lineNumber, ArrayList<String> varName) {
 		setBreakPoint(main, lineNumber, varName);
 	}
 	
 	public void setBreakPoint(String className, int lineNumber) {
-		setBreakPoint(className, lineNumber, new String[0]);
+		setBreakPoint(className, lineNumber, new ArrayList<String>());
 	}
 	
-	public void setBreakPoint(String className, int lineNumber, String[] varNames) {
+	public void setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
 		bpm.setBreakPoint(className, lineNumber, varNames);
 	}
 	
@@ -64,15 +64,15 @@ public class Debugger {
 		setBreakPoint(main, methodName);
 	}
 	
-	public void setBreakPoint(String methodName, String[] varNames) {
+	public void setBreakPoint(String methodName, ArrayList<String> varNames) {
 		setBreakPoint(main, methodName, varNames);
 	}
 	
 	public void setBreakPoint(String className, String methodName) {
-		setBreakPoint(className, methodName, new String[0]);
+		setBreakPoint(className, methodName, new ArrayList<String>());
 	}
 	
-	public void setBreakPoint(String className, String methodName, String[] varName) {
+	public void setBreakPoint(String className, String methodName, ArrayList<String> varName) {
 		bpm.setBreakPoint(className, methodName, varName);
 	}	
 	

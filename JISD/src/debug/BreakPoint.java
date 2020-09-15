@@ -3,6 +3,8 @@
  */
 package debug;
 
+import java.util.ArrayList;
+
 /**
  * Breakpoint infomation class.
  * @author sugiyama
@@ -12,16 +14,16 @@ public class BreakPoint {
 	String className;
 	int lineNumber;
 	String methodName;
-	String[] varNames;
+	ArrayList<String> varNames;
 	
-	BreakPoint(String className, int lineNumber, String[] varNames) {
+	BreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
 		this.className = className;
 		this.lineNumber = lineNumber;
 		this.methodName = "";
 		this.varNames = varNames;
 	}
 	
-	BreakPoint(String className, String methodName, String[] varNames) {
+	BreakPoint(String className, String methodName, ArrayList<String> varNames) {
 		this.className = className;
 		this.lineNumber = 0;
 		this.methodName = methodName;
@@ -40,7 +42,7 @@ public class BreakPoint {
 		return methodName; 
 	}
 	
-	public String[] getVarNames() {
+	public ArrayList<String> getVarNames() {
 		return varNames;
 	}
 

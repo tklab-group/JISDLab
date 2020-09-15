@@ -42,6 +42,9 @@ class DebugResultManager {
 		return drs;
 	}
 	
+	/**
+	 * Clear debug result all.
+	 */
 	void clearResults() {
 		drs.clear();
 	}
