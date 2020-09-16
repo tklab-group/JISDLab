@@ -1,5 +1,6 @@
 package debug;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,7 +75,7 @@ class BreakPointManager {
     }
     
     String toClassNameFromSourcePath(String sp) {
-    	String className = sp.replace('\\', '.');
+    	String className = sp.replace(File.separator.charAt(0), '.'); 
     	int length = className.length();
     	if (className.substring(length-5, length).equals(".java")) {
     		return className.substring(0, length-5);
@@ -115,7 +116,7 @@ class BreakPointManager {
 	    		}
 	        }
 	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||
-	    		 isBPSetByMethodName && bpSetByMethodName.getIsBreak()) {
+	    		(isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
 	    		currentTRef = tref;
 	    	    currentTRef.suspend();
 	    	}
