@@ -15,21 +15,31 @@ public class BreakPoint {
 	int lineNumber;
 	String methodName;
 	ArrayList<String> varNames;
+	boolean isBreak;
 	
-	BreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
-		this(className, lineNumber, "", varNames);
+	BreakPoint(String className, int lineNumber) {
+		this(className, lineNumber, "", new ArrayList<String>(), false);
 	}
 	
-	BreakPoint(String className, String methodName, ArrayList<String> varNames) {
-		this(className, 0, methodName, varNames);
+	BreakPoint(String className, String methodName) {
+		this(className, 0, methodName, new ArrayList<String>(), false);
 	}
 	
-	BreakPoint(String className, int lineNumber, String methodName, ArrayList<String> varNames) {
+	BreakPoint(String className, int lineNumber, ArrayList<String> varNames, boolean isBreak) {
+		this(className, lineNumber, "", varNames, isBreak);
+	}
+	
+	BreakPoint(String className, String methodName, ArrayList<String> varNames, boolean isBreak) {
+		this(className, 0, methodName, varNames, isBreak);
+	}
+	
+	BreakPoint(String className, int lineNumber, String methodName, ArrayList<String> varNames, boolean isBreak) {
 		this.className = className;
 		this.lineNumber = lineNumber;
 		this.methodName = methodName;
 		varNames.remove("");
 		this.varNames = varNames;
+		this.isBreak = isBreak;
 	}
 	
 	public String getClassName() {
@@ -46,6 +56,10 @@ public class BreakPoint {
 	
 	public ArrayList<String> getVarNames() {
 		return varNames;
+	}
+	
+	public boolean getIsBreak() {
+		return isBreak;
 	}
 
 	@Override

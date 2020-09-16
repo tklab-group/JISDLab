@@ -53,7 +53,7 @@ public class Debugger {
 	}
 	
 	public void setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
-		bpm.setBreakPoint(className, lineNumber, varNames);
+		bpm.setBreakPoint(className, lineNumber, varNames, true);
 	}
 	
 	/**
@@ -73,7 +73,47 @@ public class Debugger {
 	}
 	
 	public void setBreakPoint(String className, String methodName, ArrayList<String> varName) {
-		bpm.setBreakPoint(className, methodName, varName);
+		bpm.setBreakPoint(className, methodName, varName, true);
+	}	
+	
+	/**
+     * Set watchpoint with a line number.
+     * @param lineNumber A line number in a target java file 
+     */
+	public void setWatchPoint(int lineNumber) {
+		setWatchPoint(main, lineNumber);
+	}
+	
+	public void setWatchPoint(int lineNumber, ArrayList<String> varName) {
+		setWatchPoint(main, lineNumber, varName);
+	}
+	
+	public void setWatchPoint(String className, int lineNumber) {
+		setWatchPoint(className, lineNumber, new ArrayList<String>());
+	}
+	
+	public void setWatchPoint(String className, int lineNumber, ArrayList<String> varNames) {
+		bpm.setBreakPoint(className, lineNumber, varNames, false);
+	}
+	
+	/**
+	 * Set watchpoint with a method name.
+	 * @param methodName A method name in a target java file 
+	 */
+	public void setWatchPoint(String methodName) {
+		setWatchPoint(main, methodName);
+	}
+	
+	public void setWatchPoint(String methodName, ArrayList<String> varNames) {
+		setWatchPoint(main, methodName, varNames);
+	}
+	
+	public void setWatchPoint(String className, String methodName) {
+		setWatchPoint(className, methodName, new ArrayList<String>());
+	}
+	
+	public void setWatchPoint(String className, String methodName, ArrayList<String> varName) {
+		bpm.setBreakPoint(className, methodName, varName, false);
 	}	
 	
 	/**

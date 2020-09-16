@@ -93,9 +93,9 @@ class BreakPointManager {
 	    	String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
 	    	DebuggerInfo.print("Breakpoint hit, "+ "line=" + bpLineNumber + ", class=" + bpClassName + ", method=" + be.location().method().name());
 	    	BreakPoint bpSetByLineNumber = this.bps.stream()
-							    	               .filter(bp -> bp.equals( new BreakPoint(bpClassName, bpLineNumber, new ArrayList<String>()) ))
+							    	               .filter(bp -> bp.equals( new BreakPoint(bpClassName, bpLineNumber) ))
 							    	               .findFirst()
-							    	               .orElse(new BreakPoint(bpClassName, 0, new ArrayList<String>()));
+							    	               .orElse(new BreakPoint(bpClassName, 0));
 	    	for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
 	    		if (bpSetByLineNumber.getLineNumber()      == 0 ||
 	    			bpSetByLineNumber.getVarNames().size() == 0 ||
@@ -141,7 +141,7 @@ class BreakPointManager {
      * @param className A target class file name
      * @param lineNumber A line number in a target java file
      */
-	public void setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
+	public void setBreakPoint(String className, int lineNumber, ArrayList<String> varNames, boolean isBreak) {
 		if (className.length() == 0) {
 			DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
 			return;
@@ -150,7 +150,7 @@ class BreakPointManager {
 			DebuggerInfo.printError("Breakpoint is not set. A line number must be a non-negative integer(> 0).");
 			return;
 		}
-		BreakPoint bp = new BreakPoint(className, lineNumber, varNames); 
+		BreakPoint bp = new BreakPoint(className, lineNumber, varNames, isBreak); 
 		bps.add(bp);
 	}
 	
@@ -159,7 +159,7 @@ class BreakPointManager {
 	 * @param className A target class file name
 	 * @param methodName A method name a class has 
 	 */
-	public void setBreakPoint(String className, String methodName, ArrayList<String> varNames) {
+	public void setBreakPoint(String className, String methodName, ArrayList<String> varNames, boolean isBreak) {
 		if (className.length() == 0) {
 			DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
 			return;
@@ -168,7 +168,7 @@ class BreakPointManager {
 			DebuggerInfo.printError("Breakpoint is not set. A method name must be one or more letters.");
 			return;
 		}
-		BreakPoint bp = new BreakPoint(className, methodName, varNames); 
+		BreakPoint bp = new BreakPoint(className, methodName, varNames, isBreak); 
 		bps.add(bp);
 	}
 	
@@ -178,7 +178,7 @@ class BreakPointManager {
 	 * @param lineNumber A line number in a target java file
 	 */
 	public void removeBreakPoint(String className, int lineNumber) {
-		BreakPoint bp = new BreakPoint(className, lineNumber, new ArrayList<String>()); 
+		BreakPoint bp = new BreakPoint(className, lineNumber); 
 		bps.remove(bp);
 	}
 	
@@ -188,7 +188,7 @@ class BreakPointManager {
 	 * @param methodName A method name a class has 
 	 */
 	public void removeBreakPoint(String className, String methodName) {
-		BreakPoint bp = new BreakPoint(className, methodName, new ArrayList<String>()); 
+		BreakPoint bp = new BreakPoint(className, methodName); 
 		bps.remove(bp);
 	}
 	
