@@ -161,5 +161,32 @@ class DebuggerTest {
 	    	Assertions.assertEquals(res.getName(), "a");
 	    }
 	}
+	
+	@Test
+	void illegalBreakPointSetTest() {
+		Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+		ArrayList<Integer> bps = new ArrayList<>();
+		ArrayList<String> varNames = new ArrayList<>();
+		bps.add(28);
+		bps.add(30);
+		bps.add(0);
+		varNames.add("a");
+		bps.forEach(item -> {
+			dbg.setBreakPoint(item, varNames);
+		});
+		dbg.run(1000);
+		dbg.exit();
+		ArrayList<DebugResult> results = dbg.getResults();
+	    for (int i = 0; i < results.size(); i++) {
+	    	DebugResult res = results.get(i);
+	    	System.out.println("-----------------------------");
+	    	System.out.println(res.getLineNumber());
+	    	System.out.println(res.getClassOfResult());
+	    	System.out.println(res.getName());
+	    	System.out.println(res.getValue());
+	    	System.out.println("");
+	    	Assertions.assertEquals(res.getName(), "a");
+	    }
+	}
 
 }

@@ -17,16 +17,18 @@ public class BreakPoint {
 	ArrayList<String> varNames;
 	
 	BreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
-		this.className = className;
-		this.lineNumber = lineNumber;
-		this.methodName = "";
-		this.varNames = varNames;
+		this(className, lineNumber, "", varNames);
 	}
 	
 	BreakPoint(String className, String methodName, ArrayList<String> varNames) {
+		this(className, 0, methodName, varNames);
+	}
+	
+	BreakPoint(String className, int lineNumber, String methodName, ArrayList<String> varNames) {
 		this.className = className;
-		this.lineNumber = 0;
+		this.lineNumber = lineNumber;
 		this.methodName = methodName;
+		varNames.remove("");
 		this.varNames = varNames;
 	}
 	
