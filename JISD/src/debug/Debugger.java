@@ -163,18 +163,10 @@ public class Debugger {
 	}
 	
 	/**
-	 * Get line numbers a breakpoint sets.
+	 * Get breakpoints.
 	 * @return breakpoints
 	 */
-	public ArrayList<BreakPoint> getLineNumbers() {
-		return new ArrayList<>(bpm.getLineNumbers());
-	}
-	
-	/**
-	 * Get method names a breakpoint sets.
-	 * @return breakpoints
-	 */
-	public ArrayList<BreakPoint> getMethodNames() {
-		return new ArrayList<>(bpm.getMethodNames());
+	public ArrayList<BreakPoint> getBreakPoints() {
+		return new ArrayList<>(bpm.getBreakPoints());
 	}
 }

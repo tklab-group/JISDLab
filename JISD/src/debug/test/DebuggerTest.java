@@ -57,12 +57,12 @@ class DebuggerTest {
 	    	assertEquals(res.getLineNumber(), bps.get(i/4));
 	    }
 	    dbg.removeBreakPoint(30);
-	    assertEquals(dbg.getLineNumbers().size(), 1);
-	    assertEquals(dbg.getLineNumbers().get(0).getLineNumber(), bps.get(0));
+	    assertEquals(dbg.getBreakPoints().size(), 1);
+	    assertEquals(dbg.getBreakPoints().get(0).getLineNumber(), bps.get(0));
 	    dbg.setBreakPoint("sayHello");
-	    assertEquals(dbg.getMethodNames().size(), 1);
+	    assertEquals(dbg.getBreakPoints().size(), 2);
 	    dbg.removeBreakPoint("sayHello");
-	    assertEquals(dbg.getMethodNames().size(), 0);
+	    assertEquals(dbg.getBreakPoints().size(), 1);
 	    dbg.exit();
 	}
 	
@@ -105,7 +105,7 @@ class DebuggerTest {
 	    	assertEquals(res.getLineNumber(), bps.get(i/4));
 	    }
 	    dbg.removeBreakPoint(30);
-	    assertEquals(dbg.getLineNumbers().size(), 1);
+	    assertEquals(dbg.getBreakPoints().size(), 1);
 	    dbg.restart(sleepTime);
 	    results = dbg.getResults();
 	    assertEquals(results.size(), 4);

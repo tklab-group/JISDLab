@@ -35,10 +35,8 @@ class BreakPointManager {
 	JDIScript j;
 	/** A debug result manager */
 	DebugResultManager drm;
-	/** Line numbers a breakpoint sets at*/
-	private final Set<BreakPoint> lineNumbers = new HashSet<>();
-	/** Method names a breakpoint sets at*/
-	private final Set<BreakPoint> methodNames = new HashSet<>();
+	/** breakpoints */
+	private final Set<BreakPoint> bps = new HashSet<>();
 	/** Stacktraces at a breakpoint */
 	final Map<String, AtomicLong> stacktraces = new HashMap<>();
 	
@@ -94,16 +92,10 @@ class BreakPointManager {
 	    	int bpLineNumber = be.location().lineNumber();
 	    	String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
 	    	DebuggerInfo.print("Breakpoint hit, "+ "line=" + bpLineNumber + ", class=" + bpClassName + ", method=" + be.location().method().name());
-	    	BreakPoint bpSetByLineNumber = this.lineNumbers.stream()
+	    	BreakPoint bpSetByLineNumber = this.bps.stream()
 									    	               .filter(bp -> bp.equals( new BreakPoint(bpClassName, bpLineNumber, new ArrayList<String>()) ))
 									    	               .findFirst()
 									    	               .orElse(new BreakPoint(bpClassName, 0, new ArrayList<String>()));
-	    	/* ToDo: method 
-	    	 * BreakPoint bpSetByMethodName = this.methodNames.stream()
-	    			                                       .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber, new String[0])))
-									    	               .findFirst()
-									    	               .get();
-									    	               */
 	    	for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
 	    		if (bpSetByLineNumber.getLineNumber()      == 0 ||
 	    			bpSetByLineNumber.getVarNames().size() == 0 ||
@@ -124,28 +116,28 @@ class BreakPointManager {
     		System.out.println(i);
     	});
     	*/
-    	this.getLineNumbers().forEach(bp -> {
+    	bps.forEach(bp -> {
     		ReferenceType rt = j.vm().classesByName(bp.getClassName()).get(0);
-    		try {
-				rt.locationsOfLine(bp.getLineNumber()).forEach(m -> {
-				    j.breakpointRequest(m, this.breakpoint).enable();
-				});
-			} catch (AbsentInformationException e) {
-				e.printStackTrace();
-			}
-    	});
-    	this.getMethodNames().forEach(bp -> {
-    		ReferenceType rt = j.vm().classesByName(bp.getClassName()).get(0);
-    		rt.methodsByName(bp.getMethodName()).forEach(methods -> {
+    		if (bp.getLineNumber() == 0) { // breakpoints set by methodName
+    			rt.methodsByName(bp.getMethodName()).forEach(methods -> {
+        			try {
+    					methods.allLineLocations().forEach(m -> {
+    					    j.breakpointRequest(m, this.breakpoint).enable();
+    					});
+    				} catch (AbsentInformationException e) {
+    					e.printStackTrace();
+    				}
+    	    	});
+    		} else { // breakpoints set by lineNumber
     			try {
-					methods.allLineLocations().forEach(m -> {
-					    j.breakpointRequest(m, this.breakpoint).enable();
-					});
-				} catch (AbsentInformationException e) {
-					e.printStackTrace();
-				}
-	    	});
-    	});	
+    				rt.locationsOfLine(bp.getLineNumber()).forEach(m -> {
+    				    j.breakpointRequest(m, this.breakpoint).enable();
+    				});
+    			} catch (AbsentInformationException e) {
+    				e.printStackTrace();
+    			}
+    		}
+    	});
     }
     	
     /**
@@ -155,7 +147,7 @@ class BreakPointManager {
      */
 	public void setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
 		BreakPoint bp = new BreakPoint(className, lineNumber, varNames); 
-		lineNumbers.add(bp);
+		bps.add(bp);
 	}
 	
 	/**
@@ -165,7 +157,7 @@ class BreakPointManager {
 	 */
 	public void setBreakPoint(String className, String methodName, ArrayList<String> varNames) {
 		BreakPoint bp = new BreakPoint(className, methodName, varNames); 
-		methodNames.add(bp);
+		bps.add(bp);
 	}
 	
 	/**
@@ -175,7 +167,7 @@ class BreakPointManager {
 	 */
 	public void removeBreakPoint(String className, int lineNumber) {
 		BreakPoint bp = new BreakPoint(className, lineNumber, new ArrayList<String>()); 
-		lineNumbers.remove(bp);
+		bps.remove(bp);
 	}
 	
 	/**
@@ -185,23 +177,15 @@ class BreakPointManager {
 	 */
 	public void removeBreakPoint(String className, String methodName) {
 		BreakPoint bp = new BreakPoint(className, methodName, new ArrayList<String>()); 
-		methodNames.remove(bp);
+		bps.remove(bp);
 	}
 	
 	/**
 	 * Get line numbers a breakpoint sets at.
 	 * @return lineNumbers
 	 */
-	Set<BreakPoint> getLineNumbers() {
-		return lineNumbers;
-	}
-	
-	/**
-	 * Get method names a breakpoint sets at
-	 * @return methodNames
-	 */
-	Set<BreakPoint> getMethodNames() {
-		return methodNames;
+	Set<BreakPoint> getBreakPoints() {
+		return bps;
 	}
 	
 }
