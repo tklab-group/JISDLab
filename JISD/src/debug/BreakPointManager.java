@@ -91,18 +91,31 @@ class BreakPointManager {
 	    	Map<LocalVariable, Value> visibleVariables = (Map<LocalVariable, Value>) stackFrame.getValues(vars);
 	    	int bpLineNumber = be.location().lineNumber();
 	    	String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
+	    	String bpMethodName = be.location().method().name();
 	    	DebuggerInfo.print("Breakpoint hit, "+ "line=" + bpLineNumber + ", class=" + bpClassName + ", method=" + be.location().method().name());
 	    	BreakPoint bpSetByLineNumber = this.bps.stream()
-							    	               .filter(bp -> bp.equals( new BreakPoint(bpClassName, bpLineNumber) ))
+							    	               .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber)))
 							    	               .findFirst()
 							    	               .orElse(new BreakPoint(bpClassName, 0));
+	    	BreakPoint bpSetByMethodName = new BreakPoint(bpClassName, 0);
+	    	boolean isBPSetByLineNumber = (bpSetByLineNumber.getLineNumber() > 0);
+	    	if (! isBPSetByLineNumber) {
+	    		bpSetByMethodName = this.bps.stream()
+				    	                .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName)))
+				    	                .findFirst()
+				    	                .orElse(new BreakPoint(bpClassName, 0));
+	    	}
+	    	boolean isBPSetByMethodName = (bpSetByMethodName.getMethodName().length() > 0);
 	    	for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
-	    		if (bpSetByLineNumber.getLineNumber()      == 0 ||
-	    			bpSetByLineNumber.getVarNames().size() == 0 ||
-	    			bpSetByLineNumber.getVarNames().contains(entry.getKey().name())) {
-	        	  drm.addVariable(stackFrame.location(), entry);
+	    		if ((isBPSetByLineNumber && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(entry.getKey().name()))) ||
+	    			(isBPSetByMethodName && (bpSetByMethodName.getVarNames().size() == 0 || bpSetByMethodName.getVarNames().contains(entry.getKey().name())))) {
+	        	    drm.addVariable(stackFrame.location(), entry);
 	    		}
 	        }
+	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||
+	    		 isBPSetByMethodName && bpSetByMethodName.getIsBreak()) {
+	    	    tref.suspend();
+	    	}
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {
         	e.printStackTrace();
         }
