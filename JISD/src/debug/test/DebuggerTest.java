@@ -24,7 +24,7 @@ class DebuggerTest {
 		bps.add(28);
 		bps.add(30);
 		bps.forEach(item -> {
-			dbg.setBreakPoint(item);
+			dbg.setWatchPoint(item);
 		});
 		dbg.run(1000);
 		ArrayList<DebugResult> results = dbg.getResults();
@@ -42,13 +42,13 @@ class DebuggerTest {
 	}
 	
 	@Test
-	void breakPointTest() {
+	void watchPointTest() {
 		Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
 		ArrayList<Integer> bps = new ArrayList<>();
 		bps.add(28);
 		bps.add(30);
 		bps.forEach(item -> {
-			dbg.setBreakPoint(item);
+			dbg.setWatchPoint(item);
 		});
 		dbg.run(1000);
 		ArrayList<DebugResult> results = dbg.getResults();
@@ -67,12 +67,12 @@ class DebuggerTest {
 	}
 	
 	@Test
-	void methodNameBreakPointTest() {
+	void methodNameWatchPointTest() {
 		Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
 		ArrayList<Integer> bps = new ArrayList<>();
-		dbg.setBreakPoint("java.io.PrintStream", "println");
+		dbg.setWatchPoint("java.io.PrintStream", "println");
 		bps.forEach(item -> {
-			dbg.setBreakPoint(item);
+			dbg.setWatchPoint(item);
 		});
 		dbg.run(1000);
 		dbg.exit();
@@ -95,7 +95,7 @@ class DebuggerTest {
 		bps.add(28);
 		bps.add(30);
 		bps.forEach(item -> {
-			dbg.setBreakPoint(item);
+			dbg.setWatchPoint(item);
 		});
 		int sleepTime = 1000;
 		dbg.run(sleepTime);
@@ -119,7 +119,7 @@ class DebuggerTest {
 		bps.add(28);
 		bps.add(30);
 		bps.forEach(item -> {
-			dbg.setBreakPoint(item);
+			dbg.setWatchPoint(item);
 		});
 		dbg.run(1000);
 		dbg.exit();
@@ -137,7 +137,7 @@ class DebuggerTest {
 	}
 	
 	@Test
-	void breakPointSetByVarNamesTest() {
+	void watchPointSetByVarNamesTest() {
 		Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
 		ArrayList<Integer> bps = new ArrayList<>();
 		ArrayList<String> varNames = new ArrayList<>();
@@ -145,7 +145,7 @@ class DebuggerTest {
 		bps.add(30);
 		varNames.add("a");
 		bps.forEach(item -> {
-			dbg.setBreakPoint(item, varNames);
+			dbg.setWatchPoint(item, varNames);
 		});
 		dbg.run(1000);
 		dbg.exit();
@@ -163,7 +163,7 @@ class DebuggerTest {
 	}
 	
 	@Test
-	void illegalBreakPointSetTest() {
+	void illegalWatchPointSetTest() {
 		Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
 		ArrayList<Integer> bps = new ArrayList<>();
 		ArrayList<String> varNames = new ArrayList<>();
@@ -172,7 +172,7 @@ class DebuggerTest {
 		bps.add(0);
 		varNames.add("a");
 		bps.forEach(item -> {
-			dbg.setBreakPoint(item, varNames);
+			dbg.setWatchPoint(item, varNames);
 		});
 		dbg.run(1000);
 		dbg.exit();
