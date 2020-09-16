@@ -188,5 +188,28 @@ class DebuggerTest {
 	    	Assertions.assertEquals(res.getName(), "a");
 	    }
 	}
+	
+	@Test
+	void breakPointTest() {
+		Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+		ArrayList<String> varNames = new ArrayList<>();
+		varNames.add("a");
+		dbg.setBreakPoint(28, varNames);
+		dbg.setWatchPoint(30, varNames);
+		dbg.run(1000);
+		ArrayList<DebugResult> results = dbg.getResults();
+	    for (int i = 0; i < results.size(); i++) {
+	    	DebugResult res = results.get(i);
+	    	System.out.println("-----------------------------");
+	    	System.out.println(res.getLineNumber());
+	    	System.out.println(res.getClassOfResult());
+	    	System.out.println(res.getName());
+	    	System.out.println(res.getValue());
+	    	System.out.println("");
+	    	Assertions.assertEquals(res.getLineNumber(), 28);
+	    }
+	    dbg.cont();
+		dbg.exit();
+	}
 
 }

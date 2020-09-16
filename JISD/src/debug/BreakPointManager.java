@@ -39,6 +39,8 @@ class BreakPointManager {
 	private final Set<BreakPoint> bps = new HashSet<>();
 	/** Stacktraces at a breakpoint */
 	final Map<String, AtomicLong> stacktraces = new HashMap<>();
+	/** Current Thread Reference */
+	ThreadReference currentTRef;
 	
 	/**
 	 * Constructor
@@ -114,12 +116,17 @@ class BreakPointManager {
 	        }
 	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||
 	    		 isBPSetByMethodName && bpSetByMethodName.getIsBreak()) {
-	    	    tref.suspend();
+	    		currentTRef = tref;
+	    	    currentTRef.suspend();
 	    	}
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {
         	e.printStackTrace();
         }
     };
+    
+    void resumeThread() {
+    	currentTRef.resume();
+    }
 	
     /**
      * Request setting breakpoints

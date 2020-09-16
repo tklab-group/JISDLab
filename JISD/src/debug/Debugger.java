@@ -116,6 +116,10 @@ public class Debugger {
 		bpm.setBreakPoint(className, methodName, varName, false);
 	}	
 	
+	public void cont() {
+	    bpm.resumeThread();	
+	}
+	
 	/**
 	 * Remove breakpoint with a line number.
 	 * @param lineNumber A line number in a target java file
