@@ -135,6 +135,22 @@ public class Debugger {
 		});
 	}
 	
+	public void methods(String className) {
+		j.vm().classesByName(className).forEach(cls -> {
+			cls.allMethods().forEach(methods -> {
+				System.out.println(methods.name());	
+			});
+		});
+	}
+	
+	public void fields(String className) {
+		j.vm().classesByName(className).forEach(cls -> {
+			cls.allFields().forEach(fields -> {
+				System.out.println(fields.name());	
+			});
+		});
+	}
+	
 	/**
 	 * Remove breakpoint with a line number.
 	 * @param lineNumber A line number in a target java file
