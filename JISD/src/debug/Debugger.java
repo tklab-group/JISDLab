@@ -129,6 +129,12 @@ public class Debugger {
 		bpm.printSrcAtCurrentLocation("Current location,", srcDir);
 	}
 	
+	public void classes(String className) {
+		j.vm().allClasses().stream().filter(cls -> cls.name().contains(className)).forEach(cls -> {
+			System.out.println(cls.name());
+		});
+	}
+	
 	/**
 	 * Remove breakpoint with a line number.
 	 * @param lineNumber A line number in a target java file
