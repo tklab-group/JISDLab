@@ -120,6 +120,10 @@ public class Debugger {
 	    bpm.resumeThread();	
 	}
 	
+	public void list() {
+		bpm.getCurrentLocation("Current location,");
+	}
+	
 	/**
 	 * Remove breakpoint with a line number.
 	 * @param lineNumber A line number in a target java file

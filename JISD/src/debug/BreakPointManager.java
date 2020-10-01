@@ -87,15 +87,15 @@ class BreakPointManager {
      * A procedure on breakpoints.
      */
 	OnBreakpoint breakpoint = be -> {
-        ThreadReference tref = be.thread();
+		currentTRef = be.thread();
+		getCurrentLocation("Breakpoint hit,");
         try {
-	    	StackFrame stackFrame = tref.frame(0);
+	    	StackFrame stackFrame = currentTRef.frame(0);
 	    	List<LocalVariable> vars = stackFrame.visibleVariables();
 	    	Map<LocalVariable, Value> visibleVariables = (Map<LocalVariable, Value>) stackFrame.getValues(vars);
 	    	int bpLineNumber = be.location().lineNumber();
 	    	String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
 	    	String bpMethodName = be.location().method().name();
-	    	DebuggerInfo.print("Breakpoint hit, "+ "line=" + bpLineNumber + ", class=" + bpClassName + ", method=" + be.location().method().name());
 	    	BreakPoint bpSetByLineNumber = this.bps.stream()
 							    	               .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber)))
 							    	               .findFirst()
@@ -117,7 +117,6 @@ class BreakPointManager {
 	        }
 	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||
 	    		(isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
-	    		currentTRef = tref;
 	    	    currentTRef.suspend();
 	    	}
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {
@@ -219,6 +218,19 @@ class BreakPointManager {
 	 */
 	Set<BreakPoint> getBreakPoints() {
 		return bps;
+	}
+	
+	void getCurrentLocation(String prefix) {
+		try {
+			Location currentLocation = currentTRef.frame(0).location();
+			int lineNumber = currentLocation.lineNumber();
+	    	String className = toClassNameFromSourcePath(currentLocation.sourcePath());
+	    	String methodName = currentLocation.method().name();
+	    	DebuggerInfo.print(prefix + " line=" + lineNumber + ", class=" + className + ", method=" + methodName);
+		} catch (IncompatibleThreadStateException | AbsentInformationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
