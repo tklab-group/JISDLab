@@ -242,4 +242,23 @@ class BreakPointManager {
 		}
 	}
 	
+	void printLocals() {
+		try {
+			StackFrame stackFrame = currentTRef.frame(0);
+			List<LocalVariable> vars = stackFrame.visibleVariables();
+	    	Map<LocalVariable, Value> visibleVariables = (Map<LocalVariable, Value>) stackFrame.getValues(vars);
+	    	System.out.println("Method arguments:");
+	    	visibleVariables.entrySet().stream().filter(entry -> entry.getKey().isArgument()).forEach(entry -> {
+	    		System.out.println(entry.getKey().name() + " = " + entry.getValue().toString());
+	    	});
+	    	System.out.println("\nLocal variables:");
+	    	visibleVariables.entrySet().stream().filter(entry -> ! entry.getKey().isArgument()).forEach(entry -> {
+	    		System.out.println(entry.getKey().name() + " = " + entry.getValue().toString());
+	    	});
+		} catch (IncompatibleThreadStateException | AbsentInformationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }
