@@ -20,7 +20,7 @@ public class Debugger {
 	/** Manage debug results */
 	DebugResultManager drm;
 	/** Target class setting items */
-	String main, options;
+	String main, options, srcDir;
 	Thread jdiThread;
 	VMManager vmManager;
 	
@@ -29,12 +29,17 @@ public class Debugger {
 	 * @param main A target class file name
 	 * @param options A target class path setting
 	 */
-    public Debugger(String main, String options) {
+    public Debugger(String main, String options, String srcDir) {
 		this.main = main;
 		this.options = options;
+		this.srcDir = srcDir;
 		drm = new DebugResultManager();
 		bpm = new BreakPointManager(drm);
 	}
+    
+    public Debugger(String main, String options) {
+    	this(main, options, ".");
+    }
 	
     /**
      * Set breakpoint with a line number.
@@ -121,7 +126,7 @@ public class Debugger {
 	}
 	
 	public void list() {
-		bpm.getCurrentLocation("Current location,");
+		bpm.getCurrentLocation("Current location,", srcDir);
 	}
 	
 	/**

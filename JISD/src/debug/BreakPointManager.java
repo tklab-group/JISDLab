@@ -88,7 +88,6 @@ class BreakPointManager {
      */
 	OnBreakpoint breakpoint = be -> {
 		currentTRef = be.thread();
-		getCurrentLocation("Breakpoint hit,");
         try {
 	    	StackFrame stackFrame = currentTRef.frame(0);
 	    	List<LocalVariable> vars = stackFrame.visibleVariables();
@@ -96,6 +95,7 @@ class BreakPointManager {
 	    	int bpLineNumber = be.location().lineNumber();
 	    	String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
 	    	String bpMethodName = be.location().method().name();
+	    	printCurrentLocation("Breakpoint hit,", bpLineNumber, bpClassName, bpMethodName);
 	    	BreakPoint bpSetByLineNumber = this.bps.stream()
 							    	               .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber)))
 							    	               .findFirst()
@@ -220,13 +220,22 @@ class BreakPointManager {
 		return bps;
 	}
 	
-	void getCurrentLocation(String prefix) {
+	void printCurrentLocation(String prefix, int lineNumber, String className, String methodName) {
+		DebuggerInfo.print(prefix + " line=" + lineNumber + ", class=" + className + ", method=" + methodName);	
+	}
+	
+	void getCurrentLocation(String prefix, String srcDir) {
 		try {
 			Location currentLocation = currentTRef.frame(0).location();
 			int lineNumber = currentLocation.lineNumber();
-	    	String className = toClassNameFromSourcePath(currentLocation.sourcePath());
+			String srcRelPath = currentLocation.sourcePath();
+	    	String className = toClassNameFromSourcePath(srcRelPath);
 	    	String methodName = currentLocation.method().name();
-	    	DebuggerInfo.print(prefix + " line=" + lineNumber + ", class=" + className + ", method=" + methodName);
+	    	printCurrentLocation(prefix, lineNumber, className, methodName);
+	    	if (! srcDir.equals("")) {
+	    	    String srcAbsPath = srcDir + File.separator.charAt(0) + srcRelPath; 
+	    	    DebuggerInfo.printSrc(srcAbsPath, lineNumber);
+	    	}
 		} catch (IncompatibleThreadStateException | AbsentInformationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
