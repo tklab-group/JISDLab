@@ -126,7 +126,7 @@ public class Debugger {
 	}
 	
 	public void list() {
-		bpm.getCurrentLocation("Current location,", srcDir);
+		bpm.printSrcAtCurrentLocation("Current location,", srcDir);
 	}
 	
 	/**

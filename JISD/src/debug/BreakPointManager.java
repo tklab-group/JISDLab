@@ -224,7 +224,7 @@ class BreakPointManager {
 		DebuggerInfo.print(prefix + " line=" + lineNumber + ", class=" + className + ", method=" + methodName);	
 	}
 	
-	void getCurrentLocation(String prefix, String srcDir) {
+	void printSrcAtCurrentLocation(String prefix, String srcDir) {
 		try {
 			Location currentLocation = currentTRef.frame(0).location();
 			int lineNumber = currentLocation.lineNumber();
