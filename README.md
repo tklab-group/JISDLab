@@ -20,7 +20,7 @@ Then, at this project root:
 ```bash
 docker-compose up --build -d
 ```
-Access http://localhost:17682 and enter a password(an initial password is `passwd`), then you can debug your Java application!
+Access http://localhost:21510 and enter a password(an initial password is `passwd`), then you can debug your Java application!
 
 ## Demo
 Please see `debugspace/debuggerDemo.ipynb`.

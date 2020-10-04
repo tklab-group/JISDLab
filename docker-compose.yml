@@ -7,7 +7,7 @@ services:
     command: "jupyter lab --allow-root"
     container_name: JISD
     ports:
-      - 17682:17682
+      - 21510:21510
     volumes:
       - ./JISD:/workspaces/JISD/JISD
       - ./debugspace:/workspaces/debugspace

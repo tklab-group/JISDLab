@@ -8,7 +8,7 @@ echo 'c = get_config()\n\
 c.IPKernelApp.pylab = "inline"\n\
 c.NotebookApp.ip = "0.0.0.0"\n\
 c.NotebookApp.open_browser = False\n\
-c.NotebookApp.port = 17682\n\
+c.NotebookApp.port = 21510\n\
 c.NotebookApp.password = "sha1:c956c5379e61:c10306b11fa6b2d69fe0ad302c1bfe91c140ba92"'\
 > ~/.jupyter/jupyter_notebook_config.py
 
