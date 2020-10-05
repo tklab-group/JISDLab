@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnVMStart;
 import org.jdiscript.util.VMLauncher;
+import org.jdiscript.util.VMSocketAttacher;
 
 import com.sun.jdi.AbsentInformationException;
+import com.sun.jdi.VirtualMachine;
 
 /**
  * JISD's main debugger class.
@@ -24,6 +26,9 @@ public class Debugger {
 	Thread jdiThread;
 	VMManager vmManager;
 	
+	boolean isRemoteDebug = false;
+	int port = 0; 
+	
 	/**
 	 * Constructor
 	 * @param main A target class file name
@@ -39,6 +44,21 @@ public class Debugger {
     
     public Debugger(String main, String options) {
     	this(main, options, ".");
+    }
+    
+    public Debugger(String main, String srcDir, int port) { 
+    	this(main, "", srcDir);
+    	this.isRemoteDebug = true;
+    	if (port < 1024 || port > 65535) {
+    		this.port = 8000;
+    		DebuggerInfo.printError("This port is out of range. So, now port is set 8000. Please set the port bewtween 1024 ~ 65535.");
+    	} else {
+    	    this.port = port;
+    	}
+    }
+    
+    public Debugger(String main, int port) {
+    	this(main, "", port);
     }
 	
     /**
@@ -155,6 +175,13 @@ public class Debugger {
 		bpm.printLocals();
 	}
 	
+	public void stop(int lineNumber) {
+		BreakPoint bp = bpm.setBreakPoint(main, lineNumber, new ArrayList<String>(), true);
+		if (bp != null) { 
+		    bpm.requestSetBreakPoint(bp);
+		}
+	}
+	
 	/**
 	 * Remove breakpoint with a line number.
 	 * @param lineNumber A line number in a target java file
@@ -195,10 +222,16 @@ public class Debugger {
 	}
 	
 	void vmInit() {
-		j = new JDIScript(new VMLauncher(options, main).start());
+		VirtualMachine vm;
+		if (isRemoteDebug) {
+			vm = new VMSocketAttacher(port).attach();
+		} else {
+			vm = new VMLauncher(options, main).start();
+		}
+		j = new JDIScript(vm);
 		bpm.setJDI(j);
 		OnVMStart start = prepareStart();
-		vmManager = new VMManager(j, start);
+        vmManager = new VMManager(j, start);
 		jdiThread = new Thread(vmManager);
 	}
 	
@@ -209,6 +242,10 @@ public class Debugger {
 	public void run(int sleepTime) {
 		vmInit();
 		jdiThread.start();
+		sleep(sleepTime);
+	}
+	
+	public void sleep(int sleepTime) {
 		try {
 			Thread.sleep(sleepTime);
 		} catch (InterruptedException e) {
