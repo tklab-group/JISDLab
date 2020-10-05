@@ -127,33 +127,40 @@ class BreakPointManager {
     void resumeThread() {
     	currentTRef.resume();
     }
+    
+    void requestSetBreakPoint(BreakPoint bp) {
+    	List<ReferenceType> rts = j.vm().classesByName(bp.getClassName());
+		if (rts.size() < 1) {
+			DebuggerInfo.printError("Cannot set breakpoint. Skipped.");
+			return;
+		}
+		ReferenceType rt = rts.get(0);
+		if (bp.getLineNumber() == 0) { // breakpoints set by methodName
+			rt.methodsByName(bp.getMethodName()).forEach(methods -> {
+    			try {
+					methods.allLineLocations().forEach(m -> {
+					    j.breakpointRequest(m, this.breakpoint).enable();
+					});
+				} catch (AbsentInformationException e) {
+					e.printStackTrace();
+				}
+	    	});
+		} else { // breakpoints set by lineNumber
+			try {
+				rt.locationsOfLine(bp.getLineNumber()).forEach(m -> {
+					j.breakpointRequest(m, this.breakpoint).enable();
+				});
+			} catch (AbsentInformationException e) {
+				e.printStackTrace();
+			}
+		}
+    }
 	
     /**
      * Request setting breakpoints
      */
     void requestSetBreakPoints() {
-    	bps.forEach(bp -> {
-    		ReferenceType rt = j.vm().classesByName(bp.getClassName()).get(0);
-    		if (bp.getLineNumber() == 0) { // breakpoints set by methodName
-    			rt.methodsByName(bp.getMethodName()).forEach(methods -> {
-        			try {
-    					methods.allLineLocations().forEach(m -> {
-    					    j.breakpointRequest(m, this.breakpoint).enable();
-    					});
-    				} catch (AbsentInformationException e) {
-    					e.printStackTrace();
-    				}
-    	    	});
-    		} else { // breakpoints set by lineNumber
-    			try {
-    				rt.locationsOfLine(bp.getLineNumber()).forEach(m -> {
-    				    j.breakpointRequest(m, this.breakpoint).enable();
-    				});
-    			} catch (AbsentInformationException e) {
-    				e.printStackTrace();
-    			}
-    		}
-    	});
+    	bps.forEach(bp -> requestSetBreakPoint(bp));
     }
     	
     /**
