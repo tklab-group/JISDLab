@@ -112,7 +112,7 @@ class BreakPointManager {
 	    	for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
 	    		if ((isBPSetByLineNumber && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(entry.getKey().name()))) ||
 	    			(isBPSetByMethodName && (bpSetByMethodName.getVarNames().size() == 0 || bpSetByMethodName.getVarNames().contains(entry.getKey().name())))) {
-	        	    drm.addVariable(stackFrame.location(), entry);
+	        	    drm.addVariable(bpClassName, bpLineNumber, stackFrame.location(), entry);
 	    		}
 	        }
 	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||

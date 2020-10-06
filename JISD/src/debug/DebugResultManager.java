@@ -15,6 +15,7 @@ import com.sun.jdi.Value;
 class DebugResultManager {
 	/** Debug results */
     ArrayList<DebugResult> drs = new ArrayList<>();
+    long number = 0;
 	
 	/**
 	 * Constructor
@@ -28,9 +29,16 @@ class DebugResultManager {
 	 * @param loc An observed location
 	 * @param entry An observed variable and value
 	 */
-	 void addVariable(Location loc, Map.Entry<LocalVariable, Value> entry) {
+	 void addVariable(String className, int lineNumber, Location loc, Map.Entry<LocalVariable, Value> entry) {
 		synchronized (this) {
-			drs.add(new DebugResult(loc, entry));
+			DebugResult tmp = new DebugResult(className, lineNumber);
+			drs.forEach(res -> {
+				if (res.equals(tmp)) {
+					res.addValue(number++, entry);
+					return;
+				}
+			});
+			drs.add(new DebugResult(number++, className, lineNumber, loc, entry));
 		}
 	 }
 	

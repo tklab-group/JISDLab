@@ -1,5 +1,6 @@
 package debug;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import com.sun.jdi.LocalVariable;
@@ -12,21 +13,35 @@ import com.sun.jdi.Value;
  *
  */
 public class DebugResult {
+	String className;
+	int lineNumber;
 	/** An observed location*/
 	Location loc;
 	/** An observed variable and value*/
 	Map.Entry<LocalVariable, Value> entry;
-	String value;
+	ArrayList<ValueInfo> values = new ArrayList<>();
 	
 	/**
 	 * Constructor
 	 * @param loc An observed location
 	 * @param entry An observed variable and value
 	 */
-    DebugResult(Location loc, Map.Entry<LocalVariable, Value> entry) {
-        this.loc = loc;
+    DebugResult(long number, String className, int lineNumber, Location loc, Map.Entry<LocalVariable, Value> entry) {
+        this.className = className;
+        this.lineNumber = lineNumber;
+    	this.loc = loc;
         this.entry = entry;
-        this.value = entry.getValue().toString();
+        addValue(number, entry);
+    }
+    
+    DebugResult(String className, int lineNumber) {
+        this.className = className;
+        this.lineNumber = lineNumber;
+    }
+    
+    void addValue(long number, Map.Entry<LocalVariable, Value> entry) {
+    	ValueInfo value = new ValueInfo(number, entry.getValue().toString());
+        values.add(value);
     }
     
     /**
@@ -73,8 +88,36 @@ public class DebugResult {
      * Get an observed value
      * @return value
      */
-    public String getValue() {
-    	return value;
+    public ArrayList<ValueInfo> getValues() {
+    	return values;
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((className == null) ? 0 : className.hashCode());
+		result = prime * result + lineNumber;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DebugResult other = (DebugResult) obj;
+		if (className == null) {
+			if (other.className != null)
+				return false;
+		} else if (!className.equals(other.className))
+			return false;
+		if (lineNumber != other.lineNumber)
+			return false;
+		return true;
+	}
     
 }

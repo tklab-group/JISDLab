@@ -34,7 +34,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValue());
+	    	System.out.println(res.getValues().get(0).getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getLineNumber(), bps.get(i/4));
 	    }
@@ -83,7 +83,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValue());
+	    	System.out.println(res.getValues().get(0).getValue());
 	    	System.out.println("");
 	    }
 	}
@@ -130,7 +130,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValue());
+	    	System.out.println(res.getValues().get(0).getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getLineNumber(), bps.get(i/4));
 	    }
@@ -156,7 +156,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValue());
+	    	System.out.println(res.getValues().get(0).getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getName(), "a");
 	    }
@@ -183,7 +183,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValue());
+	    	System.out.println(res.getValues().get(0).getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getName(), "a");
 	    }
@@ -204,7 +204,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValue());
+	    	System.out.println(res.getValues().get(0).getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getLineNumber(), 28);
 	    }
