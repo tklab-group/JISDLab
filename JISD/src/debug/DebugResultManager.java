@@ -16,6 +16,7 @@ class DebugResultManager {
 	/** Debug results */
     ArrayList<DebugResult> drs = new ArrayList<>();
     long number = 0;
+    int maxRecordNoOfValue = 100;
 	
 	/**
 	 * Constructor
@@ -32,13 +33,14 @@ class DebugResultManager {
 	 void addVariable(String className, int lineNumber, Location loc, Map.Entry<LocalVariable, Value> entry) {
 		synchronized (this) {
 			DebugResult tmp = new DebugResult(className, lineNumber);
-			drs.forEach(res -> {
+			for (int i = 0; i < drs.size(); i++) {
+				DebugResult res = drs.get(i);
 				if (res.equals(tmp)) {
 					res.addValue(number++, entry);
 					return;
 				}
-			});
-			drs.add(new DebugResult(number++, className, lineNumber, loc, entry));
+			}
+			drs.add(new DebugResult(maxRecordNoOfValue, number++, className, lineNumber, loc, entry));
 		}
 	 }
 	

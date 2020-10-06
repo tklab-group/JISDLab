@@ -1,6 +1,6 @@
 package debug;
 
-import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Map;
 
 import com.sun.jdi.LocalVariable;
@@ -19,15 +19,17 @@ public class DebugResult {
 	Location loc;
 	/** An observed variable and value*/
 	Map.Entry<LocalVariable, Value> entry;
-	ArrayList<ValueInfo> values = new ArrayList<>();
+	ArrayDeque<ValueInfo> values = new ArrayDeque<>();
+	int maxRecordNoOfValue;
 	
 	/**
 	 * Constructor
 	 * @param loc An observed location
 	 * @param entry An observed variable and value
 	 */
-    DebugResult(long number, String className, int lineNumber, Location loc, Map.Entry<LocalVariable, Value> entry) {
-        this.className = className;
+    DebugResult(int maxRecordNoOfValue, long number, String className, int lineNumber, Location loc, Map.Entry<LocalVariable, Value> entry) {
+        this.maxRecordNoOfValue = maxRecordNoOfValue;
+    	this.className = className;
         this.lineNumber = lineNumber;
     	this.loc = loc;
         this.entry = entry;
@@ -41,7 +43,14 @@ public class DebugResult {
     
     void addValue(long number, Map.Entry<LocalVariable, Value> entry) {
     	ValueInfo value = new ValueInfo(number, entry.getValue().toString());
-        values.add(value);
+    	synchronized (this) {
+	    	if (values.size() >= maxRecordNoOfValue) {
+	    		values.pop();
+	    		values.add(value);
+	    		return;
+	    	}
+	        values.add(value);
+    	}
     }
     
     /**
@@ -88,8 +97,12 @@ public class DebugResult {
      * Get an observed value
      * @return value
      */
-    public ArrayList<ValueInfo> getValues() {
-    	return values;
+    public ValueInfo[] getValues() {
+    	return values.toArray(ValueInfo[]::new);
+    }
+    
+    public ValueInfo getLatestValue() {
+    	return values.getLast();
     }
 
 	@Override

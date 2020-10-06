@@ -3,12 +3,14 @@ package debug.test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import debug.DebugResult;
 import debug.Debugger;
+import debug.ValueInfo;
 
 /**
  * Debugger Test
@@ -34,7 +36,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValues().get(0).getValue());
+	    	System.out.println(res.getLatestValue().getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getLineNumber(), bps.get(i/4));
 	    }
@@ -83,7 +85,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValues().get(0).getValue());
+	    	System.out.println(res.getLatestValue().getValue());
 	    	System.out.println("");
 	    }
 	}
@@ -130,7 +132,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValues().get(0).getValue());
+	    	System.out.println(res.getLatestValue().getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getLineNumber(), bps.get(i/4));
 	    }
@@ -156,7 +158,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValues().get(0).getValue());
+	    	System.out.println(res.getLatestValue().getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getName(), "a");
 	    }
@@ -183,7 +185,7 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValues().get(0).getValue());
+	    	System.out.println(res.getLatestValue().getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getName(), "a");
 	    }
@@ -204,11 +206,39 @@ class DebuggerTest {
 	    	System.out.println(res.getLineNumber());
 	    	System.out.println(res.getClassOfResult());
 	    	System.out.println(res.getName());
-	    	System.out.println(res.getValues().get(0).getValue());
+	    	System.out.println(res.getLatestValue().getValue());
 	    	System.out.println("");
 	    	Assertions.assertEquals(res.getLineNumber(), 28);
 	    }
 	    dbg.cont();
+		dbg.exit();
+	}
+	
+	@Test
+	void valueInfoTest() {
+		Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+		ArrayList<String> varNames = new ArrayList<>();
+		varNames.add("a");
+		dbg.setWatchPoint(33, varNames);
+		dbg.run(1000);
+		ArrayList<DebugResult> results = dbg.getResults();
+	    for (int i = 0; i < results.size(); i++) {
+	    	DebugResult res = results.get(i);
+	    	System.out.println("-----------------------------");
+	    	System.out.println(res.getLineNumber());
+	    	System.out.println(res.getClassOfResult());
+	    	System.out.println(res.getName());
+	    	System.out.println(res.getLatestValue().getValue());
+	    	System.out.println("");
+	    	Assertions.assertEquals(res.getValues().length, 100);
+	    }
+	    ValueInfo[] values = results.get(0).getValues();
+	    IntStream.range(0, 100).forEach(i -> {
+	    	System.out.print(values[i].getValue() + " ");
+	    	if (i % 10 == 9) {
+	    		System.out.println("");
+	    	}
+	    });
 		dbg.exit();
 	}
 
