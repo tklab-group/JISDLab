@@ -15,6 +15,7 @@ import com.sun.jdi.Value;
 public class DebugResult {
 	String className;
 	int lineNumber;
+	String varName;
 	/** An observed location*/
 	Location loc;
 	/** An observed variable and value*/
@@ -27,18 +28,20 @@ public class DebugResult {
 	 * @param loc An observed location
 	 * @param entry An observed variable and value
 	 */
-    DebugResult(int maxRecordNoOfValue, long number, String className, int lineNumber, Location loc, Map.Entry<LocalVariable, Value> entry) {
+    DebugResult(int maxRecordNoOfValue, long number, String className, int lineNumber, String varName, Location loc, Map.Entry<LocalVariable, Value> entry) {
         this.maxRecordNoOfValue = maxRecordNoOfValue;
     	this.className = className;
         this.lineNumber = lineNumber;
+        this.varName = varName;
     	this.loc = loc;
         this.entry = entry;
         addValue(number, entry);
     }
     
-    DebugResult(String className, int lineNumber) {
+    DebugResult(String className, int lineNumber, String varName) {
         this.className = className;
         this.lineNumber = lineNumber;
+        this.varName = varName;
     }
     
     void addValue(long number, Map.Entry<LocalVariable, Value> entry) {
@@ -111,6 +114,7 @@ public class DebugResult {
 		int result = 1;
 		result = prime * result + ((className == null) ? 0 : className.hashCode());
 		result = prime * result + lineNumber;
+		result = prime * result + ((varName == null) ? 0 : varName.hashCode());
 		return result;
 	}
 
@@ -130,7 +134,14 @@ public class DebugResult {
 			return false;
 		if (lineNumber != other.lineNumber)
 			return false;
+		if (varName == null) {
+			if (other.varName != null)
+				return false;
+		} else if (!varName.equals(other.varName))
+			return false;
 		return true;
 	}
+
+
     
 }

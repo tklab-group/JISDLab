@@ -60,6 +60,10 @@ public class Debugger {
     public Debugger(String main, int port) {
     	this(main, "", port);
     }
+    
+    public void setMaxRecordNumber(int number) {
+    	drm.setMaxRecordNoOfValue(number);
+    }
 	
     /**
      * Set breakpoint with a line number.

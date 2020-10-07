@@ -220,6 +220,8 @@ class DebuggerTest {
 		ArrayList<String> varNames = new ArrayList<>();
 		varNames.add("a");
 		dbg.setWatchPoint(33, varNames);
+		int maxRecords = 200;
+		dbg.setMaxRecordNumber(maxRecords);
 		dbg.run(1000);
 		ArrayList<DebugResult> results = dbg.getResults();
 	    for (int i = 0; i < results.size(); i++) {
@@ -230,10 +232,10 @@ class DebuggerTest {
 	    	System.out.println(res.getName());
 	    	System.out.println(res.getLatestValue().getValue());
 	    	System.out.println("");
-	    	Assertions.assertEquals(res.getValues().length, 100);
+	    	Assertions.assertEquals(res.getValues().length, maxRecords);
 	    }
 	    ValueInfo[] values = results.get(0).getValues();
-	    IntStream.range(0, 100).forEach(i -> {
+	    IntStream.range(0, maxRecords).forEach(i -> {
 	    	System.out.print(values[i].getValue() + " ");
 	    	if (i % 10 == 9) {
 	    		System.out.println("");
