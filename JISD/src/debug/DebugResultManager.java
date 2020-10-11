@@ -74,5 +74,6 @@ class DebugResultManager {
 	 */
 	void clearResults() {
 		drs.clear();
+		number = 0;
 	}
 }
