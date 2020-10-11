@@ -392,12 +392,19 @@ public class Debugger {
 	}
 	
 	/**
+	 * Clear debug results all.
+	 */
+	public void clear() {
+		drm.clearResults();
+	}
+	
+	/**
 	 * Restart the debugger.
 	 * @param sleepTime  Wait time after the debugger starts running
 	 */
 	public void restart(int sleepTime) {
 		exit();
-		drm.clearResults();
+		clear();
 		run(sleepTime);
 	}
 	
