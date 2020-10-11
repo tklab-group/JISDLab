@@ -40,11 +40,6 @@ class DebugResultManager {
 	}
 	
 	/**
-	 * 
-	 * @param 
-	 * @param 
-	 */
-	/**
 	 * Add an observed result.
 	 * @param className class name
 	 * @param lineNumber line number

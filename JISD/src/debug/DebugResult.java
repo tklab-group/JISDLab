@@ -166,7 +166,5 @@ public class DebugResult {
 			return false;
 		return true;
 	}
-
-
     
 }
