@@ -8,14 +8,16 @@ import com.sun.jdi.Location;
 import com.sun.jdi.Value;
 
 /**
- * A debug result manager class.
+ * Debug result manager
  * @author sugiyama
  *
  */
 class DebugResultManager {
 	/** Debug results */
     ArrayList<DebugResult> drs = new ArrayList<>();
+    /** time stamp */
     long number = 0;
+    /** the max record number of values */
     int maxRecordNoOfValue = 100;
 	
 	/**
@@ -25,6 +27,10 @@ class DebugResultManager {
 		
 	}
 	
+	/**
+	 * Set the max record number of values
+	 * @param maxRecordNoOfValue the max record number of values
+	 */
 	void setMaxRecordNoOfValue(int maxRecordNoOfValue) {
 		if (maxRecordNoOfValue <= 0) {
 			DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
@@ -34,9 +40,17 @@ class DebugResultManager {
 	}
 	
 	/**
+	 * 
+	 * @param 
+	 * @param 
+	 */
+	/**
 	 * Add an observed result.
+	 * @param className class name
+	 * @param lineNumber line number
+	 * @param varName variable name
 	 * @param loc An observed location
-	 * @param entry An observed variable and value
+	 * @param entry entry An observed variable and value
 	 */
 	 void addVariable(String className, int lineNumber, String varName, Location loc, Map.Entry<LocalVariable, Value> entry) {
 		synchronized (this) {

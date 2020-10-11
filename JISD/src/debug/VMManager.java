@@ -6,7 +6,7 @@ import org.jdiscript.handlers.OnVMStart;
 import com.sun.jdi.VMDisconnectedException;
 
 /**
- * A target JavaVM manager class.
+ * Target JavaVM manager
  * @author sugiyama
  *
  */
@@ -38,6 +38,9 @@ class VMManager implements Runnable {
 		}
 	}
 	
+	/**
+	 * Shut down the debugger.
+	 */
 	void shutdown() {
 		j.vm().exit(0);
 		DebuggerInfo.print("VM exited.");

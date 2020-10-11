@@ -8,23 +8,33 @@ import com.sun.jdi.Location;
 import com.sun.jdi.Value;
 
 /**
- * Debug result class.
+ * Debug result
  * @author sugiyama
  *
  */
 public class DebugResult {
+	/** class name */
 	String className;
+	/** line number */
 	int lineNumber;
+	/** value name */
 	String varName;
 	/** An observed location*/
 	Location loc;
 	/** An observed variable and value*/
 	Map.Entry<LocalVariable, Value> entry;
+	/** saved values */
 	ArrayDeque<ValueInfo> values = new ArrayDeque<>();
+	/** the max record number of values */
 	int maxRecordNoOfValue;
 	
 	/**
 	 * Constructor
+	 * @param maxRecordNoOfValue the max record number of values
+	 * @param number time stamp
+     * @param className class name
+     * @param lineNumber line number
+     * @param varName value name
 	 * @param loc An observed location
 	 * @param entry An observed variable and value
 	 */
@@ -38,12 +48,23 @@ public class DebugResult {
         addValue(number, entry);
     }
     
+    /**
+     * Constructor
+     * @param className class name
+     * @param lineNumber line number
+     * @param varName value name
+     */
     DebugResult(String className, int lineNumber, String varName) {
         this.className = className;
         this.lineNumber = lineNumber;
         this.varName = varName;
     }
     
+    /**
+     * Add value to deque
+     * @param number time stamp
+     * @param entry entry An observed variable and value
+     */
     void addValue(long number, Map.Entry<LocalVariable, Value> entry) {
     	ValueInfo value = new ValueInfo(number, entry.getValue().toString());
     	synchronized (this) {
@@ -104,6 +125,10 @@ public class DebugResult {
     	return values.toArray(ValueInfo[]::new);
     }
     
+    /**
+     * Get the latest observed value
+     * @return latest value
+     */
     public ValueInfo getLatestValue() {
     	return values.getLast();
     }

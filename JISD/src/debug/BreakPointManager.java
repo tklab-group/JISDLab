@@ -25,7 +25,7 @@ import com.sun.jdi.Value;
 import com.sun.jdi.event.ClassPrepareEvent;
 
 /**
- * A breakpoint manager class.
+ * Breakpoint manager
  * @author sugiyama
  *
  */
@@ -74,6 +74,11 @@ class BreakPointManager {
         return sb.substring(0, sb.length() - 1);
     }
     
+    /**
+     * generate a class path from a source path 
+     * @param sp source path
+     * @return class name
+     */
     String toClassNameFromSourcePath(String sp) {
     	String className = sp.replace(File.separator.charAt(0), '.'); 
     	int length = className.length();
@@ -125,10 +130,17 @@ class BreakPointManager {
         }
     };
     
+    /**
+     * resume current thread
+     */
     void resumeThread() {
     	currentTRef.resume();
     }
     
+    /**
+     * Request VM to set a breakpoint 
+     * @param bp breakpoint
+     */
     void requestSetBreakPoint(BreakPoint bp) {
     	List<ReferenceType> rts = j.vm().classesByName(bp.getClassName());
 		if (rts.size() < 1) {
@@ -158,16 +170,19 @@ class BreakPointManager {
     }
 	
     /**
-     * Request setting breakpoints
+     * Request VM to set a breakpoint 
      */
     void requestSetBreakPoints() {
     	bps.forEach(bp -> requestSetBreakPoint(bp));
     }
     	
     /**
-     * Set breakpoint.
-     * @param className A target class file name
-     * @param lineNumber A line number in a target java file
+     * Set breakpoint by a line number.
+     * @param className class name
+     * @param lineNumber line number
+     * @param varNames variable names 
+     * @param isBreak break or not at points
+     * @return breakpoint
      */
 	public BreakPoint setBreakPoint(String className, int lineNumber, ArrayList<String> varNames, boolean isBreak) {
 		if (className.length() == 0) {
@@ -184,9 +199,12 @@ class BreakPointManager {
 	}
 	
 	/**
-	 * Set breakpoint with a method name.
-	 * @param className A target class file name
-	 * @param methodName A method name a class has 
+	 * Set breakpoint by a method name.
+	 * @param className class name
+	 * @param methodName method name
+	 * @param varNames value name
+	 * @param isBreak break or not at points
+	 * @return breakpoint
 	 */
 	public BreakPoint setBreakPoint(String className, String methodName, ArrayList<String> varNames, boolean isBreak) {
 		if (className.length() == 0) {
@@ -223,17 +241,29 @@ class BreakPointManager {
 	}
 	
 	/**
-	 * Get line numbers a breakpoint sets at.
-	 * @return lineNumbers
+	 * Get breakpoints
+	 * @return breakpoints
 	 */
 	Set<BreakPoint> getBreakPoints() {
 		return bps;
 	}
 	
+	/**
+	 * Print current location infomation
+	 * @param prefix print reason 
+	 * @param lineNumber line number
+	 * @param className class name
+	 * @param methodName method name
+	 */
 	void printCurrentLocation(String prefix, int lineNumber, String className, String methodName) {
 		DebuggerInfo.print(prefix + " line=" + lineNumber + ", class=" + className + ", method=" + methodName);	
 	}
 	
+	/**
+	 * Print source code.
+	 * @param prefix print reason
+	 * @param srcDir source directory
+	 */
 	void printSrcAtCurrentLocation(String prefix, String srcDir) {
 		try {
 			Location currentLocation = currentTRef.frame(0).location();
@@ -252,6 +282,9 @@ class BreakPointManager {
 		}
 	}
 	
+	/**
+	 * Print local variables
+	 */
 	void printLocals() {
 		try {
 			StackFrame stackFrame = currentTRef.frame(0);

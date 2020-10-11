@@ -6,33 +6,70 @@ package debug;
 import java.util.ArrayList;
 
 /**
- * Breakpoint infomation class.
+ * Breakpoint infomation
  * @author sugiyama
  *
  */
 public class BreakPoint {
+	/** class name */
 	String className;
+	/** line number */
 	int lineNumber;
+	/** method name */
 	String methodName;
+	/** variable names */
 	ArrayList<String> varNames;
+	/** break or not at points*/
 	boolean isBreak;
 	
+	/**
+	 * Constructor
+	 * @param className class name
+	 * @param lineNumber line number
+	 */
 	BreakPoint(String className, int lineNumber) {
 		this(className, lineNumber, "", new ArrayList<String>(), false);
 	}
 	
+	/**
+	 * Constructor
+	 * @param className class name
+	 * @param methodName method name
+	 */
 	BreakPoint(String className, String methodName) {
 		this(className, 0, methodName, new ArrayList<String>(), false);
 	}
 	
+	/**
+	 * Constructor
+	 * @param className class name
+	 * @param lineNumber line number
+	 * @param varNames variable names
+	 * @param isBreak break or not at points
+	 */
 	BreakPoint(String className, int lineNumber, ArrayList<String> varNames, boolean isBreak) {
 		this(className, lineNumber, "", varNames, isBreak);
 	}
 	
+	/**
+	 * Constructor
+	 * @param className class name
+	 * @param methodName method name
+	 * @param varNames variable names
+	 * @param isBreak break or not at points
+	 */
 	BreakPoint(String className, String methodName, ArrayList<String> varNames, boolean isBreak) {
 		this(className, 0, methodName, varNames, isBreak);
 	}
 	
+	/**
+	 * Constructor
+	 * @param className class name
+	 * @param lineNumber line number
+	 * @param methodName method name
+	 * @param varNames variable names
+	 * @param isBreak break or not at points
+	 */
 	BreakPoint(String className, int lineNumber, String methodName, ArrayList<String> varNames, boolean isBreak) {
 		this.className = className;
 		this.lineNumber = lineNumber;
@@ -42,22 +79,42 @@ public class BreakPoint {
 		this.isBreak = isBreak;
 	}
 	
+	/**
+	 * Get a class name.
+	 * @return class name
+	 */
 	public String getClassName() {
 	    return className;	
 	}
 	
+	/**
+	 * Get a line number
+	 * @return line number
+	 */
 	public int getLineNumber() {
 		return lineNumber;
 	}
 	
+	/**
+	 * Get a method name
+	 * @return method name
+	 */
 	public String getMethodName() {
 		return methodName; 
 	}
 	
+	/**
+	 * Get variable names
+	 * @return variable names
+	 */
 	public ArrayList<String> getVarNames() {
 		return varNames;
 	}
 	
+	/**
+	 * Get whether the debugger breaks or not at points
+	 * @return break or not at points
+	 */
 	public boolean getIsBreak() {
 		return isBreak;
 	}
