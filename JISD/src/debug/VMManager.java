@@ -42,7 +42,11 @@ class VMManager implements Runnable {
 	 * Shut down the debugger.
 	 */
 	void shutdown() {
-		j.vm().exit(0);
-		DebuggerInfo.print("VM exited.");
+		try {
+		  j.vm().exit(0);
+		  DebuggerInfo.print("VM exited.");
+		} catch (VMDisconnectedException e) {
+			DebuggerInfo.print("VM already exited.");
+		}
 	}
 }
