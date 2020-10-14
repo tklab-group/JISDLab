@@ -98,7 +98,7 @@ public class DebugResult {
      * @return line number
      */
     public int getLineNumber() {
-    	return loc.lineNumber();
+    	return lineNumber;
     }
     
     /**
@@ -129,8 +129,8 @@ public class DebugResult {
      * Get the latest observed value
      * @return latest value
      */
-    public ValueInfo getLatestValue() {
-    	return values.getLast();
+    public String getLatestValue() {
+    	return values.getLast().getValue();
     }
 
 	@Override
