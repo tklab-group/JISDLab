@@ -100,19 +100,16 @@ class BreakPointManager {
 	    	int bpLineNumber = be.location().lineNumber();
 	    	String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
 	    	String bpMethodName = be.location().method().name();
-	    	printCurrentLocation("Breakpoint hit,", bpLineNumber, bpClassName, bpMethodName);
 	    	BreakPoint bpSetByLineNumber = this.bps.stream()
 							    	               .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber)))
 							    	               .findFirst()
 							    	               .orElse(new BreakPoint(bpClassName, 0));
-	    	BreakPoint bpSetByMethodName = new BreakPoint(bpClassName, 0);
 	    	boolean isBPSetByLineNumber = (bpSetByLineNumber.getLineNumber() > 0);
-	    	if (! isBPSetByLineNumber) {
-	    		bpSetByMethodName = this.bps.stream()
-				    	                .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName)))
-				    	                .findFirst()
-				    	                .orElse(new BreakPoint(bpClassName, 0));
-	    	}
+	    	BreakPoint bpSetByMethodName = (! isBPSetByLineNumber) ? this.bps.stream()
+														                   .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName)))
+														                   .findFirst()
+														                   .orElse(new BreakPoint(bpClassName, 0))
+                                                                 : new BreakPoint(bpClassName, 0);
 	    	boolean isBPSetByMethodName = (bpSetByMethodName.getMethodName().length() > 0);
 	    	for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
 	    		String varName = entry.getKey().name();
@@ -123,6 +120,7 @@ class BreakPointManager {
 	        }
 	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||
 	    		(isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
+	    		printCurrentLocation("Breakpoint hit,", bpLineNumber, bpClassName, bpMethodName);
 	    	    currentTRef.suspend();
 	    	}
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {
