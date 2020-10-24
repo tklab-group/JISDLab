@@ -6,6 +6,8 @@ package debug;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import util.StreamUtil;
+
 /**
  * Breakpoint infomation
  * @author sugiyama
@@ -23,7 +25,7 @@ public class BreakPoint {
 	/** break or not at points*/
 	boolean isBreak;
 	/** debug result */
-	DebugResult dr;
+	ArrayList<DebugResult> drs = new ArrayList<>();
 	
 	/**
 	 * Constructor
@@ -123,26 +125,36 @@ public class BreakPoint {
 	}
 	
 	/**
-	 * Get DebugResult if it exists.
+	 * Get DebugResult a variable name matches.
 	 * @return debug result
 	 */
-	public Optional<DebugResult> getDebugResult() {
-		return Optional.ofNullable(dr);
+	public Optional<DebugResult> getDebugResult(String varName) {
+		Optional<DebugResult> result = drs.stream().filter(r -> r.getName().equals(varName))
+				   			                       .findFirst();
+        return result;
+	}
+	
+	/**
+	 * Get DebugResults.
+	 * @return debug result
+	 */
+	public ArrayList<DebugResult> getDebugResults() {
+		return drs;
 	}
 	
 	/**
 	 * Set DebugResult
 	 * @param dr debugresult
 	 */
-	public void setDebugResult(DebugResult dr) {
-		this.dr = dr; 
+	public void addDebugResult(DebugResult dr) {
+		drs.add(dr);
 	}
 	
 	/**
 	 * Clear DebugResult
 	 */
-	public void clearDebugResult() {
-		dr = null;
+	public void clearDebugResults() {
+		drs = null;
 	}
 
 	@Override

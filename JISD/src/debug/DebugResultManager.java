@@ -7,6 +7,8 @@ import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
 import com.sun.jdi.Value;
 
+import util.StreamUtil;
+
 /**
  * Debug result manager
  * @author sugiyama
@@ -60,7 +62,7 @@ class DebugResultManager {
 			}
 			DebugResult dr = new DebugResult(maxRecordNoOfValue, number++, className, lineNumber, varName, loc, entry);
 			drs.add(dr);
-			bp.setDebugResult(dr);
+			bp.addDebugResult(dr);
 		}
 	 }
 	
@@ -70,6 +72,16 @@ class DebugResultManager {
 	 */
 	ArrayList<DebugResult> getResults() {
 		return drs;
+	}
+	
+	/**
+	 * Get debug results a variable name matches.
+	 * @return debug results
+	 */
+	ArrayList<DebugResult> getResults(String varName) {
+		ArrayList<DebugResult> results =  (ArrayList<DebugResult>) drs.stream().filter(r -> r.getName().equals(varName))
+                                                      						   .collect(StreamUtil.toArrayList());
+		return results;
 	}
 	
 	/**

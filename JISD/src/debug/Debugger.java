@@ -415,7 +415,7 @@ public class Debugger {
 	public void clear() {
 		drm.clearResults();
 		getBreakPoints().forEach(bp -> {
-			bp.clearDebugResult();
+			bp.clearDebugResults();
 		});
 	}
 	
