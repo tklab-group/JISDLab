@@ -4,6 +4,7 @@
 package debug;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Breakpoint infomation
@@ -21,6 +22,8 @@ public class BreakPoint {
 	ArrayList<String> varNames;
 	/** break or not at points*/
 	boolean isBreak;
+	/** debug result */
+	DebugResult dr;
 	
 	/**
 	 * Constructor
@@ -117,6 +120,29 @@ public class BreakPoint {
 	 */
 	public boolean getIsBreak() {
 		return isBreak;
+	}
+	
+	/**
+	 * Get DebugResult if it exists.
+	 * @return debug result
+	 */
+	public Optional<DebugResult> getDebugResult() {
+		return Optional.ofNullable(dr);
+	}
+	
+	/**
+	 * Set DebugResult
+	 * @param dr debugresult
+	 */
+	public void setDebugResult(DebugResult dr) {
+		this.dr = dr; 
+	}
+	
+	/**
+	 * Clear DebugResult
+	 */
+	public void clearDebugResult() {
+		dr = null;
 	}
 
 	@Override

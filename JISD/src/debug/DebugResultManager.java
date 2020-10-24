@@ -41,13 +41,14 @@ class DebugResultManager {
 	
 	/**
 	 * Add an observed result.
+	 * @param bp breakpoint
 	 * @param className class name
 	 * @param lineNumber line number
 	 * @param varName variable name
 	 * @param loc An observed location
 	 * @param entry entry An observed variable and value
 	 */
-	 void addVariable(String className, int lineNumber, String varName, Location loc, Map.Entry<LocalVariable, Value> entry) {
+	 void addVariable(BreakPoint bp, String className, int lineNumber, String varName, Location loc, Map.Entry<LocalVariable, Value> entry) {
 		synchronized (this) {
 			DebugResult tmp = new DebugResult(className, lineNumber, varName);
 			for (int i = 0; i < drs.size(); i++) {
@@ -57,7 +58,9 @@ class DebugResultManager {
 					return;
 				}
 			}
-			drs.add(new DebugResult(maxRecordNoOfValue, number++, className, lineNumber, varName, loc, entry));
+			DebugResult dr = new DebugResult(maxRecordNoOfValue, number++, className, lineNumber, varName, loc, entry);
+			drs.add(dr);
+			bp.setDebugResult(dr);
 		}
 	 }
 	

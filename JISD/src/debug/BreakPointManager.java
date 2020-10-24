@@ -106,16 +106,19 @@ class BreakPointManager {
 							    	               .orElse(new BreakPoint(bpClassName, 0));
 	    	boolean isBPSetByLineNumber = (bpSetByLineNumber.getLineNumber() > 0);
 	    	BreakPoint bpSetByMethodName = (! isBPSetByLineNumber) ? this.bps.stream()
-														                   .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName)))
-														                   .findFirst()
-														                   .orElse(new BreakPoint(bpClassName, 0))
-                                                                 : new BreakPoint(bpClassName, 0);
+														                     .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName)))
+														                     .findFirst()
+														                     .orElse(new BreakPoint(bpClassName, 0))
+                                                                   : new BreakPoint(bpClassName, 0);
 	    	boolean isBPSetByMethodName = (bpSetByMethodName.getMethodName().length() > 0);
+	    	BreakPoint bp = (isBPSetByLineNumber) ? bpSetByLineNumber
+	    			                              : (isBPSetByMethodName) ? bpSetByMethodName
+	    			                            		                  : new BreakPoint(bpClassName, 0);
 	    	for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
 	    		String varName = entry.getKey().name();
 	    		if ((isBPSetByLineNumber && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(varName))) ||
 	    			(isBPSetByMethodName && (bpSetByMethodName.getVarNames().size() == 0 || bpSetByMethodName.getVarNames().contains(varName)))) {
-	        	    drm.addVariable(bpClassName, bpLineNumber, varName, stackFrame.location(), entry);
+	        	    drm.addVariable(bp, bpClassName, bpLineNumber, varName, stackFrame.location(), entry);
 	    		}
 	        }
 	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||
@@ -182,18 +185,18 @@ class BreakPointManager {
      * @param isBreak break or not at points
      * @return breakpoint
      */
-	public BreakPoint setBreakPoint(String className, int lineNumber, ArrayList<String> varNames, boolean isBreak) {
+	public Optional<BreakPoint> setBreakPoint(String className, int lineNumber, ArrayList<String> varNames, boolean isBreak) {
 		if (className.length() == 0) {
 			DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
-			return null;
+			return Optional.empty();
 		}
 		if (lineNumber <= 0) {
 			DebuggerInfo.printError("Breakpoint is not set. A line number must be a non-negative integer(> 0).");
-			return null;
+			return Optional.empty();
 		}
 		BreakPoint bp = new BreakPoint(className, lineNumber, varNames, isBreak); 
 		bps.add(bp);
-		return bp;
+		return Optional.of(bp);
 	}
 	
 	/**
@@ -204,18 +207,18 @@ class BreakPointManager {
 	 * @param isBreak break or not at points
 	 * @return breakpoint
 	 */
-	public BreakPoint setBreakPoint(String className, String methodName, ArrayList<String> varNames, boolean isBreak) {
+	public Optional<BreakPoint> setBreakPoint(String className, String methodName, ArrayList<String> varNames, boolean isBreak) {
 		if (className.length() == 0) {
 			DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
-			return null;
+			return Optional.empty();
 		}
 		if (methodName.length() == 0) {
 			DebuggerInfo.printError("Breakpoint is not set. A method name must be one or more letters.");
-			return null;
+			return Optional.empty();
 		}
 		BreakPoint bp = new BreakPoint(className, methodName, varNames, isBreak); 
 		bps.add(bp);
-		return bp;
+		return Optional.of(bp);
 	}
 	
 	/**

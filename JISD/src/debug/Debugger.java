@@ -1,6 +1,8 @@
 package debug;
 
 import java.util.ArrayList;
+import java.util.Optional;
+
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnVMStart;
 import org.jdiscript.util.VMLauncher;
@@ -92,27 +94,30 @@ public class Debugger {
     /**
      * Set breakpoint with a line number.
      * @param lineNumber A line number in a target java file 
+     * @return breakpoint(optional)
      */
-	public void setBreakPoint(int lineNumber) {
-		setBreakPoint(main, lineNumber);
+	public Optional<BreakPoint> setBreakPoint(int lineNumber) {
+		return setBreakPoint(main, lineNumber);
 	}
 	
 	/**
 	 * Set breakpoint with a line number and variable names.
 	 * @param lineNumber line number
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setBreakPoint(int lineNumber, ArrayList<String> varNames) {
-		setBreakPoint(main, lineNumber, varNames);
+	public Optional<BreakPoint> setBreakPoint(int lineNumber, ArrayList<String> varNames) {
+		return setBreakPoint(main, lineNumber, varNames);
 	}
 	
 	/**
 	 * Set breakpoint with a line number and variable names.
 	 * @param className class name
 	 * @param lineNumber line number
+	 * @return breakpoint(optional)
 	 */
-	public void setBreakPoint(String className, int lineNumber) {
-		setBreakPoint(className, lineNumber, new ArrayList<String>());
+	public Optional<BreakPoint> setBreakPoint(String className, int lineNumber) {
+		return setBreakPoint(className, lineNumber, new ArrayList<String>());
 	}
 	
 	/**
@@ -120,35 +125,39 @@ public class Debugger {
 	 * @param className class name
 	 * @param lineNumber line number
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
-		bpm.setBreakPoint(className, lineNumber, varNames, true);
+	public Optional<BreakPoint> setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
+		return bpm.setBreakPoint(className, lineNumber, varNames, true);
 	}
 	
 	/**
 	 * Set breakpoint with a method name.
 	 * @param methodName A method name in a target java file 
+	 * @return breakpoint(optional)
 	 */
-	public void setBreakPoint(String methodName) {
-		setBreakPoint(main, methodName);
+	public Optional<BreakPoint> setBreakPoint(String methodName) {
+		return setBreakPoint(main, methodName);
 	}
 	
 	/**
 	 * Set breakpoint with a method name  and variable names.
 	 * @param methodName method name
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setBreakPoint(String methodName, ArrayList<String> varNames) {
-		setBreakPoint(main, methodName, varNames);
+	public Optional<BreakPoint> setBreakPoint(String methodName, ArrayList<String> varNames) {
+		return setBreakPoint(main, methodName, varNames);
 	}
 	
 	/**
 	 * Set breakpoint with a method name.
 	 * @param className class name
 	 * @param methodName method name
+	 * @return breakpoint(optional)
 	 */
-	public void setBreakPoint(String className, String methodName) {
-		setBreakPoint(className, methodName, new ArrayList<String>());
+	public Optional<BreakPoint> setBreakPoint(String className, String methodName) {
+		return setBreakPoint(className, methodName, new ArrayList<String>());
 	}
 	
 	/**
@@ -156,35 +165,39 @@ public class Debugger {
 	 * @param className class name
 	 * @param methodName method name
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setBreakPoint(String className, String methodName, ArrayList<String> varNames) {
-		bpm.setBreakPoint(className, methodName, varNames, true);
+	public Optional<BreakPoint> setBreakPoint(String className, String methodName, ArrayList<String> varNames) {
+		return bpm.setBreakPoint(className, methodName, varNames, true);
 	}	
 	
 	/**
      * Set watchpoint with a line number.
      * @param lineNumber A line number in a target java file 
+     * @return breakpoint(optional)
      */
-	public void setWatchPoint(int lineNumber) {
-		setWatchPoint(main, lineNumber);
+	public Optional<BreakPoint> setWatchPoint(int lineNumber) {
+		return setWatchPoint(main, lineNumber);
 	}
 	
 	/**
 	 * Set watchpoint with a line number and variable names.
 	 * @param lineNumber line number
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setWatchPoint(int lineNumber, ArrayList<String> varNames) {
-		setWatchPoint(main, lineNumber, varNames);
+	public Optional<BreakPoint> setWatchPoint(int lineNumber, ArrayList<String> varNames) {
+		return setWatchPoint(main, lineNumber, varNames);
 	}
 	
 	/**
 	 * Set watchpoint with a line number.
 	 * @param className class name
 	 * @param lineNumber line number
+	 * @return breakpoint(optional)
 	 */
-	public void setWatchPoint(String className, int lineNumber) {
-		setWatchPoint(className, lineNumber, new ArrayList<String>());
+	public Optional<BreakPoint> setWatchPoint(String className, int lineNumber) {
+		return setWatchPoint(className, lineNumber, new ArrayList<String>());
 	}
 	
 	/**
@@ -192,34 +205,38 @@ public class Debugger {
 	 * @param className class name
 	 * @param lineNumber line number
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setWatchPoint(String className, int lineNumber, ArrayList<String> varNames) {
-		bpm.setBreakPoint(className, lineNumber, varNames, false);
+	public Optional<BreakPoint> setWatchPoint(String className, int lineNumber, ArrayList<String> varNames) {
+		return bpm.setBreakPoint(className, lineNumber, varNames, false);
 	}
 	
 	/**
 	 * Set watchpoint with a method name.
-	 * @param methodName A method name in a target java file 
+	 * @param methodName A method name in a target java file
+	 * @return breakpoint(optional) 
 	 */
-	public void setWatchPoint(String methodName) {
-		setWatchPoint(main, methodName);
+	public Optional<BreakPoint> setWatchPoint(String methodName) {
+		return setWatchPoint(main, methodName);
 	}
 	/**
 	 * Set watchpoint with a method name and variable names.
 	 * @param methodName method name
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setWatchPoint(String methodName, ArrayList<String> varNames) {
-		setWatchPoint(main, methodName, varNames);
+	public Optional<BreakPoint> setWatchPoint(String methodName, ArrayList<String> varNames) {
+		return setWatchPoint(main, methodName, varNames);
 	}
 	
 	/**
 	 * Set watchpoint with a method name.
 	 * @param className class name
 	 * @param methodName method name
+	 * @return breakpoint(optional)
 	 */
-	public void setWatchPoint(String className, String methodName) {
-		setWatchPoint(className, methodName, new ArrayList<String>());
+	public Optional<BreakPoint> setWatchPoint(String className, String methodName) {
+		return setWatchPoint(className, methodName, new ArrayList<String>());
 	}
 	
 	/**
@@ -227,9 +244,10 @@ public class Debugger {
 	 * @param className class name
 	 * @param methodName method name
 	 * @param varNames variable names
+	 * @return breakpoint(optional)
 	 */
-	public void setWatchPoint(String className, String methodName, ArrayList<String> varNames) {
-		bpm.setBreakPoint(className, methodName, varNames, false);
+	public Optional<BreakPoint> setWatchPoint(String className, String methodName, ArrayList<String> varNames) {
+		return bpm.setBreakPoint(className, methodName, varNames, false);
 	}	
 	
 	/**  Continue execution from breakpoint */
@@ -290,9 +308,9 @@ public class Debugger {
 	 * @param lineNumber line number
 	 */
 	public void stop(int lineNumber) {
-		BreakPoint bp = bpm.setBreakPoint(main, lineNumber, new ArrayList<String>(), true);
-		if (bp != null) { 
-		    bpm.requestSetBreakPoint(bp);
+		Optional<BreakPoint> bp = bpm.setBreakPoint(main, lineNumber, new ArrayList<String>(), true);
+		if (bp.isPresent()) { 
+		    bpm.requestSetBreakPoint(bp.get());
 		}
 	}
 	
@@ -396,6 +414,9 @@ public class Debugger {
 	 */
 	public void clear() {
 		drm.clearResults();
+		getBreakPoints().forEach(bp -> {
+			bp.clearDebugResult();
+		});
 	}
 	
 	/**
