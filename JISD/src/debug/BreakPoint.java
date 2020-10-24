@@ -154,7 +154,7 @@ public class BreakPoint {
 	 * Clear DebugResult
 	 */
 	public void clearDebugResults() {
-		drs = null;
+		drs = new ArrayList<>();
 	}
 
 	@Override

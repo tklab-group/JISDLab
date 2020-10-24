@@ -438,6 +438,14 @@ public class Debugger {
 	}
 	
 	/**
+	 * Get debug results a variable name matches. 
+	 * @return Debug results 
+	 */
+	public ArrayList<DebugResult> getResults(String varName) {
+		return drm.getResults(varName);
+	}
+	
+	/**
 	 * Get breakpoints.
 	 * @return breakpoints
 	 */
