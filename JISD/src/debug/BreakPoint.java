@@ -128,7 +128,7 @@ public class BreakPoint {
 	 * Get DebugResult a variable name matches.
 	 * @return debug result
 	 */
-	public Optional<DebugResult> getDebugResult(String varName) {
+	public Optional<DebugResult> getResult(String varName) {
 		Optional<DebugResult> result = drs.stream().filter(r -> r.getName().equals(varName))
 				   			                       .findFirst();
         return result;
@@ -138,7 +138,7 @@ public class BreakPoint {
 	 * Get DebugResults.
 	 * @return debug result
 	 */
-	public ArrayList<DebugResult> getDebugResults() {
+	public ArrayList<DebugResult> getResults() {
 		return drs;
 	}
 	
