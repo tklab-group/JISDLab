@@ -1,4 +1,4 @@
-# JISD
+# JISDLab
 Java scriptable debugger on JupyterLab.
 
 ## Requirements
@@ -8,7 +8,7 @@ Java scriptable debugger on JupyterLab.
 ## Setup
 First of all, you should clone this repository with a `--recursive` option.
 ```
-git clone --recursive https://github.com/tklab-group/JISD.git
+git clone --recursive https://github.com/tklab-group/JISDLab.git
 ```
 And then, you can set your Java application's classpaths in `ARG cp3` of [Dockerfile](./Dockerfile).Concerning local and container path  relations, see [docker-compose.yml](./docker-compose.yml). 
 ```bash:Dockerfile
@@ -39,4 +39,4 @@ docker-compose down -v
 ```
 
 ## Trouble Shooting
-Please see https://github.com/tklab-group/JISD/wiki/Trouble-Shooting (Japanese only)
+Please see https://github.com/tklab-group/JISDLab/wiki/Trouble-Shooting (Japanese only)

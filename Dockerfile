@@ -26,7 +26,7 @@ RUN apt-get install -y openjdk-11-jdk
 ARG ws_dir=/workspaces
 
 # project directory
-ARG project_dir=${ws_dir}/JISD
+ARG project_dir=${ws_dir}/JISDLab
 
 COPY . $project_dir
 WORKDIR $project_dir

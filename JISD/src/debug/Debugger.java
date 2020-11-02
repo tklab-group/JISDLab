@@ -12,7 +12,7 @@ import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.VirtualMachine;
 
 /**
- * JISD's main debugger
+ * JISDLab's main debugger
  * @author sugiyama
  *
  */
