@@ -29,6 +29,8 @@ public class Debugger {
 	Thread jdiThread;
 	/** VM manager */
 	VMManager vmManager;
+	/** A procedure when vm started */
+	OnVMStart start = s -> {};
 	/** use attaching connector or not */
 	boolean isRemoteDebug = false;
 	/** attaching port */
@@ -46,6 +48,7 @@ public class Debugger {
 		this.srcDir = srcDir;
 		drm = new DebugResultManager();
 		bpm = new BreakPointManager(drm);
+		vmInit();
 	}
     
     /**
@@ -128,7 +131,11 @@ public class Debugger {
 	 * @return breakpoint(optional)
 	 */
 	public Optional<BreakPoint> setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
-		return bpm.setBreakPoint(className, lineNumber, varNames, true);
+		Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, true); 
+		if (bp.isPresent()) {
+			bpm.requestSetBreakPoint(bp.get());
+		}
+		return bp;
 	}
 	
 	/**
@@ -168,7 +175,11 @@ public class Debugger {
 	 * @return breakpoint(optional)
 	 */
 	public Optional<BreakPoint> setBreakPoint(String className, String methodName, ArrayList<String> varNames) {
-		return bpm.setBreakPoint(className, methodName, varNames, true);
+		Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, true);
+		if (bp.isPresent()) {
+			bpm.requestSetBreakPoint(bp.get());
+		}
+		return bp;
 	}	
 	
 	/**
@@ -208,7 +219,11 @@ public class Debugger {
 	 * @return breakpoint(optional)
 	 */
 	public Optional<BreakPoint> setWatchPoint(String className, int lineNumber, ArrayList<String> varNames) {
-		return bpm.setBreakPoint(className, lineNumber, varNames, false);
+		Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, false);
+		if (bp.isPresent()) {
+			bpm.requestSetBreakPoint(bp.get());
+		}
+		return bp;
 	}
 	
 	/**
@@ -247,7 +262,11 @@ public class Debugger {
 	 * @return breakpoint(optional)
 	 */
 	public Optional<BreakPoint> setWatchPoint(String className, String methodName, ArrayList<String> varNames) {
-		return bpm.setBreakPoint(className, methodName, varNames, false);
+		Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, false);
+		if (bp.isPresent()) {
+			bpm.requestSetBreakPoint(bp.get());
+		}
+		return bp;
 	}	
 	
 	/**  Continue execution from breakpoint */
@@ -304,17 +323,6 @@ public class Debugger {
 	}
 	
 	/**
-	 * Set breakpoint at once.
-	 * @param lineNumber line number
-	 */
-	public void stop(int lineNumber) {
-		Optional<BreakPoint> bp = bpm.setBreakPoint(main, lineNumber, new ArrayList<String>(), true);
-		if (bp.isPresent()) { 
-		    bpm.requestSetBreakPoint(bp.get());
-		}
-	}
-	
-	/**
 	 * Remove breakpoint with a line number.
 	 * @param lineNumber A line number in a target java file
 	 */
@@ -353,12 +361,9 @@ public class Debugger {
 	 * @return A procedure before the debugger runs 
 	 */
 	OnVMStart prepareStart() {
-		OnVMStart start = se -> {
-	        j.onClassPrep(p -> {
-	        	if(p.referenceType().name().equals(main)) {
-	        		bpm.requestSetBreakPoints();
-	        	}
-	        });
+		start = se -> {
+			/* procedure when vm starts. */
+			bpm.requestSetBreakPoints();
 	    };
 	    return start;
 	}
@@ -375,9 +380,6 @@ public class Debugger {
 		}
 		j = new JDIScript(vm);
 		bpm.setJDI(j);
-		OnVMStart start = prepareStart();
-        vmManager = new VMManager(j, start);
-		jdiThread = new Thread(vmManager);
 	}
 	
 	/**
@@ -385,7 +387,8 @@ public class Debugger {
 	 * @param sleepTime Wait time after the debugger starts running 
 	 */
 	public void run(int sleepTime) {
-		vmInit();
+        vmManager = new VMManager(j, start);
+		jdiThread = new Thread(vmManager);
 		jdiThread.start();
 		sleep(sleepTime);
 	}
@@ -414,8 +417,10 @@ public class Debugger {
 	 */
 	public void clear() {
 		drm.clearResults();
-		getBreakPoints().forEach(bp -> {
+		ArrayList<BreakPoint> bps = getBreakPoints();
+		bps.forEach(bp -> {
 			bp.clearDebugResults();
+			bp.setRequestState(false);
 		});
 	}
 	
@@ -426,6 +431,8 @@ public class Debugger {
 	public void restart(int sleepTime) {
 		exit();
 		clear();
+		vmInit();
+		prepareStart();
 		run(sleepTime);
 	}
 	

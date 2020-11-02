@@ -56,7 +56,7 @@ class DebugResultManager {
 			for (int i = 0; i < drs.size(); i++) {
 				DebugResult res = drs.get(i);
 				if (res.equals(tmp)) {
-					res.addValue(number++, entry);
+					res.addValue(number++, entry, loc.declaringType());
 					return;
 				}
 			}

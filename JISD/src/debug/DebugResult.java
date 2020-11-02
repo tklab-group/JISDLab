@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
+import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 
 /**
@@ -45,7 +46,7 @@ public class DebugResult {
         this.varName = varName;
     	this.loc = loc;
         this.entry = entry;
-        addValue(number, entry);
+        addValue(number, entry, loc.declaringType());
     }
     
     /**
@@ -59,14 +60,13 @@ public class DebugResult {
         this.lineNumber = lineNumber;
         this.varName = varName;
     }
-    
     /**
      * Add value to deque
      * @param number time stamp
      * @param entry entry An observed variable and value
      */
-    void addValue(long number, Map.Entry<LocalVariable, Value> entry) {
-    	ValueInfo value = new ValueInfo(number, entry.getValue().toString());
+    void addValue(long number, Map.Entry<LocalVariable, Value> entry, ReferenceType rt) {
+    	ValueInfo value = new ValueInfo(number, entry.getValue().toString(), rt, entry.getValue());
     	synchronized (this) {
 	    	if (values.size() >= maxRecordNoOfValue) {
 	    		values.pop();

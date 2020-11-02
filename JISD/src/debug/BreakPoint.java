@@ -26,6 +26,8 @@ public class BreakPoint {
 	boolean isBreak;
 	/** debug result */
 	ArrayList<DebugResult> drs = new ArrayList<>();
+	/** already request to set Breakpoint? */
+	boolean isRequested = false;
 	
 	/**
 	 * Constructor
@@ -155,6 +157,18 @@ public class BreakPoint {
 	 */
 	public void clearDebugResults() {
 		drs = new ArrayList<>();
+	}
+	
+	/** Set request state */
+	void setRequestState(boolean state) {
+		isRequested = state;
+	}
+	
+	/** Get request state
+	 * @return request state
+	 */
+	boolean getRequestState() {
+		return isRequested;
 	}
 
 	@Override

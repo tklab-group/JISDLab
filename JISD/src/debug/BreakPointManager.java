@@ -96,7 +96,9 @@ class BreakPointManager {
         try {
 	    	StackFrame stackFrame = currentTRef.frame(0);
 	    	List<LocalVariable> vars = stackFrame.visibleVariables();
+	    	Location loc = stackFrame.location();
 	    	Map<LocalVariable, Value> visibleVariables = (Map<LocalVariable, Value>) stackFrame.getValues(vars);
+	    	
 	    	int bpLineNumber = be.location().lineNumber();
 	    	String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
 	    	String bpMethodName = be.location().method().name();
@@ -118,7 +120,7 @@ class BreakPointManager {
 	    		String varName = entry.getKey().name();
 	    		if ((isBPSetByLineNumber && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(varName))) ||
 	    			(isBPSetByMethodName && (bpSetByMethodName.getVarNames().size() == 0 || bpSetByMethodName.getVarNames().contains(varName)))) {
-	        	    drm.addVariable(bp, bpClassName, bpLineNumber, varName, stackFrame.location(), entry);
+	        	    drm.addVariable(bp, bpClassName, bpLineNumber, varName, loc, entry);
 	    		}
 	        }
 	    	if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak()) ||
@@ -143,9 +145,10 @@ class BreakPointManager {
      * @param bp breakpoint
      */
     void requestSetBreakPoint(BreakPoint bp) {
-    	List<ReferenceType> rts = j.vm().classesByName(bp.getClassName());
+    	String className = bp.getClassName();
+    	List<ReferenceType> rts = j.vm().classesByName(className);
 		if (rts.size() < 1) {
-			DebuggerInfo.printError("Cannot set breakpoint. Skipped.");
+			deferSetBreakPoint(bp);
 			return;
 		}
 		ReferenceType rt = rts.get(0);
@@ -154,6 +157,7 @@ class BreakPointManager {
     			try {
 					methods.allLineLocations().forEach(m -> {
 					    j.breakpointRequest(m, this.breakpoint).enable();
+					    bp.setRequestState(true);
 					});
 				} catch (AbsentInformationException e) {
 					e.printStackTrace();
@@ -163,11 +167,30 @@ class BreakPointManager {
 			try {
 				rt.locationsOfLine(bp.getLineNumber()).forEach(m -> {
 					j.breakpointRequest(m, this.breakpoint).enable();
+					bp.setRequestState(true);
 				});
 			} catch (AbsentInformationException e) {
 				e.printStackTrace();
 			}
 		}
+    }
+    
+    /**
+     * Defer to set breakpoint until the class loaded.
+     * @param bp breakpoint
+     */
+    void deferSetBreakPoint(BreakPoint bp) {
+    	if (bp.getRequestState()) {
+			DebuggerInfo.printError("Cannot set breakpoint. Skipped.");
+			return;
+		}
+    	String className = bp.getClassName();
+    	j.onClassPrep(p -> {
+        	if(p.referenceType().name().equals(className)) {
+        		requestSetBreakPoint(bp);
+        	}
+        });
+    	DebuggerInfo.print("Deferring breakpoint in " + className + ". It will be set after the class is loaded.");
     }
 	
     /**

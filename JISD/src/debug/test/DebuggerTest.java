@@ -102,6 +102,7 @@ class DebuggerTest {
 		int sleepTime = 1000;
 		dbg.run(sleepTime);
 		ArrayList<DebugResult> results = dbg.getResults();
+		assertEquals(results.size(), 8);
 	    for (int i = 0; i < results.size(); i++) {
 	    	DebugResult res = results.get(i);
 	    	assertEquals(res.getLineNumber(), bps.get(i/4));
