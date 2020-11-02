@@ -26,19 +26,19 @@ RUN apt-get install -y openjdk-11-jdk
 ARG ws_dir=/workspaces
 
 # project directory
-ARG project_dir=${ws_dir}/JISDLab
+ARG project_dir=/JISDLab
 
 COPY . $project_dir
 WORKDIR $project_dir
 
 # jdiscript classpath  
-ARG cp1=jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar
+ARG cp1=${project_dir}/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar
 
 # JISD classpath
-ARG cp2=JISD/lib/JISD.jar
+ARG cp2=${project_dir}/JISD/lib/JISD.jar
 
 # your application's absolute classpaths in a container(classpath1:classpath2:...)
 ARG cp3=${ws_dir}/sample
 
 # IJava install
-RUN cd IJava && ./gradlew installKernel --param classpath:${project_dir}/${cp1}:${project_dir}/${cp2}:${cp3}
+RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3}
