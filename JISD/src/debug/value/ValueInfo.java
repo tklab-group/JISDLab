@@ -1,4 +1,4 @@
-package debug;
+package debug.value;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -18,21 +18,22 @@ public class ValueInfo {
 	String value;
 	/** time stamp */
 	long number;
-	/** reference type */
-	ReferenceType rt;
+	/** the current number of variable expansion strata */
+	int stratum;
 	/** value */
-	Value val;
+	Value jValue;
+	ArrayList<ValueInfo> children = new ArrayList<>();
 	
 	/**
 	 * Constructor
 	 * @param number saved value
 	 * @param value time stamp
 	 */
-    ValueInfo(long number, String value, ReferenceType rt, Value val) {
+    public ValueInfo(long number, int strutum, Value jValue) {
     	this.number = number;
-    	this.value = value; 
-    	this.rt = rt;
-    	this.val = val;
+    	this.stratum = strutum;
+    	this.value = jValue.toString(); 
+    	this.jValue = jValue;
     }
     
     /**
@@ -52,18 +53,29 @@ public class ValueInfo {
     }
     
     /**
-     * Get ReferenceType
-     * @return reference type
-     */
-    public ReferenceType getRT() {
-    	return rt;
-    }
-    
-    /**
      * Get jdi raw value 
      * @return
      */
-    public Value getVal() {
-    	return val;
+    public Value getJValue() {
+    	return jValue;
     }
+    
+    public int getStratum() {
+    	return stratum;
+    }
+    
+    public ArrayList<ValueInfo> expand() {
+    	return new ArrayList<>();
+    }
+
+	@Override
+	public String toString() {
+		return "ValueInfo [value=" + value + ", number=" + number + ", stratum=" + stratum + "]";
+	}
+    
+    public ArrayList<ValueInfo> ch() {
+    	return children;
+    }
+    
+    
 }

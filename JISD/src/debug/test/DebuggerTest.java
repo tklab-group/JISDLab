@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import debug.DebugResult;
 import debug.Debugger;
-import debug.ValueInfo;
+import debug.value.ValueInfo;
 
 /**
  * Debugger Test
@@ -223,7 +223,7 @@ class DebuggerTest {
 		dbg.setWatchPoint(33, varNames);
 		int maxRecords = 200;
 		dbg.setMaxRecordNumber(maxRecords);
-		dbg.run(1000);
+		dbg.run(2000);
 		ArrayList<DebugResult> results = dbg.getResults();
 	    for (int i = 0; i < results.size(); i++) {
 	    	DebugResult res = results.get(i);
