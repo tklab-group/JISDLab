@@ -8,7 +8,6 @@ import org.jdiscript.handlers.OnVMStart;
 import org.jdiscript.util.VMLauncher;
 import org.jdiscript.util.VMSocketAttacher;
 
-import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.VirtualMachine;
 
 /**

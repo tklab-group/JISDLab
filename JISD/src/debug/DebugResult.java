@@ -1,12 +1,16 @@
 package debug;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Map;
 
 import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
+
+import debug.value.ValueInfo;
+import debug.value.ValueInfoFactory;
 
 /**
  * Debug result
@@ -28,7 +32,8 @@ public class DebugResult {
 	ArrayDeque<ValueInfo> values = new ArrayDeque<>();
 	/** the max record number of values */
 	int maxRecordNoOfValue;
-	
+	/** the max number of the variable expantion strata */
+	int maxNoOfExpand;
 	/**
 	 * Constructor
 	 * @param maxRecordNoOfValue the max record number of values
@@ -39,14 +44,15 @@ public class DebugResult {
 	 * @param loc An observed location
 	 * @param entry An observed variable and value
 	 */
-    DebugResult(int maxRecordNoOfValue, long number, String className, int lineNumber, String varName, Location loc, Map.Entry<LocalVariable, Value> entry) {
+    DebugResult(int maxRecordNoOfValue, int maxNoOfExpand, long number, String className, int lineNumber, String varName, Location loc, Map.Entry<LocalVariable, Value> entry) {
         this.maxRecordNoOfValue = maxRecordNoOfValue;
+        this.maxNoOfExpand = maxNoOfExpand;
     	this.className = className;
         this.lineNumber = lineNumber;
         this.varName = varName;
     	this.loc = loc;
         this.entry = entry;
-        addValue(number, entry, loc.declaringType());
+        addValue(number, entry);
     }
     
     /**
@@ -65,8 +71,23 @@ public class DebugResult {
      * @param number time stamp
      * @param entry entry An observed variable and value
      */
-    void addValue(long number, Map.Entry<LocalVariable, Value> entry, ReferenceType rt) {
-    	ValueInfo value = new ValueInfo(number, entry.getValue().toString(), rt, entry.getValue());
+    void addValue(long number, Map.Entry<LocalVariable, Value> entry) {
+    	ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
+    	ValueInfo value = ValueInfoFactory.create(number, 0, entry.getValue());
+    	valueExpansionQue.add(value);
+    	while(true) {
+    		ValueInfo v = valueExpansionQue.pop();
+    		if (v.getStratum() >= maxNoOfExpand) {
+    			break;
+    		}
+    		ArrayList<ValueInfo> childValues = v.expand();
+    		childValues.forEach(cv -> {
+    			valueExpansionQue.add(cv);
+    		});
+    		if (valueExpansionQue.isEmpty()) {
+    			break;
+    		}
+    	}
     	synchronized (this) {
 	    	if (values.size() >= maxRecordNoOfValue) {
 	    		values.pop();
@@ -129,8 +150,8 @@ public class DebugResult {
      * Get the latest observed value
      * @return latest value
      */
-    public String getLatestValue() {
-    	return values.getLast().getValue();
+    public ValueInfo getLatestValue() {
+    	return values.getLast();
     }
 
 	@Override

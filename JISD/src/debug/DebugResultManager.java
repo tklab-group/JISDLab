@@ -21,7 +21,8 @@ class DebugResultManager {
     long number = 0;
     /** the max record number of values */
     int maxRecordNoOfValue = 100;
-	
+    /** the max number of the variable expantion strata */ 
+	int maxNoOfExpand = 1;
 	/**
 	 * Constructor
 	 */
@@ -41,6 +42,13 @@ class DebugResultManager {
 		this.maxRecordNoOfValue = maxRecordNoOfValue;
 	}
 	
+	void setMaxNoOfExpand(int maxNoOfExpand) {
+		if (maxNoOfExpand < 0) {
+			DebuggerInfo.printError("A max number of the variable expansion must be a positive integer(>= 0).");
+		}
+		this.maxNoOfExpand = maxNoOfExpand;
+	}
+	
 	/**
 	 * Add an observed result.
 	 * @param bp breakpoint
@@ -56,11 +64,11 @@ class DebugResultManager {
 			for (int i = 0; i < drs.size(); i++) {
 				DebugResult res = drs.get(i);
 				if (res.equals(tmp)) {
-					res.addValue(number++, entry, loc.declaringType());
+					res.addValue(number++, entry);
 					return;
 				}
 			}
-			DebugResult dr = new DebugResult(maxRecordNoOfValue, number++, className, lineNumber, varName, loc, entry);
+			DebugResult dr = new DebugResult(maxRecordNoOfValue, maxNoOfExpand, number++, className, lineNumber, varName, loc, entry);
 			drs.add(dr);
 			bp.addDebugResult(dr);
 		}
