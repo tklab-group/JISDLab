@@ -92,6 +92,14 @@ public class Debugger {
     public void setMaxRecordNumber(int number) {
     	drm.setMaxRecordNoOfValue(number);
     }
+    
+    /**
+	 * Set the max number of the variable expantion strata
+	 * @param maxNoOfExpand the max number of the variable expantion strata
+	 */
+    public void setMaxNoOfExpand(int number) {
+    	drm.setMaxNoOfExpand(number);
+    }
 	
     /**
      * Set breakpoint with a line number.

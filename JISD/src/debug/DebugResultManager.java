@@ -42,6 +42,10 @@ class DebugResultManager {
 		this.maxRecordNoOfValue = maxRecordNoOfValue;
 	}
 	
+	/**
+	 * Set the max number of the variable expantion strata
+	 * @param maxNoOfExpand the max number of the variable expantion strata
+	 */
 	void setMaxNoOfExpand(int maxNoOfExpand) {
 		if (maxNoOfExpand < 0) {
 			DebuggerInfo.printError("A max number of the variable expansion must be a positive integer(>= 0).");
