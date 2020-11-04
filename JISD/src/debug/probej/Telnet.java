@@ -1,8 +1,4 @@
-/**
- * 
- */
 package debug.probej;
-
 
 import java.net.* ;
 import java.io.* ;
@@ -13,10 +9,10 @@ import java.io.* ;
  */
 //Telnet.java 指定されたアドレスのポートに標準入出力を接続します
 //ポートが23番の場合ネゴシエーションを行います。
-//使い方：java Telnet サーバーアドレス　ポート番号　例：java Telnet 192.168.0.1 23
-//ポート番号を省略すると23番を仮定します　終了はCtrl+c
+//使い方：java Telnet サーバーアドレス ポート番号 例：java Telnet 192.168.0.1 23
+//ポート番号を省略すると23番を仮定します 終了はCtrl+c
 
-//Telnetクラス　
+//Telnetクラス 
 //Telnetクラスはネットワーク接続の管理を行います。
 public class Telnet
 {
@@ -149,7 +145,7 @@ class StreamConnector implements Runnable
 {
 	InputStream src = null ;
 	OutputStream dist = null ;
-	//　コンストラクタ 入出力ストリームを受け取ります。
+	// コンストラクタ 入出力ストリームを受け取ります。
 	public StreamConnector (InputStream in, OutputStream out)
 	{
 		src = in ;
