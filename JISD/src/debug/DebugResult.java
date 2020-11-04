@@ -37,6 +37,7 @@ public class DebugResult {
 	/**
 	 * Constructor
 	 * @param maxRecordNoOfValue the max record number of values
+	 * @param maxNoOfExpand the max number of the variable expantion strata
 	 * @param number time stamp
      * @param className class name
      * @param lineNumber line number

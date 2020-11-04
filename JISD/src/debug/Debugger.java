@@ -445,6 +445,7 @@ public class Debugger {
 	
 	/**
 	 * Get debug results a variable name matches. 
+	 * @param varName variable name
 	 * @return Debug results 
 	 */
 	public ArrayList<DebugResult> getResults(String varName) {

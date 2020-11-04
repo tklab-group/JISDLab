@@ -22,12 +22,16 @@ public class ValueInfo {
 	int stratum;
 	/** value */
 	Value jValue;
+	/** children value info */
 	ArrayList<ValueInfo> children = new ArrayList<>();
+	/** already expanded? */
+	boolean isExpanded = false;
 	
 	/**
 	 * Constructor
-	 * @param number saved value
-	 * @param value time stamp
+	 * @param number time stamp
+	 * @param strutum the current number of variable expansion strata
+	 * @param jValue jdi value
 	 */
     public ValueInfo(long number, int strutum, Value jValue) {
     	this.number = number;
@@ -54,18 +58,27 @@ public class ValueInfo {
     
     /**
      * Get jdi raw value 
-     * @return
+     * @return jdi value
      */
     public Value getJValue() {
     	return jValue;
     }
     
+    /**
+     * Get the current number of variable expansion strata.
+     * @return stratum
+     */
     public int getStratum() {
     	return stratum;
     }
     
+    /**
+     * Create children value info
+     * @return children value info
+     */
     public ArrayList<ValueInfo> expand() {
-    	return new ArrayList<>();
+    	isExpanded = true;
+    	return children;
     }
 
 	@Override
@@ -73,6 +86,10 @@ public class ValueInfo {
 		return "ValueInfo [value=" + value + ", number=" + number + ", stratum=" + stratum + "]";
 	}
     
+	/**
+	 * Get children value info
+	 * @return children
+	 */
     public ArrayList<ValueInfo> ch() {
     	return children;
     }

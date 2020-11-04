@@ -84,6 +84,7 @@ class DebugResultManager {
 	
 	/**
 	 * Get debug results a variable name matches.
+	 * @param varName variable name
 	 * @return debug results
 	 */
 	ArrayList<DebugResult> getResults(String varName) {

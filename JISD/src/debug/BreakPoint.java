@@ -128,6 +128,7 @@ public class BreakPoint {
 	
 	/**
 	 * Get DebugResult a variable name matches.
+	 * @param varName variable name
 	 * @return debug result
 	 */
 	public Optional<DebugResult> getResult(String varName) {
@@ -159,7 +160,9 @@ public class BreakPoint {
 		drs = new ArrayList<>();
 	}
 	
-	/** Set request state */
+	/** Set request state
+	 * @param state already request to set breakpoint?
+	 */
 	void setRequestState(boolean state) {
 		isRequested = state;
 	}
