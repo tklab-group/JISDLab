@@ -95,7 +95,7 @@ public class Debugger {
     
     /**
 	 * Set the max number of the variable expantion strata
-	 * @param maxNoOfExpand the max number of the variable expantion strata
+	 * @param number the max number of the variable expantion strata
 	 */
     public void setMaxNoOfExpand(int number) {
     	drm.setMaxNoOfExpand(number);
