@@ -1,4 +1,4 @@
-package debug.probej;
+package probej;
 
 import java.net.* ;
 import java.io.* ;
