@@ -13,15 +13,11 @@ import java.util.stream.Collector.Characteristics;
  *
  */
 public class StreamUtil {
-	public static <T> Collector<T, ?, List<T>> toArrayList() {
-		Collector<T, ?, List<T>> toArrayList = Collector.of(
-		    ArrayList::new,
-		    List::add,
-		    (l1, l2) -> {
-		        l1.addAll(l2);
-		        return l1;
-		    },
-		    Characteristics.IDENTITY_FINISH); 
-		return toArrayList;
-	}
+  public static <T> Collector<T, ?, List<T>> toArrayList() {
+    Collector<T, ?, List<T>> toArrayList = Collector.of(ArrayList::new, List::add, (l1, l2) -> {
+      l1.addAll(l2);
+      return l1;
+    }, Characteristics.IDENTITY_FINISH);
+    return toArrayList;
+  }
 }
