@@ -23,6 +23,8 @@ import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Value;
 
+import util.StreamUtil;
+
 /**
  * Breakpoint manager
  * 
@@ -100,11 +102,7 @@ class BreakPointManager {
   OnBreakpoint breakpoint = be -> {
     currentTRef = be.thread();
     try {
-      StackFrame stackFrame = currentTRef.frame(0);
-      List<LocalVariable> vars = stackFrame.visibleVariables();
-      Location loc = stackFrame.location();
-      Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
-
+      // search the breakpoint which caused this event.
       int bpLineNumber = be.location().lineNumber();
       String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
       String bpMethodName = be.location().method().name();
@@ -122,6 +120,28 @@ class BreakPointManager {
       BreakPoint bp = (isBPSetByLineNumber) ? bpSetByLineNumber
                                             : (isBPSetByMethodName) ? bpSetByMethodName
                                                                     : new BreakPoint(bpClassName, 0);
+      // get variable data from target VM
+      var varNames = bp.getVarNames();
+      List<LocalVariable> vars;
+      StackFrame stackFrame = currentTRef.frame(0);
+      if (varNames.size() == 0) {
+        vars = stackFrame.visibleVariables();
+      } else {
+        vars = varNames.stream()
+                       .map(name -> {
+                              try {
+                                return stackFrame.visibleVariableByName(name);
+                              } catch (AbsentInformationException ee) {
+                                DebuggerInfo.printError("such a variable name not found.");
+                                return null;
+                              }
+                            })
+                       .filter(o -> o != null)
+                       .collect(StreamUtil.toArrayList());
+      }     
+      Location loc = stackFrame.location();
+      Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
+      // add debug result
       for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
         String varName = entry.getKey().name();
         if (   (isBPSetByLineNumber && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(varName)))
@@ -129,6 +149,7 @@ class BreakPointManager {
           drm.addVariable(bp, bpClassName, bpLineNumber, varName, loc, entry);
         }
       }
+      // if isBreak is true
       if (   (isBPSetByLineNumber && bpSetByLineNumber.getIsBreak())
           || (isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
         printCurrentLocation("Breakpoint hit,", bpLineNumber, bpClassName, bpMethodName);
