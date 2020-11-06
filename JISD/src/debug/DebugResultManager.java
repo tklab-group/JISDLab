@@ -101,8 +101,9 @@ class DebugResultManager {
    * @return debug results
    */
   ArrayList<DebugResult> getResults(String varName) {
-    ArrayList<DebugResult> results = (ArrayList<DebugResult>) drs.stream().filter(r -> r.getName().equals(varName))
-        .collect(StreamUtil.toArrayList());
+    ArrayList<DebugResult> results = (ArrayList<DebugResult>) drs.stream()
+                                                                 .filter(r -> r.getName().equals(varName))
+                                                                 .collect(StreamUtil.toArrayList());
     return results;
   }
 

@@ -19,7 +19,7 @@ import debug.value.ValueInfo;
  *
  */
 class DebuggerTest {
-  /* line numbers a breakpoint is set*/
+  /* line numbers a breakpoint is set */
   static final int bpln1 = 29;
   static final int bpln2 = 31;
 

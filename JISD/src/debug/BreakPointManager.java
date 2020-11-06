@@ -70,8 +70,11 @@ class BreakPointManager {
     StringBuilder sb = new StringBuilder();
     for (StackFrame f : t.frames()) {
       Location loc = f.location();
-      sb.append(loc.declaringType().name()).append(".").append(loc.method().name()).append(loc.lineNumber())
-          .append(":");
+      sb.append(loc.declaringType().name())
+        .append(".")
+        .append(loc.method().name())
+        .append(loc.lineNumber())
+        .append(":");
     }
     return sb.substring(0, sb.length() - 1);
   }
@@ -106,26 +109,27 @@ class BreakPointManager {
       String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
       String bpMethodName = be.location().method().name();
       BreakPoint bpSetByLineNumber = this.bps.stream()
-          .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber))).findFirst()
-          .orElse(new BreakPoint(bpClassName, 0));
+                                             .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber)))
+                                             .findFirst()
+                                             .orElse(new BreakPoint(bpClassName, 0));
       boolean isBPSetByLineNumber = (bpSetByLineNumber.getLineNumber() > 0);
-      BreakPoint bpSetByMethodName = (!isBPSetByLineNumber)
-          ? this.bps.stream().filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName))).findFirst().orElse(
-              new BreakPoint(bpClassName, 0))
-          : new BreakPoint(bpClassName, 0);
+      BreakPoint bpSetByMethodName = (!isBPSetByLineNumber) ? this.bps.stream()
+                                                                      .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName)))
+                                                                      .findFirst()
+                                                                      .orElse(new BreakPoint(bpClassName, 0))
+                                                            : new BreakPoint(bpClassName, 0);
       boolean isBPSetByMethodName = (bpSetByMethodName.getMethodName().length() > 0);
       BreakPoint bp = (isBPSetByLineNumber) ? bpSetByLineNumber
-          : (isBPSetByMethodName) ? bpSetByMethodName : new BreakPoint(bpClassName, 0);
+                                            : (isBPSetByMethodName) ? bpSetByMethodName
+                                                                    : new BreakPoint(bpClassName, 0);
       for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
         String varName = entry.getKey().name();
-        if ((isBPSetByLineNumber
-            && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(varName)))
-            || (isBPSetByMethodName && (bpSetByMethodName.getVarNames().size() == 0
-                || bpSetByMethodName.getVarNames().contains(varName)))) {
+        if (   (isBPSetByLineNumber && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(varName)))
+            || (isBPSetByMethodName && (bpSetByMethodName.getVarNames().size() == 0 || bpSetByMethodName.getVarNames().contains(varName)))) {
           drm.addVariable(bp, bpClassName, bpLineNumber, varName, loc, entry);
         }
       }
-      if ((isBPSetByLineNumber && bpSetByLineNumber.getIsBreak())
+      if (   (isBPSetByLineNumber && bpSetByLineNumber.getIsBreak())
           || (isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
         printCurrentLocation("Breakpoint hit,", bpLineNumber, bpClassName, bpMethodName);
         currentTRef.suspend();
