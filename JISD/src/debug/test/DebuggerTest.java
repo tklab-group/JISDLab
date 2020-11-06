@@ -30,7 +30,7 @@ class DebuggerTest {
     bps.add(bpln1);
     bps.add(bpln2);
     bps.forEach(item -> {
-      dbg.setWatchPoint(item);
+      dbg.watch(item);
     });
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
@@ -54,7 +54,7 @@ class DebuggerTest {
     bps.add(bpln1);
     bps.add(bpln2);
     bps.forEach(item -> {
-      dbg.setWatchPoint(item);
+      dbg.watch(item);
     });
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
@@ -62,12 +62,12 @@ class DebuggerTest {
       DebugResult res = results.get(i);
       assertEquals(res.getLineNumber(), bps.get(i / 4));
     }
-    dbg.removeBreakPoint(bpln2);
+    dbg.clear(bpln2);
     assertEquals(dbg.getBreakPoints().size(), 1);
     assertEquals(dbg.getBreakPoints().get(0).getLineNumber(), bps.get(0));
-    dbg.setBreakPoint("sayHello");
+    dbg.stop("sayHello");
     assertEquals(dbg.getBreakPoints().size(), 2);
-    dbg.removeBreakPoint("sayHello");
+    dbg.clear("sayHello");
     assertEquals(dbg.getBreakPoints().size(), 1);
     dbg.exit();
   }
@@ -76,9 +76,9 @@ class DebuggerTest {
   void methodNameWatchPointTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     ArrayList<Integer> bps = new ArrayList<>();
-    dbg.setWatchPoint("java.io.PrintStream", "println");
+    dbg.watch("java.io.PrintStream", "println");
     bps.forEach(item -> {
-      dbg.setWatchPoint(item);
+      dbg.watch(item);
     });
     dbg.run(1000);
     dbg.exit();
@@ -101,7 +101,7 @@ class DebuggerTest {
     bps.add(bpln1);
     bps.add(bpln2);
     bps.forEach(item -> {
-      dbg.setWatchPoint(item);
+      dbg.watch(item);
     });
     int sleepTime = 1000;
     dbg.run(sleepTime);
@@ -111,7 +111,7 @@ class DebuggerTest {
       DebugResult res = results.get(i);
       assertEquals(res.getLineNumber(), bps.get(i / 4));
     }
-    dbg.removeBreakPoint(bpln2);
+    dbg.clear(bpln2);
     assertEquals(dbg.getBreakPoints().size(), 1);
     dbg.restart(sleepTime);
     results = dbg.getResults();
@@ -126,7 +126,7 @@ class DebuggerTest {
     bps.add(bpln1);
     bps.add(bpln2);
     bps.forEach(item -> {
-      dbg.setWatchPoint(item);
+      dbg.watch(item);
     });
     dbg.run(1000);
     dbg.exit();
@@ -152,7 +152,7 @@ class DebuggerTest {
     bps.add(bpln2);
     varNames.add("a");
     bps.forEach(item -> {
-      dbg.setWatchPoint(item, varNames);
+      dbg.watch(item, varNames);
     });
     dbg.run(1000);
     dbg.exit();
@@ -179,7 +179,7 @@ class DebuggerTest {
     bps.add(0);
     varNames.add("a");
     bps.forEach(item -> {
-      dbg.setWatchPoint(item, varNames);
+      dbg.watch(item, varNames);
     });
     dbg.run(1000);
     dbg.exit();
@@ -201,8 +201,8 @@ class DebuggerTest {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
-    dbg.setBreakPoint(28, varNames);
-    dbg.setWatchPoint(30, varNames);
+    dbg.stop(28, varNames);
+    dbg.watch(30, varNames);
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
@@ -224,7 +224,7 @@ class DebuggerTest {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
-    dbg.setWatchPoint(33, varNames);
+    dbg.watch(33, varNames);
     int maxRecords = 200;
     dbg.setMaxRecordNumber(maxRecords);
     dbg.run(2000);

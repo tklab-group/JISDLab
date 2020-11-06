@@ -92,6 +92,7 @@ public class Debugger {
     this(main, "", port);
   }
 
+  //********** debugger settings ************************************************************//
   /**
    * Set the max record number of values
    * 
@@ -109,15 +110,17 @@ public class Debugger {
   public void setMaxNoOfExpand(int number) {
     drm.setMaxNoOfExpand(number);
   }
+  //********** debugger settings ************************************************************//
 
+  //********** stop ************************************************************//
   /**
    * Set breakpoint with a line number.
    * 
    * @param lineNumber A line number in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(int lineNumber) {
-    return setBreakPoint(main, lineNumber);
+  public Optional<BreakPoint> stop(int lineNumber) {
+    return stop(main, lineNumber);
   }
 
   /**
@@ -127,8 +130,8 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(int lineNumber, ArrayList<String> varNames) {
-    return setBreakPoint(main, lineNumber, varNames);
+  public Optional<BreakPoint> stop(int lineNumber, ArrayList<String> varNames) {
+    return stop(main, lineNumber, varNames);
   }
 
   /**
@@ -138,8 +141,8 @@ public class Debugger {
    * @param lineNumber line number
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(String className, int lineNumber) {
-    return setBreakPoint(className, lineNumber, new ArrayList<String>());
+  public Optional<BreakPoint> stop(String className, int lineNumber) {
+    return stop(className, lineNumber, new ArrayList<String>());
   }
 
   /**
@@ -150,7 +153,7 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(String className, int lineNumber, ArrayList<String> varNames) {
+  public Optional<BreakPoint> stop(String className, int lineNumber, ArrayList<String> varNames) {
     Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, true);
     if (bp.isPresent()) {
       bpm.requestSetBreakPoint(bp.get());
@@ -164,8 +167,8 @@ public class Debugger {
    * @param methodName A method name in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(String methodName) {
-    return setBreakPoint(main, methodName);
+  public Optional<BreakPoint> stop(String methodName) {
+    return stop(main, methodName);
   }
 
   /**
@@ -175,8 +178,8 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(String methodName, ArrayList<String> varNames) {
-    return setBreakPoint(main, methodName, varNames);
+  public Optional<BreakPoint> stop(String methodName, ArrayList<String> varNames) {
+    return stop(main, methodName, varNames);
   }
 
   /**
@@ -186,8 +189,8 @@ public class Debugger {
    * @param methodName method name
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(String className, String methodName) {
-    return setBreakPoint(className, methodName, new ArrayList<String>());
+  public Optional<BreakPoint> stop(String className, String methodName) {
+    return stop(className, methodName, new ArrayList<String>());
   }
 
   /**
@@ -198,22 +201,24 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setBreakPoint(String className, String methodName, ArrayList<String> varNames) {
+  public Optional<BreakPoint> stop(String className, String methodName, ArrayList<String> varNames) {
     Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, true);
     if (bp.isPresent()) {
       bpm.requestSetBreakPoint(bp.get());
     }
     return bp;
   }
-
+  //********** stop ************************************************************//
+  
+  //********** watch ************************************************************//
   /**
    * Set watchpoint with a line number.
    * 
    * @param lineNumber A line number in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(int lineNumber) {
-    return setWatchPoint(main, lineNumber);
+  public Optional<BreakPoint> watch(int lineNumber) {
+    return watch(main, lineNumber);
   }
 
   /**
@@ -223,8 +228,8 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(int lineNumber, ArrayList<String> varNames) {
-    return setWatchPoint(main, lineNumber, varNames);
+  public Optional<BreakPoint> watch(int lineNumber, ArrayList<String> varNames) {
+    return watch(main, lineNumber, varNames);
   }
 
   /**
@@ -234,8 +239,8 @@ public class Debugger {
    * @param lineNumber line number
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(String className, int lineNumber) {
-    return setWatchPoint(className, lineNumber, new ArrayList<String>());
+  public Optional<BreakPoint> watch(String className, int lineNumber) {
+    return watch(className, lineNumber, new ArrayList<String>());
   }
 
   /**
@@ -246,7 +251,7 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(String className, int lineNumber, ArrayList<String> varNames) {
+  public Optional<BreakPoint> watch(String className, int lineNumber, ArrayList<String> varNames) {
     Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, false);
     if (bp.isPresent()) {
       bpm.requestSetBreakPoint(bp.get());
@@ -260,8 +265,8 @@ public class Debugger {
    * @param methodName A method name in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(String methodName) {
-    return setWatchPoint(main, methodName);
+  public Optional<BreakPoint> watch(String methodName) {
+    return watch(main, methodName);
   }
 
   /**
@@ -271,8 +276,8 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(String methodName, ArrayList<String> varNames) {
-    return setWatchPoint(main, methodName, varNames);
+  public Optional<BreakPoint> watch(String methodName, ArrayList<String> varNames) {
+    return watch(main, methodName, varNames);
   }
 
   /**
@@ -282,8 +287,8 @@ public class Debugger {
    * @param methodName method name
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(String className, String methodName) {
-    return setWatchPoint(className, methodName, new ArrayList<String>());
+  public Optional<BreakPoint> watch(String className, String methodName) {
+    return watch(className, methodName, new ArrayList<String>());
   }
 
   /**
@@ -294,14 +299,16 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> setWatchPoint(String className, String methodName, ArrayList<String> varNames) {
+  public Optional<BreakPoint> watch(String className, String methodName, ArrayList<String> varNames) {
     Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, false);
     if (bp.isPresent()) {
       bpm.requestSetBreakPoint(bp.get());
     }
     return bp;
   }
-
+  //********** watch ************************************************************//
+  
+  //********** on breakpoint ************************************************************//
   /** Continue execution from breakpoint */
   public void cont() {
     bpm.resumeThread();
@@ -357,13 +364,15 @@ public class Debugger {
   public void locals() {
     bpm.printLocals();
   }
+  //********** on breakpoint ************************************************************//
 
+  //********** remove breakpoint ************************************************************//
   /**
    * Remove breakpoint with a line number.
    * 
    * @param lineNumber A line number in a target java file
    */
-  public void removeBreakPoint(int lineNumber) {
+  public void clear(int lineNumber) {
     bpm.removeBreakPoint(main, lineNumber);
   }
 
@@ -373,7 +382,7 @@ public class Debugger {
    * @param className  class name
    * @param lineNumber line number
    */
-  public void removeBreakPoint(String className, int lineNumber) {
+  public void clear(String className, int lineNumber) {
     bpm.removeBreakPoint(className, lineNumber);
   }
 
@@ -382,7 +391,7 @@ public class Debugger {
    * 
    * @param methodName A method name in a target java file
    */
-  public void removeBreakPoint(String methodName) {
+  public void clear(String methodName) {
     bpm.removeBreakPoint(main, methodName);
   }
 
@@ -392,10 +401,12 @@ public class Debugger {
    * @param className  class name
    * @param methodName method name
    */
-  public void removeBreakPoint(String className, String methodName) {
+  public void clear(String className, String methodName) {
     bpm.removeBreakPoint(className, methodName);
   }
+  //********** remove breakpoint ************************************************************//
 
+  //********** debugger control ************************************************************//
   /**
    * Set some settings(breakpoints) before the debugger runs.
    * 
@@ -458,7 +469,7 @@ public class Debugger {
   /**
    * Clear debug results all.
    */
-  public void clear() {
+  public void clearResults() {
     drm.clearResults();
     ArrayList<BreakPoint> bps = getBreakPoints();
     bps.forEach(bp -> {
@@ -474,12 +485,14 @@ public class Debugger {
    */
   public void restart(int sleepTime) {
     exit();
-    clear();
+    clearResults();
     vmInit();
     prepareStart();
     run(sleepTime);
   }
+  //********** debugger control ************************************************************//
 
+  //********** debug result ************************************************************//
   /**
    * Get debug results.
    * 
@@ -498,7 +511,9 @@ public class Debugger {
   public ArrayList<DebugResult> getResults(String varName) {
     return drm.getResults(varName);
   }
+  //********** debug result ************************************************************//
 
+  //********** breakpoint ************************************************************//
   /**
    * Get breakpoints.
    * 
@@ -507,4 +522,5 @@ public class Debugger {
   public ArrayList<BreakPoint> getBreakPoints() {
     return new ArrayList<>(bpm.getBreakPoints());
   }
+  //********** breakpoint ************************************************************//
 }
