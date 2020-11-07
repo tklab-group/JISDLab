@@ -465,6 +465,13 @@ public class Debugger {
   public void exit() {
     vmManager.shutdown();
   }
+  
+  /**
+   * Shutdown the debugger.(alias of "exit")
+   */
+  public void quit() {
+    exit();
+  }
 
   /**
    * Clear debug results all.
