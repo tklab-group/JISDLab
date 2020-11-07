@@ -62,6 +62,12 @@ class BreakPointManager {
   void setJDI(JDIScript j) {
     this.j = j;
   }
+  
+  void init(JDIScript j) {
+    setJDI(j);
+    isProcessing = false;
+    currentTRef = null;
+  }
 
   /**
    * A stacktrace string
@@ -109,7 +115,10 @@ class BreakPointManager {
    * A procedure on breakpoints.
    */
   OnBreakpoint breakpoint = be -> {
-    currentTRef = be.thread();
+    boolean isNotSuspended = ! checkCurrentTRef();
+    if (isNotSuspended) {
+      currentTRef = be.thread();
+    }
     try {
       // search the breakpoint which caused this event.
       int bpLineNumber = be.location().lineNumber();
@@ -132,7 +141,7 @@ class BreakPointManager {
       // get variable data from target VM
       var varNames = bp.getVarNames();
       List<LocalVariable> vars;
-      StackFrame stackFrame = currentTRef.frame(0);
+      StackFrame stackFrame = be.thread().frame(0);
       if (varNames.size() == 0) {
         vars = stackFrame.visibleVariables();
       } else {
@@ -162,29 +171,15 @@ class BreakPointManager {
       if (   (isBPSetByLineNumber && bpSetByLineNumber.getIsBreak())
           || (isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
         printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
-        currentTRef.suspend();
+        if (isNotSuspended) {
+          currentTRef.suspend();
+        }
+        isProcessing = false;
       }
     } catch (IncompatibleThreadStateException | AbsentInformationException e) {
       e.printStackTrace();
     }
   };
-  
-  /**
-   * A procedure on step.
-   */
-  OnStep onStep = j.once((s) -> {
-    int lineNumber = s.location().lineNumber();
-    String methodName = s.location().method().name();
-    try {
-      String className = toClassNameFromSourcePath(s.location().sourcePath());
-      printCurrentLocation("Step completed", lineNumber, className, methodName);
-    } catch (AbsentInformationException e) {
-      printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
-    }
-    currentTRef = s.thread();
-    currentTRef.suspend();
-    isProcessing = false;
-  });
   
   /**
    * Check current thread reference state
@@ -221,6 +216,26 @@ class BreakPointManager {
       return;
     }
     isProcessing = true;
+    /**
+     * A procedure on step.
+     */
+    OnStep onStep = j.once((s) -> {
+      if (! isProcessing) {
+        DebuggerInfo.print("Step completed");
+        return;
+      }
+      int lineNumber = s.location().lineNumber();
+      String methodName = s.location().method().name();
+      try {
+        String className = toClassNameFromSourcePath(s.location().sourcePath());
+        printCurrentLocation("Step completed", lineNumber, className, methodName);
+      } catch (AbsentInformationException e) {
+        printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
+      }
+      currentTRef = s.thread();
+      currentTRef.suspend();
+      isProcessing = false;
+    });
     try {
       j.onStep(currentTRef, StepRequest.STEP_LINE, depth, onStep);
     } catch (DuplicateRequestException e) {

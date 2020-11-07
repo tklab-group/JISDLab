@@ -462,7 +462,7 @@ public class Debugger {
       vm = new VMLauncher(options, main).start();
     }
     j = new JDIScript(vm);
-    bpm.setJDI(j);
+    bpm.init(j);
   }
 
   /**

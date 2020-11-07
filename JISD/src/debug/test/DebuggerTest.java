@@ -245,6 +245,7 @@ class DebuggerTest {
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
     dbg.stop(bpln1, varNames).get();
+    dbg.stop(bpln2, varNames).get();
     dbg.run(1000);
     dbg.step();
     dbg.finish();
