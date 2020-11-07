@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnBreakpoint;
+import org.jdiscript.handlers.OnStep;
 import org.jdiscript.handlers.OnVMStart;
 
 import com.sun.jdi.AbsentInformationException;
@@ -22,6 +23,8 @@ import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Value;
+import com.sun.jdi.request.DuplicateRequestException;
+import com.sun.jdi.request.StepRequest;
 
 import util.StreamUtil;
 
@@ -44,7 +47,9 @@ class BreakPointManager {
   final Map<String, AtomicLong> stacktraces = new HashMap<>();
   /** Current Thread Reference */
   ThreadReference currentTRef;
-
+  /** is processing now? */
+  volatile boolean isProcessing = false;
+  
   /**
    * Constructor
    * 
@@ -159,12 +164,58 @@ class BreakPointManager {
       e.printStackTrace();
     }
   };
+  
+  boolean checkCurrentTRef() {
+    boolean isSuspended = false;
+    if (currentTRef == null) {
+      isSuspended = false;
+    } else {
+      isSuspended = currentTRef.isSuspended();
+    }
+    if (! isSuspended) {
+      DebuggerInfo.print("The target VM thread is not suspended now.");
+    }
+    return isSuspended;
+  }
 
   /**
    * resume current thread
    */
   void resumeThread() {
+    if (! checkCurrentTRef()) return;
     currentTRef.resume();
+    currentTRef = null;
+  }
+  
+  void execStep(int depth) {
+    if (! checkCurrentTRef()) {
+      return;
+    }
+    isProcessing = true;
+    OnStep onStep = j.once((s) -> {
+      DebuggerInfo.print("step");
+      currentTRef = s.thread();
+      currentTRef.suspend();
+      isProcessing = false;
+    });
+    try {
+      j.onStep(currentTRef, StepRequest.STEP_LINE, depth, onStep);
+    } catch (DuplicateRequestException e) {
+      e.printStackTrace();
+    }
+    resumeThread();
+  }
+  
+  void execStepInto() {
+    execStep(StepRequest.STEP_INTO);
+  }
+  
+  void execStepOver() {
+    execStep(StepRequest.STEP_OVER);
+  }
+  
+  void execStepOut() {
+    execStep(StepRequest.STEP_OUT);
   }
 
   /**
@@ -327,6 +378,9 @@ class BreakPointManager {
    * @param srcDir source directory
    */
   void printSrcAtCurrentLocation(String prefix, String srcDir) {
+    if (! checkCurrentTRef()) {
+      return;
+    }
     try {
       Location currentLocation = currentTRef.frame(0).location();
       int lineNumber = currentLocation.lineNumber();
@@ -348,6 +402,9 @@ class BreakPointManager {
    * Print local variables
    */
   void printLocals() {
+    if (! checkCurrentTRef()) {
+      return;
+    }
     try {
       StackFrame stackFrame = currentTRef.frame(0);
       List<LocalVariable> vars = stackFrame.visibleVariables();

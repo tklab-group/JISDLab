@@ -309,6 +309,30 @@ public class Debugger {
   //********** watch ************************************************************//
   
   //********** on breakpoint ************************************************************//
+  /**
+   * Execute "step in"/"step into"
+   */
+  public void step() {
+    bpm.execStepInto();
+    sleep();
+  }
+  
+  /**
+   * Execute "step over"
+   */
+  public void next() {
+    bpm.execStepOver();
+    sleep();
+  }
+  
+  /**
+   * Execute "step out"/"step return"
+   */
+  public void finish() {
+    bpm.execStepOut();
+    sleep();
+  }
+  
   /** Continue execution from breakpoint */
   public void cont() {
     bpm.resumeThread();
@@ -454,6 +478,21 @@ public class Debugger {
   public void sleep(int sleepTime) {
     try {
       Thread.sleep(sleepTime);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  /**
+   * Sleep main thread
+   * 
+   * @param sleepTime wait time
+   */
+  public void sleep() {
+    try {
+      while (bpm.isProcessing) {
+        Thread.sleep(100);
+      }
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
