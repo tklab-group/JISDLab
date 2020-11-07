@@ -157,7 +157,7 @@ class BreakPointManager {
       // if isBreak is true
       if (   (isBPSetByLineNumber && bpSetByLineNumber.getIsBreak())
           || (isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
-        printCurrentLocation("Breakpoint hit,", bpLineNumber, bpClassName, bpMethodName);
+        printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
         currentTRef.suspend();
       }
     } catch (IncompatibleThreadStateException | AbsentInformationException e) {
@@ -193,7 +193,14 @@ class BreakPointManager {
     }
     isProcessing = true;
     OnStep onStep = j.once((s) -> {
-      DebuggerInfo.print("step");
+      int lineNumber = s.location().lineNumber();
+      String methodName = s.location().method().name();
+      try {
+        String className = toClassNameFromSourcePath(s.location().sourcePath());
+        printCurrentLocation("Step completed", lineNumber, className, methodName);
+      } catch (AbsentInformationException e) {
+        printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
+      }
       currentTRef = s.thread();
       currentTRef.suspend();
       isProcessing = false;
@@ -368,7 +375,7 @@ class BreakPointManager {
    * @param methodName method name
    */
   void printCurrentLocation(String prefix, int lineNumber, String className, String methodName) {
-    DebuggerInfo.print(prefix + " line=" + lineNumber + ", class=" + className + ", method=" + methodName);
+    DebuggerInfo.print(prefix + ": line=" + lineNumber + ", class=" + className + ", method=" + methodName);
   }
 
   /**
