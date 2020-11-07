@@ -313,7 +313,7 @@ public class Debugger {
    * Execute "step in"/"step into"
    */
   public void step() {
-    bpm.execStepInto();
+    bpm.requestStepInto();
     sleep();
   }
   
@@ -321,7 +321,7 @@ public class Debugger {
    * Execute "step over"
    */
   public void next() {
-    bpm.execStepOver();
+    bpm.requestStepOver();
     sleep();
   }
   
@@ -329,7 +329,7 @@ public class Debugger {
    * Execute "step out"/"step return"
    */
   public void finish() {
-    bpm.execStepOut();
+    bpm.requestStepOut();
     sleep();
   }
   

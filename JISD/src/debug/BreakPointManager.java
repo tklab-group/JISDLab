@@ -169,6 +169,27 @@ class BreakPointManager {
     }
   };
   
+  /**
+   * A procedure on step.
+   */
+  OnStep onStep = j.once((s) -> {
+    int lineNumber = s.location().lineNumber();
+    String methodName = s.location().method().name();
+    try {
+      String className = toClassNameFromSourcePath(s.location().sourcePath());
+      printCurrentLocation("Step completed", lineNumber, className, methodName);
+    } catch (AbsentInformationException e) {
+      printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
+    }
+    currentTRef = s.thread();
+    currentTRef.suspend();
+    isProcessing = false;
+  });
+  
+  /**
+   * Check current thread reference state
+   * @return whether the current thread is suspended or not
+   */
   boolean checkCurrentTRef() {
     boolean isSuspended = false;
     if (currentTRef == null) {
@@ -191,24 +212,15 @@ class BreakPointManager {
     currentTRef = null;
   }
   
-  void execStep(int depth) {
+  /**
+   * request step execution
+   * @param depth depth of step
+   */
+  void requestStep(int depth) {
     if (! checkCurrentTRef()) {
       return;
     }
     isProcessing = true;
-    OnStep onStep = j.once((s) -> {
-      int lineNumber = s.location().lineNumber();
-      String methodName = s.location().method().name();
-      try {
-        String className = toClassNameFromSourcePath(s.location().sourcePath());
-        printCurrentLocation("Step completed", lineNumber, className, methodName);
-      } catch (AbsentInformationException e) {
-        printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
-      }
-      currentTRef = s.thread();
-      currentTRef.suspend();
-      isProcessing = false;
-    });
     try {
       j.onStep(currentTRef, StepRequest.STEP_LINE, depth, onStep);
     } catch (DuplicateRequestException e) {
@@ -217,16 +229,25 @@ class BreakPointManager {
     resumeThread();
   }
   
-  void execStepInto() {
-    execStep(StepRequest.STEP_INTO);
+  /**
+   * request step into execution
+   */
+  void requestStepInto() {
+    requestStep(StepRequest.STEP_INTO);
   }
   
-  void execStepOver() {
-    execStep(StepRequest.STEP_OVER);
+  /**
+   * request step over execution
+   */
+  void requestStepOver() {
+    requestStep(StepRequest.STEP_OVER);
   }
   
-  void execStepOut() {
-    execStep(StepRequest.STEP_OUT);
+  /**
+   * request step out execution
+   */
+  void requestStepOut() {
+    requestStep(StepRequest.STEP_OUT);
   }
 
   /**
