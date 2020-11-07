@@ -484,9 +484,8 @@ public class Debugger {
   }
   
   /**
-   * Sleep main thread
+   * Sleep main thread until current bpm process is done
    * 
-   * @param sleepTime wait time
    */
   public void sleep() {
     try {
