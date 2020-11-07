@@ -73,15 +73,19 @@ class BreakPointManager {
    *                                          becompleted while the specified
    *                                          thread is in its current state.
    */
-  String stacktraceKey(ThreadReference t) throws IncompatibleThreadStateException {
+  String stackTraceKey(ThreadReference t) throws IncompatibleThreadStateException {
     StringBuilder sb = new StringBuilder();
+    int i = 0;
     for (StackFrame f : t.frames()) {
       Location loc = f.location();
-      sb.append(loc.declaringType().name())
+      sb.append("["+i+"] ")
+        .append(loc.declaringType().name())
         .append(".")
         .append(loc.method().name())
+        .append(" (line: ")
         .append(loc.lineNumber())
-        .append(":");
+        .append(")\n");
+      i++;
     }
     return sb.substring(0, sb.length() - 1);
   }
@@ -426,6 +430,19 @@ class BreakPointManager {
       });
     } catch (IncompatibleThreadStateException | AbsentInformationException e) {
       // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+  
+  /**
+   * Print stacktrace 
+   */
+  void printStackTrace() {
+    if (! checkCurrentTRef()) return;
+    try {
+      System.out.println();
+      System.out.println(stackTraceKey(currentTRef));
+    } catch (IncompatibleThreadStateException e) {
       e.printStackTrace();
     }
   }

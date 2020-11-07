@@ -388,6 +388,13 @@ public class Debugger {
   public void locals() {
     bpm.printLocals();
   }
+  
+  /**
+   * Print stacktrace in current stack frame.
+   */
+  public void where() {
+    bpm.printStackTrace();
+  }
   //********** on breakpoint ************************************************************//
 
   //********** remove breakpoint ************************************************************//

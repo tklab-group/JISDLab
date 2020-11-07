@@ -251,7 +251,6 @@ class DebuggerTest {
     dbg.next();
     dbg.next();
     dbg.locals();
-    dbg.next();
     dbg.getResults().forEach((r)->{System.out.println(r.getLineNumber()+": "+r.getName());});
     dbg.exit();
   }
