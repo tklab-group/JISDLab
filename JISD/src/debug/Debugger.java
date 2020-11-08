@@ -587,7 +587,7 @@ public class Debugger {
    * @param command command (wildcard * is unavailable)
    * @return [stdout, stderr, exit code] (optional)
    */
-  public Optional<String[]> exec(String command) {
+  public static Optional<String[]> exec(String command) {
     String lineSeparator = System.getProperty("line.separator");
     String[] results = new String[3];
     Arrays.fill(results, "");
