@@ -281,10 +281,11 @@ class BreakPointManager {
     if (bp.getLineNumber() == 0) { // breakpoints set by methodName
       rt.methodsByName(bp.getMethodName()).forEach(methods -> {
         try {
-          methods.allLineLocations().forEach(m -> {
-            j.breakpointRequest(m, this.breakpoint).enable();
+          var locs = methods.allLineLocations();
+          if (locs.size() > 0) {
+            j.breakpointRequest(locs.get(0), this.breakpoint).enable();
             bp.setRequestState(true);
-          });
+          };
         } catch (AbsentInformationException e) {
           e.printStackTrace();
         }
