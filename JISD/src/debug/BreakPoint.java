@@ -196,6 +196,7 @@ public class BreakPoint {
     result = prime * result + ((className == null) ? 0 : className.hashCode());
     result = prime * result + lineNumber;
     result = prime * result + ((methodName == null) ? 0 : methodName.hashCode());
+    result = prime * result + ((this instanceof ProbePoint) ? 1231 : 1237);
     return result;
   }
 

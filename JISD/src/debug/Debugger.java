@@ -31,13 +31,15 @@ public class Debugger {
   /** Target class setting items */
   String main, options, srcDir;
   /** JDI thread */
-  Thread jdiThread;
+  Thread vmThread;
   /** VM manager */
   VMManager vmManager;
   /** A procedure when vm started */
   OnVMStart start = s -> {};
   /** use attaching connector or not */
   boolean isRemoteDebug = false;
+  /** uses ProbeJ ? */
+  boolean usesProbeJ = false;
   /** attaching port */
   int port = 0;
   /** */
@@ -51,12 +53,7 @@ public class Debugger {
    * @param srcDir  source directory
    */
   public Debugger(String main, String options, String srcDir) {
-    setMain(main);
-    this.options = options;
-    setSrcDir(srcDir);
-    drm = new DebugResultManager();
-    bpm = new BreakPointManager(drm);
-    vmInit();
+    this(main, options, srcDir, false);
   }
 
   /**
@@ -66,7 +63,7 @@ public class Debugger {
    * @param options A target class path setting
    */
   public Debugger(String main, String options) {
-    this(main, options, ".");
+    this(main, options, false);
   }
 
   /**
@@ -77,13 +74,7 @@ public class Debugger {
    * @param port   attaching port
    */
   public Debugger(String host, int port, String srcDir) {
-    setSrcDir(srcDir);
-    this.host = host;
-    drm = new DebugResultManager();
-    bpm = new BreakPointManager(drm);
-    this.isRemoteDebug = true;
-    setPort(port);
-    vmInit();
+    this(host, port, srcDir, false);
   }
 
   /**
@@ -93,7 +84,7 @@ public class Debugger {
    * @param port attaching port
    */
   public Debugger(int port) {
-    this("localhost", port);
+    this(port, false);
   }
   
   /**
@@ -103,7 +94,74 @@ public class Debugger {
    * @param port attaching port
    */
   public Debugger(String host, int port) {
-    this(host, port, "");
+    this(host, port, false);
+  }
+  
+  /**
+   * Constructor
+   * 
+   * @param main    A target class file name
+   * @param options A target class path setting
+   * @param srcDir  source directory
+   */
+  public Debugger(String main, String options, String srcDir, boolean usesProbeJ) {
+    setMain(main);
+    this.options = options;
+    this.usesProbeJ = usesProbeJ;
+    setSrcDir(srcDir);
+    drm = new DebugResultManager();
+    bpm = new BreakPointManager(drm);
+    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager.prepareStart(bpm);
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param main    A target class file name
+   * @param options A target class path setting
+   */
+  public Debugger(String main, String options, boolean usesProbeJ) {
+    this(main, options, ".", usesProbeJ);
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param main   A target class file name
+   * @param srcDir source directory
+   * @param port   attaching port
+   */
+  public Debugger(String host, int port, String srcDir, boolean usesProbeJ) {
+    setSrcDir(srcDir);
+    this.host = host;
+    this.usesProbeJ = usesProbeJ;
+    drm = new DebugResultManager();
+    bpm = new BreakPointManager(drm);
+    this.isRemoteDebug = true;
+    setPort(port);
+    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager.prepareStart(bpm);
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param main A target class file name
+   * @param port attaching port
+   */
+  public Debugger(int port, boolean usesProbeJ) {
+    this("localhost", port, usesProbeJ);
+  }
+  
+  /**
+   * Constructor
+   * 
+   * @param main A target class file name
+   * @param port attaching port
+   */
+  public Debugger(String host, int port, boolean usesProbeJ) {
+    this(host, port, "", usesProbeJ);
   }
 
   //********** debugger settings ************************************************************//
@@ -284,7 +342,7 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<BreakPoint> watch(String className, int lineNumber, ArrayList<String> varNames) {
-    return watch(className, lineNumber, varNames, true);
+    return watch(className, lineNumber, varNames, usesProbeJ);
   }
 
   /**
@@ -328,7 +386,7 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<BreakPoint> watch(String className, String methodName, ArrayList<String> varNames) {
-    return watch(className, methodName, varNames, true);
+    return watch(className, methodName, varNames, usesProbeJ);
   }
   //********** watch ************************************************************//
   
@@ -559,43 +617,13 @@ public class Debugger {
 
   //********** debugger control ************************************************************//
   /**
-   * Set some settings(breakpoints) before the debugger runs.
-   * 
-   * @return A procedure before the debugger runs
-   */
-  OnVMStart prepareStart() {
-    start = se -> {
-      /* procedure when vm starts. */
-      bpm.requestSetBreakPoints();
-    };
-    return start;
-  }
-
-  /**
-   * Initialize VM before running
-   */
-  void vmInit() {
-    VirtualMachine vm;
-    if (isRemoteDebug) {
-      DebuggerInfo.print("Try to connect to "+host+":"+port);
-      vm = new VMSocketAttacher(host, port).attach();
-      DebuggerInfo.print("Successflly connected to "+host+":"+port);
-    } else {
-      vm = new VMLauncher(options, main).start();
-    }
-    j = new JDIScript(vm);
-    bpm.init(j);
-  }
-
-  /**
    * Start up the debugger.
    * 
    * @param sleepTime Wait time after the debugger starts running
    */
   public void run(int sleepTime) {
-    vmManager = new VMManager(j, start);
-    jdiThread = new Thread(vmManager);
-    jdiThread.start();
+    vmThread = new Thread(vmManager);
+    vmThread.start();
     sleep(sleepTime);
   }
 
@@ -660,8 +688,8 @@ public class Debugger {
   public void restart(int sleepTime) {
     exit();
     clearResults();
-    vmInit();
-    prepareStart();
+    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager.prepareStart(bpm);
     run(sleepTime);
   }
   //********** debugger control ************************************************************//
