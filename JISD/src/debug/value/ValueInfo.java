@@ -42,7 +42,7 @@ public class ValueInfo {
    * 
    * @return time stamp
    */
-  public long GetNumber() {
+  public long getNumber() {
     return number;
   }
 
