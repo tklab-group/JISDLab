@@ -20,6 +20,7 @@ public class PrimitiveInfo extends ValueInfo {
    */
   public PrimitiveInfo(long number, int stratum, Value jValue) {
     super(number, stratum, jValue);
+    isExpanded = true;
   }
 
 }
