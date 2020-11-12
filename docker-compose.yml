@@ -8,6 +8,7 @@ services:
     container_name: JISDLab
     ports:
       - 21510:21510
+      - 39876:39876
     volumes:
       - ./JISD:/JISDLab/JISD
       - ./debugspace:/workspaces/debugspace
