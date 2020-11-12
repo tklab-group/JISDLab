@@ -32,7 +32,7 @@ class DebuggerTest {
   Debugger makeDebugger() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     bps.forEach(item -> {
-      dbg.watch(item);
+      dbg.watch(item, false);
     });
     return dbg;
   }
@@ -67,7 +67,7 @@ class DebuggerTest {
     dbg.clear(bpln2);
     assertEquals(dbg.getBreakPoints().size(), 1);
     assertEquals(dbg.getBreakPoints().get(0).getLineNumber(), bps.get(0));
-    dbg.stop("sayHello");
+    dbg.stopAt("sayHello");
     assertEquals(dbg.getBreakPoints().size(), 2);
     dbg.clear("sayHello");
     assertEquals(dbg.getBreakPoints().size(), 1);
@@ -78,7 +78,7 @@ class DebuggerTest {
   void methodNameWatchPointTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     ArrayList<Integer> bps = new ArrayList<>();
-    dbg.watch("java.io.PrintStream", "println");
+    dbg.watch("java.io.PrintStream", "println", false);
     bps.forEach(item -> {
       dbg.watch(item);
     });
@@ -142,7 +142,7 @@ class DebuggerTest {
     bps.add(bpln2);
     varNames.add("a");
     bps.forEach(item -> {
-      dbg.watch(item, varNames);
+      dbg.watch(item, varNames, false);
     });
     dbg.run(1000);
     dbg.exit();
@@ -169,7 +169,7 @@ class DebuggerTest {
     bps.add(0);
     varNames.add("a");
     bps.forEach(item -> {
-      dbg.watch(item, varNames);
+      dbg.watch(item, varNames, false);
     });
     dbg.run(1000);
     dbg.exit();
@@ -191,8 +191,8 @@ class DebuggerTest {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
-    dbg.stop(bpln1, varNames);
-    dbg.watch(bpln2, varNames);
+    dbg.stopAt(bpln1, varNames);
+    dbg.watch(bpln2, varNames, false);
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
@@ -214,7 +214,7 @@ class DebuggerTest {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
-    dbg.watch(34, varNames);
+    dbg.watch(34, varNames, false);
     int maxRecords = 200;
     dbg.setMaxRecordNumber(maxRecords);
     dbg.run(2000);
@@ -244,8 +244,8 @@ class DebuggerTest {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
-    dbg.stop(bpln1, varNames).get();
-    dbg.stop(bpln2, varNames).get();
+    dbg.stopAt(bpln1, varNames).get();
+    dbg.stopAt(bpln2, varNames).get();
     dbg.run(1000);
     dbg.step();
     dbg.finish();

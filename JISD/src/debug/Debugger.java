@@ -35,12 +35,13 @@ public class Debugger {
   /** VM manager */
   VMManager vmManager;
   /** A procedure when vm started */
-  OnVMStart start = s -> {
-  };
+  OnVMStart start = s -> {};
   /** use attaching connector or not */
   boolean isRemoteDebug = false;
   /** attaching port */
   int port = 0;
+  /** */
+  String host;
 
   /**
    * Constructor
@@ -50,9 +51,9 @@ public class Debugger {
    * @param srcDir  source directory
    */
   public Debugger(String main, String options, String srcDir) {
-    this.main = main;
+    setMain(main);
     this.options = options;
-    this.srcDir = srcDir;
+    setSrcDir(srcDir);
     drm = new DebugResultManager();
     bpm = new BreakPointManager(drm);
     vmInit();
@@ -75,16 +76,14 @@ public class Debugger {
    * @param srcDir source directory
    * @param port   attaching port
    */
-  public Debugger(String main, String srcDir, int port) {
-    this(main, "", srcDir);
+  public Debugger(String host, int port, String srcDir) {
+    setSrcDir(srcDir);
+    this.host = host;
+    drm = new DebugResultManager();
+    bpm = new BreakPointManager(drm);
     this.isRemoteDebug = true;
-    if (port < 1024 || port > 65535) {
-      this.port = 8000;
-      DebuggerInfo.printError(
-          "This port is out of range. So, now port is set 8000. Please set the port bewtween 1024 ~ 65535.");
-    } else {
-      this.port = port;
-    }
+    setPort(port);
+    vmInit();
   }
 
   /**
@@ -93,8 +92,18 @@ public class Debugger {
    * @param main A target class file name
    * @param port attaching port
    */
-  public Debugger(String main, int port) {
-    this(main, "", port);
+  public Debugger(int port) {
+    this("localhost", port);
+  }
+  
+  /**
+   * Constructor
+   * 
+   * @param main A target class file name
+   * @param port attaching port
+   */
+  public Debugger(String host, int port) {
+    this(host, port, "");
   }
 
   //********** debugger settings ************************************************************//
@@ -115,6 +124,24 @@ public class Debugger {
   public void setMaxNoOfExpand(int number) {
     drm.setMaxNoOfExpand(number);
   }
+  
+  public void setPort(int port) {
+    if (port < 1024 || port > 65535) {
+      this.port = 8000;
+      DebuggerInfo.printError(
+          "This port is out of range. So, now port is set 8000. Please set the port bewtween 1024 ~ 65535.");
+    } else {
+      this.port = port;
+    }
+  }
+  
+  public void setMain(String main) {
+    this.main = main;
+  }
+  
+  public void setSrcDir(String srcDir) {
+    this.srcDir = srcDir;
+  }
   //********** debugger settings ************************************************************//
 
   //********** stop ************************************************************//
@@ -124,8 +151,8 @@ public class Debugger {
    * @param lineNumber A line number in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(int lineNumber) {
-    return stop(main, lineNumber);
+  public Optional<BreakPoint> stopAt(int lineNumber) {
+    return stopAt(main, lineNumber);
   }
 
   /**
@@ -135,8 +162,8 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(int lineNumber, ArrayList<String> varNames) {
-    return stop(main, lineNumber, varNames);
+  public Optional<BreakPoint> stopAt(int lineNumber, ArrayList<String> varNames) {
+    return stopAt(main, lineNumber, varNames);
   }
 
   /**
@@ -146,8 +173,8 @@ public class Debugger {
    * @param lineNumber line number
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(String className, int lineNumber) {
-    return stop(className, lineNumber, new ArrayList<String>());
+  public Optional<BreakPoint> stopAt(String className, int lineNumber) {
+    return stopAt(className, lineNumber, new ArrayList<String>());
   }
 
   /**
@@ -158,8 +185,8 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(String className, int lineNumber, ArrayList<String> varNames) {
-    Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, true);
+  public Optional<BreakPoint> stopAt(String className, int lineNumber, ArrayList<String> varNames) {
+    Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, true, false);
     if (bp.isPresent()) {
       bpm.requestSetBreakPoint(bp.get());
     }
@@ -172,8 +199,8 @@ public class Debugger {
    * @param methodName A method name in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(String methodName) {
-    return stop(main, methodName);
+  public Optional<BreakPoint> stopAt(String methodName) {
+    return stopAt(main, methodName);
   }
 
   /**
@@ -183,8 +210,8 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(String methodName, ArrayList<String> varNames) {
-    return stop(main, methodName, varNames);
+  public Optional<BreakPoint> stopAt(String methodName, ArrayList<String> varNames) {
+    return stopAt(main, methodName, varNames);
   }
 
   /**
@@ -194,8 +221,8 @@ public class Debugger {
    * @param methodName method name
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(String className, String methodName) {
-    return stop(className, methodName, new ArrayList<String>());
+  public Optional<BreakPoint> stopAt(String className, String methodName) {
+    return stopAt(className, methodName, new ArrayList<String>());
   }
 
   /**
@@ -206,14 +233,14 @@ public class Debugger {
    * @param varNames   variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stop(String className, String methodName, ArrayList<String> varNames) {
-    Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, true);
+  public Optional<BreakPoint> stopAt(String className, String methodName, ArrayList<String> varNames) {
+    Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, true, false);
     if (bp.isPresent()) {
       bpm.requestSetBreakPoint(bp.get());
     }
     return bp;
   }
-  //********** stop ************************************************************//
+  //********** stopAta ************************************************************//
   
   //********** watch ************************************************************//
   /**
@@ -257,11 +284,7 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<BreakPoint> watch(String className, int lineNumber, ArrayList<String> varNames) {
-    Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, false);
-    if (bp.isPresent()) {
-      bpm.requestSetBreakPoint(bp.get());
-    }
-    return bp;
+    return watch(className, lineNumber, varNames, true);
   }
 
   /**
@@ -305,13 +328,105 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<BreakPoint> watch(String className, String methodName, ArrayList<String> varNames) {
-    Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, false);
-    if (bp.isPresent()) {
-      bpm.requestSetBreakPoint(bp.get());
-    }
-    return bp;
+    return watch(className, methodName, varNames, true);
   }
   //********** watch ************************************************************//
+  
+  //********** watch or probe ************************************************************//
+  /**
+   * Set watchpoint with a line number.
+   * 
+   * @param lineNumber A line number in a target java file
+   * @return breakpoint(optional)
+   */
+  public Optional<BreakPoint> watch(int lineNumber, boolean isProbe) {
+    return watch(main, lineNumber, isProbe);
+  }
+
+  /**
+   * Set watchpoint with a line number and variable names.
+   * 
+   * @param lineNumber line number
+   * @param varNames   variable names
+   * @return breakpoint(optional)
+   */
+  public Optional<BreakPoint> watch(int lineNumber, ArrayList<String> varNames, boolean isProbe) {
+    return watch(main, lineNumber, varNames, isProbe);
+  }
+
+  /**
+   * Set watchpoint with a line number.
+   * 
+   * @param className  class name
+   * @param lineNumber line number
+   * @return breakpoint(optional)
+   */
+  public Optional<BreakPoint> watch(String className, int lineNumber, boolean isProbe) {
+    return watch(className, lineNumber, new ArrayList<String>(), isProbe);
+  }
+  
+  public Optional<BreakPoint> watch(String className, int lineNumber, ArrayList<String> varNames, boolean isProbe) {
+    Optional<BreakPoint> bpOpt = bpm.setBreakPoint(className, lineNumber, varNames, false, isProbe);
+    if (bpOpt.isPresent()) {
+      BreakPoint bp = bpOpt.get();
+      if (bp instanceof ProbePoint) {
+        bpm.requestSetProbePoint((ProbePoint) bp);
+      } else if (bp instanceof BreakPoint) {
+        bpm.requestSetBreakPoint(bp);
+      } else {
+        return Optional.empty();
+      }
+    }
+    return bpOpt;
+  }
+  
+  /**
+   * Set watchpoint with a method name.
+   * 
+   * @param methodName A method name in a target java file
+   * @return breakpoint(optional)
+   */
+  public Optional<BreakPoint> watch(String methodName, boolean isProbe) {
+    return watch(main, methodName, isProbe);
+  }
+
+  /**
+   * Set watchpoint with a method name and variable names.
+   * 
+   * @param methodName method name
+   * @param varNames   variable names
+   * @return breakpoint(optional)
+   */
+  public Optional<BreakPoint> watch(String methodName, ArrayList<String> varNames, boolean isProbe) {
+    return watch(main, methodName, varNames, isProbe);
+  }
+
+  /**
+   * Set watchpoint with a method name.
+   * 
+   * @param className  class name
+   * @param methodName method name
+   * @return breakpoint(optional)
+   */
+  public Optional<BreakPoint> watch(String className, String methodName, boolean isProbe) {
+    return watch(className, methodName, new ArrayList<String>(), isProbe);
+  }
+  
+  public Optional<BreakPoint> watch(String className, String methodName, ArrayList<String> varNames, boolean isProbe) {
+    Optional<BreakPoint> bpOpt = bpm.setBreakPoint(className, methodName, varNames, false, isProbe);
+    if (bpOpt.isPresent()) {
+      BreakPoint bp = bpOpt.get();
+      if (bp instanceof ProbePoint) {
+        bpm.requestSetProbePoint((ProbePoint) bp);
+      } else if (bp instanceof BreakPoint) {
+        bpm.requestSetBreakPoint(bp);
+      } else {
+        return Optional.empty();
+      }
+    }
+    return bpOpt;
+  }
+  //********** watch or probe ************************************************************//
   
   //********** on breakpoint ************************************************************//
   /**
@@ -462,7 +577,9 @@ public class Debugger {
   void vmInit() {
     VirtualMachine vm;
     if (isRemoteDebug) {
-      vm = new VMSocketAttacher(port).attach();
+      DebuggerInfo.print("Try to connect to "+host+":"+port);
+      vm = new VMSocketAttacher(host, port).attach();
+      DebuggerInfo.print("Successflly connected to "+host+":"+port);
     } else {
       vm = new VMLauncher(options, main).start();
     }
