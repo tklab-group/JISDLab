@@ -22,20 +22,14 @@ import com.sun.jdi.VirtualMachine;
  *
  */
 public class Debugger {
-  /** JDI */
-  JDIScript j;
   /** Manage breakpoints */
   BreakPointManager bpm;
-  /** Manage debug results */
-  DebugResultManager drm;
   /** Target class setting items */
   String main, options, srcDir;
   /** JDI thread */
   Thread vmThread;
   /** VM manager */
   VMManager vmManager;
-  /** A procedure when vm started */
-  OnVMStart start = s -> {};
   /** use attaching connector or not */
   boolean isRemoteDebug = false;
   /** uses ProbeJ ? */
@@ -109,8 +103,7 @@ public class Debugger {
     this.options = options;
     this.usesProbeJ = usesProbeJ;
     setSrcDir(srcDir);
-    drm = new DebugResultManager();
-    bpm = new BreakPointManager(drm);
+    bpm = new BreakPointManager();
     vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(bpm);
   }
@@ -136,8 +129,7 @@ public class Debugger {
     setSrcDir(srcDir);
     this.host = host;
     this.usesProbeJ = usesProbeJ;
-    drm = new DebugResultManager();
-    bpm = new BreakPointManager(drm);
+    bpm = new BreakPointManager();
     this.isRemoteDebug = true;
     setPort(port);
     vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
@@ -165,24 +157,6 @@ public class Debugger {
   }
 
   //********** debugger settings ************************************************************//
-  /**
-   * Set the max record number of values
-   * 
-   * @param number the max record number of values
-   */
-  public void setMaxRecordNumber(int number) {
-    drm.setMaxRecordNoOfValue(number);
-  }
-
-  /**
-   * Set the max number of the variable expantion strata
-   * 
-   * @param number the max number of the variable expantion strata
-   */
-  public void setMaxNoOfExpand(int number) {
-    drm.setMaxNoOfExpand(number);
-  }
-  
   public void setPort(int port) {
     if (port < 1024 || port > 65535) {
       this.port = 8000;
@@ -244,11 +218,7 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<BreakPoint> stopAt(String className, int lineNumber, ArrayList<String> varNames) {
-    Optional<BreakPoint> bp = bpm.setBreakPoint(className, lineNumber, varNames, true, false);
-    if (bp.isPresent()) {
-      bpm.requestSetBreakPoint(bp.get());
-    }
-    return bp;
+    return bpm.setBreakPoint(vmManager, className, lineNumber, varNames, true, false);
   }
 
   /**
@@ -292,11 +262,7 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<BreakPoint> stopAt(String className, String methodName, ArrayList<String> varNames) {
-    Optional<BreakPoint> bp = bpm.setBreakPoint(className, methodName, varNames, true, false);
-    if (bp.isPresent()) {
-      bpm.requestSetBreakPoint(bp.get());
-    }
-    return bp;
+    return bpm.setBreakPoint(vmManager, className, methodName, varNames, true, false);
   }
   //********** stopAta ************************************************************//
   
@@ -424,18 +390,7 @@ public class Debugger {
   }
   
   public Optional<BreakPoint> watch(String className, int lineNumber, ArrayList<String> varNames, boolean isProbe) {
-    Optional<BreakPoint> bpOpt = bpm.setBreakPoint(className, lineNumber, varNames, false, isProbe);
-    if (bpOpt.isPresent()) {
-      BreakPoint bp = bpOpt.get();
-      if (bp instanceof ProbePoint) {
-        bpm.requestSetProbePoint((ProbePoint) bp);
-      } else if (bp instanceof BreakPoint) {
-        bpm.requestSetBreakPoint(bp);
-      } else {
-        return Optional.empty();
-      }
-    }
-    return bpOpt;
+    return bpm.setBreakPoint(vmManager, className, lineNumber, varNames, false, isProbe);
   }
   
   /**
@@ -471,18 +426,7 @@ public class Debugger {
   }
   
   public Optional<BreakPoint> watch(String className, String methodName, ArrayList<String> varNames, boolean isProbe) {
-    Optional<BreakPoint> bpOpt = bpm.setBreakPoint(className, methodName, varNames, false, isProbe);
-    if (bpOpt.isPresent()) {
-      BreakPoint bp = bpOpt.get();
-      if (bp instanceof ProbePoint) {
-        bpm.requestSetProbePoint((ProbePoint) bp);
-      } else if (bp instanceof BreakPoint) {
-        bpm.requestSetBreakPoint(bp);
-      } else {
-        return Optional.empty();
-      }
-    }
-    return bpOpt;
+    return bpm.setBreakPoint(vmManager, className, methodName, varNames, false, isProbe);
   }
   //********** watch or probe ************************************************************//
   
@@ -491,7 +435,7 @@ public class Debugger {
    * Execute "step in"/"step into"
    */
   public void step() {
-    bpm.requestStepInto();
+    bpm.requestStepInto(vmManager);
     sleep();
   }
   
@@ -499,7 +443,7 @@ public class Debugger {
    * Execute "step over"
    */
   public void next() {
-    bpm.requestStepOver();
+    bpm.requestStepOver(vmManager);
     sleep();
   }
   
@@ -507,7 +451,7 @@ public class Debugger {
    * Execute "step out"/"step return"
    */
   public void finish() {
-    bpm.requestStepOut();
+    bpm.requestStepOut(vmManager);
     sleep();
   }
   
@@ -521,43 +465,6 @@ public class Debugger {
    */
   public void list() {
     bpm.printSrcAtCurrentLocation("Current location,", srcDir);
-  }
-
-  /**
-   * List currently known classes
-   * 
-   * @param className if className sets "", all classes are shown.
-   */
-  public void classes(String className) {
-    j.vm().allClasses().stream().filter(cls -> cls.name().contains(className)).forEach(cls -> {
-      System.out.println(cls.name());
-    });
-  }
-
-  /**
-   * List a class's methods
-   * 
-   * @param className class name
-   */
-  public void methods(String className) {
-    j.vm().classesByName(className).forEach(cls -> {
-      cls.allMethods().forEach(methods -> {
-        System.out.println(methods.name());
-      });
-    });
-  }
-
-  /**
-   * List a class's fields
-   * 
-   * @param className class name
-   */
-  public void fields(String className) {
-    j.vm().classesByName(className).forEach(cls -> {
-      cls.allFields().forEach(fields -> {
-        System.out.println(fields.name());
-      });
-    });
   }
 
   /**
@@ -672,7 +579,6 @@ public class Debugger {
    * Clear debug results all.
    */
   public void clearResults() {
-    drm.clearResults();
     ArrayList<BreakPoint> bps = getBreakPoints();
     bps.forEach(bp -> {
       bp.clearDebugResults();
@@ -701,7 +607,7 @@ public class Debugger {
    * @return Debug results
    */
   public ArrayList<DebugResult> getResults() {
-    return drm.getResults();
+    return bpm.getResults();
   }
 
   /**
@@ -711,7 +617,7 @@ public class Debugger {
    * @return Debug results
    */
   public ArrayList<DebugResult> getResults(String varName) {
-    return drm.getResults(varName);
+    return bpm.getResults(varName);
   }
   //********** debug result ************************************************************//
 

@@ -70,8 +70,46 @@ class JDIManager extends VMManager {
   void prepareStart(BreakPointManager bpm) {
     start = se -> {
       /* procedure when vm starts. */
-      bpm.requestSetBreakPoints();
+      bpm.requestSetBreakPoints(this);
     };
-    bpm.init(j);
+    bpm.init();
+  }
+  
+
+  /**
+   * List currently known classes
+   * 
+   * @param className if className sets "", all classes are shown.
+   */
+  public void classes(String className) {
+    j.vm().allClasses().stream().filter(cls -> cls.name().contains(className)).forEach(cls -> {
+      System.out.println(cls.name());
+    });
+  }
+
+  /**
+   * List a class's methods
+   * 
+   * @param className class name
+   */
+  public void methods(String className) {
+    j.vm().classesByName(className).forEach(cls -> {
+      cls.allMethods().forEach(methods -> {
+        System.out.println(methods.name());
+      });
+    });
+  }
+
+  /**
+   * List a class's fields
+   * 
+   * @param className class name
+   */
+  public void fields(String className) {
+    j.vm().classesByName(className).forEach(cls -> {
+      cls.allFields().forEach(fields -> {
+        System.out.println(fields.name());
+      });
+    });
   }
 }

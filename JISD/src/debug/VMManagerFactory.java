@@ -9,7 +9,7 @@ import org.jdiscript.util.VMSocketAttacher;
 
 import com.sun.jdi.VirtualMachine;
 
-import probej.ProbeJClient;
+import probej.ProbeJ;
 
 /**
  * @author sugiyama
@@ -20,7 +20,7 @@ class VMManagerFactory {
     // ProbeJ
     if (usesProbeJ) {
       DebuggerInfo.print("Try to connect to "+host+":"+port);
-      ProbeJClient probeJ = new ProbeJClient(host, port);
+      ProbeJ probeJ = new ProbeJ(host, port);
       DebuggerInfo.print("Successflly connected to "+host+":"+port);
       return new ProbeJManager(probeJ);
     }

@@ -26,6 +26,7 @@ import com.sun.jdi.Value;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.sun.jdi.request.StepRequest;
 
+import probej.ProbeJ;
 import util.StreamUtil;
 
 /**
@@ -35,38 +36,35 @@ import util.StreamUtil;
  *
  */
 class BreakPointManager {
-  /** A procedure before the debugger runs. */
-  OnVMStart start;
-  /** JDI */
-  JDIScript j;
-  /** A debug result manager */
-  DebugResultManager drm;
   /** breakpoints */
   private final Set<BreakPoint> bps = new HashSet<>();
-  /** Stacktraces at a breakpoint */
-  final Map<String, AtomicLong> stacktraces = new HashMap<>();
   /** Current Thread Reference */
   ThreadReference currentTRef;
   /** is processing now? */
-  volatile boolean isProcessing = false;
+  volatile boolean isProcessing;
   
   /**
-   * Constructor
    * 
-   * @param drm a debug result manager
    */
-  BreakPointManager(DebugResultManager drm) {
-    this.drm = drm;
-  }
-
-  void setJDI(JDIScript j) {
-    this.j = j;
+  BreakPointManager() {
+    init();
   }
   
-  void init(JDIScript j) {
-    setJDI(j);
-    isProcessing = false;
-    currentTRef = null;
+  void setIsProcessing(boolean isProcessing) {
+    this.isProcessing = isProcessing;
+  }
+  
+  void setCurrentTRef(ThreadReference tRef) {
+    this.currentTRef = tRef;
+  }
+  
+  ThreadReference getCurrentTRef() {
+    return currentTRef;
+  }
+  
+  void init() {
+    setIsProcessing(false);
+    setCurrentTRef(null);
   }
 
   /**
@@ -110,76 +108,6 @@ class BreakPointManager {
     }
     return className;
   }
-
-  /**
-   * A procedure on breakpoints.
-   */
-  OnBreakpoint breakpoint = be -> {
-    boolean isNotSuspended = ! checkCurrentTRef();
-    if (isNotSuspended) {
-      currentTRef = be.thread();
-    }
-    try {
-      // search the breakpoint which caused this event.
-      int bpLineNumber = be.location().lineNumber();
-      String bpClassName = toClassNameFromSourcePath(be.location().sourcePath());
-      String bpMethodName = be.location().method().name();
-      BreakPoint bpSetByLineNumber = this.bps.stream()
-                                             .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpLineNumber)))
-                                             .findFirst()
-                                             .orElse(new BreakPoint(bpClassName, 0));
-      boolean isBPSetByLineNumber = (bpSetByLineNumber.getLineNumber() > 0);
-      BreakPoint bpSetByMethodName = (!isBPSetByLineNumber) ? this.bps.stream()
-                                                                      .filter(bp -> bp.equals(new BreakPoint(bpClassName, bpMethodName)))
-                                                                      .findFirst()
-                                                                      .orElse(new BreakPoint(bpClassName, 0))
-                                                            : new BreakPoint(bpClassName, 0);
-      boolean isBPSetByMethodName = (bpSetByMethodName.getMethodName().length() > 0);
-      BreakPoint bp = (isBPSetByLineNumber) ? bpSetByLineNumber
-                                            : (isBPSetByMethodName) ? bpSetByMethodName
-                                                                    : new BreakPoint(bpClassName, 0);
-      // get variable data from target VM
-      var varNames = bp.getVarNames();
-      List<LocalVariable> vars;
-      StackFrame stackFrame = be.thread().frame(0);
-      if (varNames.size() == 0) {
-        vars = stackFrame.visibleVariables();
-      } else {
-        vars = varNames.stream()
-                       .map(name -> {
-                              try {
-                                return stackFrame.visibleVariableByName(name);
-                              } catch (AbsentInformationException ee) {
-                                DebuggerInfo.printError("such a variable name not found.");
-                                return null;
-                              }
-                            })
-                       .filter(o -> o != null)
-                       .collect(StreamUtil.toArrayList());
-      }     
-      Location loc = stackFrame.location();
-      Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
-      // add debug result
-      for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
-        String varName = entry.getKey().name();
-        if (   (isBPSetByLineNumber && (bpSetByLineNumber.getVarNames().size() == 0 || bpSetByLineNumber.getVarNames().contains(varName)))
-            || (isBPSetByMethodName && (bpSetByMethodName.getVarNames().size() == 0 || bpSetByMethodName.getVarNames().contains(varName)))) {
-          drm.addVariable(bp, bpClassName, bpLineNumber, varName, loc, entry);
-        }
-      }
-      // if isBreak is true
-      if (   (isBPSetByLineNumber && bpSetByLineNumber.getIsBreak())
-          || (isBPSetByMethodName && bpSetByMethodName.getIsBreak())) {
-        printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
-        if (isNotSuspended) {
-          currentTRef.suspend();
-        }
-        isProcessing = false;
-      }
-    } catch (IncompatibleThreadStateException | AbsentInformationException e) {
-      e.printStackTrace();
-    }
-  };
   
   /**
    * Check current thread reference state
@@ -211,7 +139,7 @@ class BreakPointManager {
    * request step execution
    * @param depth depth of step
    */
-  void requestStep(int depth) {
+  void requestStep(VMManager vmMgr, int depth) {
     if (! checkCurrentTRef()) {
       return;
     }
@@ -219,6 +147,11 @@ class BreakPointManager {
     /**
      * A procedure on step.
      */
+    if (!(vmMgr instanceof JDIManager)) {
+      /* do nothing */
+      return;  
+    }
+    JDIScript j = ((JDIManager) vmMgr).getJDI();
     OnStep onStep = j.once((s) -> {
       if (! isProcessing) {
         DebuggerInfo.print("Step completed");
@@ -247,85 +180,31 @@ class BreakPointManager {
   /**
    * request step into execution
    */
-  void requestStepInto() {
-    requestStep(StepRequest.STEP_INTO);
+  void requestStepInto(VMManager vm) {
+    requestStep(vm, StepRequest.STEP_INTO);
   }
   
   /**
    * request step over execution
    */
-  void requestStepOver() {
-    requestStep(StepRequest.STEP_OVER);
+  void requestStepOver(VMManager vm) {
+    requestStep(vm, StepRequest.STEP_OVER);
   }
   
   /**
    * request step out execution
    */
-  void requestStepOut() {
-    requestStep(StepRequest.STEP_OUT);
+  void requestStepOut(VMManager vm) {
+    requestStep(vm, StepRequest.STEP_OUT);
   }
-
+  
   /**
    * Request VM to set a breakpoint
-   * 
-   * @param bp breakpoint
    */
-  void requestSetBreakPoint(BreakPoint bp) {
-    String className = bp.getClassName();
-    List<ReferenceType> rts = j.vm().classesByName(className);
-    if (rts.size() < 1) {
-      deferSetBreakPoint(bp);
-      return;
-    }
-    ReferenceType rt = rts.get(0);
-    if (bp.getLineNumber() == 0) { // breakpoints set by methodName
-      rt.methodsByName(bp.getMethodName()).forEach(methods -> {
-        try {
-          var locs = methods.allLineLocations();
-          if (locs.size() > 0) {
-            j.breakpointRequest(locs.get(0), this.breakpoint).enable();
-            bp.setRequestState(true);
-          };
-        } catch (AbsentInformationException e) {
-          e.printStackTrace();
-        }
-      });
-    } else { // breakpoints set by lineNumber
-      try {
-        rt.locationsOfLine(bp.getLineNumber()).forEach(m -> {
-          j.breakpointRequest(m, this.breakpoint).enable();
-          bp.setRequestState(true);
-        });
-      } catch (AbsentInformationException e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
-  /**
-   * Defer to set breakpoint until the class loaded.
-   * 
-   * @param bp breakpoint
-   */
-  void deferSetBreakPoint(BreakPoint bp) {
-    if (bp.getRequestState()) {
-      DebuggerInfo.printError("Cannot set breakpoint. Skipped.");
-      return;
-    }
-    String className = bp.getClassName();
-    j.onClassPrep(p -> {
-      if (p.referenceType().name().equals(className)) {
-        requestSetBreakPoint(bp);
-      }
+  void requestSetBreakPoints(VMManager vm) {
+    bps.forEach(bp -> {
+      bp.requestSetBreakPoint(vm, this);
     });
-    DebuggerInfo.print("Deferring breakpoint in " + className + ". It will be set after the class is loaded.");
-  }
-
-  /**
-   * Request VM to set a breakpoint
-   */
-  void requestSetBreakPoints() {
-    bps.forEach(bp -> requestSetBreakPoint(bp));
   }
 
   /**
@@ -337,8 +216,8 @@ class BreakPointManager {
    * @param isBreak    break or not at points
    * @return breakpoint
    */
-  public Optional<BreakPoint> setBreakPoint(String className, int lineNumber, ArrayList<String> varNames,
-      boolean isBreak) {
+  public Optional<BreakPoint> setBreakPoint(VMManager vm, String className, int lineNumber, ArrayList<String> varNames,
+      boolean isBreak, boolean isProbe) {
     if (className.length() == 0) {
       DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
       return Optional.empty();
@@ -347,7 +226,13 @@ class BreakPointManager {
       DebuggerInfo.printError("Breakpoint is not set. A line number must be a non-negative integer(> 0).");
       return Optional.empty();
     }
-    BreakPoint bp = new BreakPoint(className, lineNumber, varNames, isBreak);
+    BreakPoint bp;
+    if (isProbe) {
+      bp = new ProbePoint(className, lineNumber, varNames, isBreak);
+    } else {
+      bp = new BreakPoint(className, lineNumber, varNames, isBreak);
+    }
+    bp.requestSetBreakPoint(vm, this);
     bps.add(bp);
     return Optional.of(bp);
   }
@@ -361,8 +246,8 @@ class BreakPointManager {
    * @param isBreak    break or not at points
    * @return breakpoint
    */
-  public Optional<BreakPoint> setBreakPoint(String className, String methodName, ArrayList<String> varNames,
-      boolean isBreak) {
+  public Optional<BreakPoint> setBreakPoint(VMManager vm, String className, String methodName, ArrayList<String> varNames,
+      boolean isBreak, boolean isProbe) {
     if (className.length() == 0) {
       DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
       return Optional.empty();
@@ -371,7 +256,13 @@ class BreakPointManager {
       DebuggerInfo.printError("Breakpoint is not set. A method name must be one or more letters.");
       return Optional.empty();
     }
-    BreakPoint bp = new BreakPoint(className, methodName, varNames, isBreak);
+    BreakPoint bp;
+    if (isProbe) {
+      bp = new ProbePoint(className, methodName, varNames, isBreak);
+    } else {
+      bp = new BreakPoint(className, methodName, varNames, isBreak);
+    }
+    bp.requestSetBreakPoint(vm, this);
     bps.add(bp);
     return Optional.of(bp);
   }
@@ -483,5 +374,23 @@ class BreakPointManager {
       e.printStackTrace();
     }
   }
-
+  
+  public ArrayList<DebugResult> getResults() {
+    ArrayList<DebugResult> drs = new ArrayList<>();
+    bps.forEach(bp -> {
+      bp.getResults().forEach((key, value) -> {
+        drs.add(value); 
+      });
+    });
+    return drs;
+  }
+  
+  public ArrayList<DebugResult> getResults(String varName) {
+    ArrayList<DebugResult> drs = (ArrayList<DebugResult>) bps.stream().map(bp -> bp.getResult(varName))
+                                                                      .filter(res -> res.isPresent())
+                                                                      .map(res -> res.get())
+                                                                      .collect(StreamUtil.toArrayList());
+    return drs;
+  }
+ 
 }

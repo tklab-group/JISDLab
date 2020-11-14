@@ -3,7 +3,7 @@
  */
 package debug;
 
-import probej.ProbeJClient;
+import probej.ProbeJ;
 
 /**
  * @author sugiyama
@@ -13,7 +13,7 @@ class ProbeJManager extends VMManager {
   /**
    * 
    */
-  public ProbeJManager(ProbeJClient probeJ) {
+  public ProbeJManager(ProbeJ probeJ) {
     
   }
 

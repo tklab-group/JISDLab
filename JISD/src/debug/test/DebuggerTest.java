@@ -37,6 +37,14 @@ class DebuggerTest {
     return dbg;
   }
 
+  void showResult(DebugResult res) {
+    System.out.println("-----------------------------");
+    System.out.println(res.getLineNumber());
+    System.out.println(res.getName());
+    System.out.println(res.getLatestValue());
+    System.out.println("");
+  }
+
   @Test
   void basicTest() {
     Debugger dbg = makeDebugger();
@@ -44,12 +52,7 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      System.out.println("-----------------------------");
-      System.out.println(res.getLineNumber());
-      System.out.println(res.getClassOfResult());
-      System.out.println(res.getName());
-      System.out.println(res.getLatestValue());
-      System.out.println("");
+      showResult(res);
       Assertions.assertEquals(res.getLineNumber(), bps.get(i / 4));
     }
     dbg.exit();
@@ -87,12 +90,7 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      System.out.println("-----------------------------");
-      System.out.println(res.getLineNumber());
-      System.out.println(res.getClassOfResult());
-      System.out.println(res.getName());
-      System.out.println(res.getLatestValue());
-      System.out.println("");
+      showResult(res);
     }
   }
 
@@ -123,12 +121,7 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      System.out.println("-----------------------------");
-      System.out.println(res.getLineNumber());
-      System.out.println(res.getClassOfResult());
-      System.out.println(res.getName());
-      System.out.println(res.getLatestValue());
-      System.out.println("");
+      showResult(res);
       Assertions.assertEquals(res.getLineNumber(), bps.get(i / 4));
     }
   }
@@ -149,12 +142,7 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      System.out.println("-----------------------------");
-      System.out.println(res.getLineNumber());
-      System.out.println(res.getClassOfResult());
-      System.out.println(res.getName());
-      System.out.println(res.getLatestValue());
-      System.out.println("");
+      showResult(res);
       Assertions.assertEquals(res.getName(), "a");
     }
   }
@@ -176,12 +164,7 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      System.out.println("-----------------------------");
-      System.out.println(res.getLineNumber());
-      System.out.println(res.getClassOfResult());
-      System.out.println(res.getName());
-      System.out.println(res.getLatestValue());
-      System.out.println("");
+      showResult(res);
       Assertions.assertEquals(res.getName(), "a");
     }
   }
@@ -197,12 +180,7 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      System.out.println("-----------------------------");
-      System.out.println(res.getLineNumber());
-      System.out.println(res.getClassOfResult());
-      System.out.println(res.getName());
-      System.out.println(res.getLatestValue());
-      System.out.println("");
+      showResult(res);
       Assertions.assertEquals(res.getLineNumber(), bpln1);
     }
     dbg.cont();
@@ -216,17 +194,12 @@ class DebuggerTest {
     varNames.add("a");
     dbg.watch(34, varNames, false);
     int maxRecords = 200;
-    dbg.setMaxRecordNumber(maxRecords);
+    DebugResult.setDefaultMaxRecordNoOfValue(maxRecords);
     dbg.run(2000);
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      System.out.println("-----------------------------");
-      System.out.println(res.getLineNumber());
-      System.out.println(res.getClassOfResult());
-      System.out.println(res.getName());
-      System.out.println(res.getLatestValue());
-      System.out.println("");
+      showResult(res);
       Assertions.assertEquals(res.getValues().length, maxRecords);
     }
     ValueInfo[] values = results.get(0).getValues();

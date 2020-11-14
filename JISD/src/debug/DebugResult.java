@@ -24,17 +24,18 @@ public class DebugResult {
   int lineNumber;
   /** value name */
   String varName;
-  /** An observed location */
-  Location loc;
-  /** An observed variable and value */
-  Map.Entry<LocalVariable, Value> entry;
+  /** time stamp */
+  static long number = 0;
   /** saved values */
   ArrayDeque<ValueInfo> values = new ArrayDeque<>();
   /** the max record number of values */
   int maxRecordNoOfValue;
   /** the max number of the variable expantion strata */
   int maxNoOfExpand;
-
+  /** the default max record number of values */
+  static int defaultMaxRecordNoOfValue = 100;
+  /** the default max number of the variable expantion strata */
+  static int defaultMaxNoOfExpand = 1;
   /**
    * Constructor
    * 
@@ -47,26 +48,9 @@ public class DebugResult {
    * @param loc                An observed location
    * @param entry              An observed variable and value
    */
-  DebugResult(int maxRecordNoOfValue, int maxNoOfExpand, long number, String className, int lineNumber, String varName,
-      Location loc, Map.Entry<LocalVariable, Value> entry) {
-    this.maxRecordNoOfValue = maxRecordNoOfValue;
-    this.maxNoOfExpand = maxNoOfExpand;
-    this.className = className;
-    this.lineNumber = lineNumber;
-    this.varName = varName;
-    this.loc = loc;
-    this.entry = entry;
-    addValue(number, entry);
-  }
-
-  /**
-   * Constructor
-   * 
-   * @param className  class name
-   * @param lineNumber line number
-   * @param varName    value name
-   */
   DebugResult(String className, int lineNumber, String varName) {
+    maxRecordNoOfValue = defaultMaxRecordNoOfValue;
+    maxNoOfExpand = defaultMaxNoOfExpand;
     this.className = className;
     this.lineNumber = lineNumber;
     this.varName = varName;
@@ -78,9 +62,9 @@ public class DebugResult {
    * @param number time stamp
    * @param entry  entry An observed variable and value
    */
-  void addValue(long number, Map.Entry<LocalVariable, Value> entry) {
+  void addValue(Map.Entry<LocalVariable, Value> entry) {
     ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
-    ValueInfo value = ValueInfoFactory.create(number, 0, entry.getValue());
+    ValueInfo value = ValueInfoFactory.create(number++, 0, entry.getValue());
     valueExpansionQue.add(value);
     while (true) {
       ValueInfo v = valueExpansionQue.pop();
@@ -104,23 +88,9 @@ public class DebugResult {
       values.add(value);
     }
   }
-
-  /**
-   * Get an observed location.
-   * 
-   * @return location
-   */
-  Location getLocation() {
-    return loc;
-  }
-
-  /**
-   * Get an observed variable and value
-   * 
-   * @return variable and value
-   */
-  Map.Entry<LocalVariable, Value> getEntry() {
-    return entry;
+  
+  static void resetNumber() {
+    number = 0;
   }
 
   /**
@@ -133,21 +103,12 @@ public class DebugResult {
   }
 
   /**
-   * Get a class name of an observed variable.
-   * 
-   * @return class name
-   */
-  public String getClassOfResult() {
-    return entry.getKey().typeName();
-  }
-
-  /**
    * Get a name of an observed variable.
    * 
    * @return variable name
    */
   public String getName() {
-    return entry.getKey().name();
+    return varName;
   }
 
   /**
@@ -166,6 +127,36 @@ public class DebugResult {
    */
   public ValueInfo getLatestValue() {
     return values.getLast();
+  }
+  
+  public void setMaxRecordNoOfValue(int number) {
+    if (number <= 0) {
+      DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
+      return;
+    }
+    maxRecordNoOfValue = number;
+  }
+  
+  public void setMaxNoOfExpand(int number) {
+    if (number < 0) {
+      DebuggerInfo.printError("A max number of the variable expansion must be a positive integer(>= 0).");
+    }
+    maxNoOfExpand =number;
+  }
+  
+  public static void setDefaultMaxRecordNoOfValue(int number) {
+    if (number <= 0) {
+      DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
+      return;
+    }
+    defaultMaxRecordNoOfValue = number;
+  }
+  
+  public static void setDefaultMaxNoOfExpand(int number) {
+    if (number < 0) {
+      DebuggerInfo.printError("A max number of the variable expansion must be a positive integer(>= 0).");
+    }
+    defaultMaxNoOfExpand =number;
   }
 
   @Override
