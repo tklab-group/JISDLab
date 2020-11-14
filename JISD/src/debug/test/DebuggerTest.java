@@ -228,5 +228,22 @@ class DebuggerTest {
     dbg.getResults().forEach((r)->{System.out.println(r.getLineNumber()+": "+r.getName());});
     dbg.exit();
   }
+  
+  @Test
+  void breakPointClearTest() {
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    BreakPoint bp1 = dbg.watch(bpln1, false).get();
+    BreakPoint bp2 = dbg.watch(bpln2, false).get();
+    bp1.disable();
+    dbg.run(1000);
+    ArrayList<DebugResult> results = dbg.getResults();
+    Assertions.assertEquals(results.size(), 4);
+    for (int i = 0; i < results.size(); i++) {
+      DebugResult res = results.get(i);
+      showResult(res);
+      Assertions.assertEquals(res.getLineNumber(), bpln2);
+    }
+    dbg.exit();
+  }
 
 }

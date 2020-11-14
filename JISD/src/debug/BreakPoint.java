@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnBreakpoint;
+import org.jdiscript.requests.ChainingBreakpointRequest;
 
 import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.IncompatibleThreadStateException;
@@ -41,6 +42,8 @@ public class BreakPoint {
   HashMap<String, Integer> maxRecords = new HashMap<>();
   /** varNames and maxNoOfExpand */
   HashMap<String, Integer> maxExpands = new HashMap<>();
+  Optional<ChainingBreakpointRequest> bpr = Optional.empty();
+  boolean isEnable = true;
   /** variable names */
   ArrayList<String> varNames;
   /** break or not at points */
@@ -222,11 +225,20 @@ public class BreakPoint {
       return;  
     }
     JDIScript j = ((JDIManager) vmMgr).getJDI();
+    String className = getClassName();
+    List<ReferenceType> rts = j.vm().classesByName(className);
+    if (rts.size() < 1) {
+      if (! getRequestState()) {
+        deferSetBreakPoint(vmMgr, bpm);
+      }
+      return;
+    }
+    ReferenceType rt = rts.get(0);
     /**
      * A procedure on breakpoints.
      */
     OnBreakpoint breakpoint = be -> {
-      boolean isNotSuspended = ! bpm.checkCurrentTRef();
+      boolean isNotSuspended = ! bpm.checkCurrentTRef(false);
       if (isNotSuspended) {
         bpm.setCurrentTRef(be.thread());
       }
@@ -273,19 +285,15 @@ public class BreakPoint {
         e.printStackTrace();
       }
     };
-    String className = getClassName();
-    List<ReferenceType> rts = j.vm().classesByName(className);
-    if (rts.size() < 1) {
-      deferSetBreakPoint(vmMgr, bpm);
-      return;
-    }
-    ReferenceType rt = rts.get(0);
     if (getLineNumber() == 0) { // breakpoints set by methodName
       rt.methodsByName(getMethodName()).forEach(methods -> {
         try {
           var locs = methods.allLineLocations();
           if (locs.size() > 0) {
-            j.breakpointRequest(locs.get(0), breakpoint).enable();
+            bpr = Optional.of(j.breakpointRequest(locs.get(0), breakpoint));
+            if (bpr.isPresent() && isEnable) {
+              bpr.get().enable();
+            }
             setRequestState(true);
           };
         } catch (AbsentInformationException e) {
@@ -295,7 +303,10 @@ public class BreakPoint {
     } else { // breakpoints set by lineNumber
       try {
         rt.locationsOfLine(getLineNumber()).forEach(m -> {
-          j.breakpointRequest(m, breakpoint).enable();
+          bpr = Optional.of(j.breakpointRequest(m, breakpoint));
+          if (bpr.isPresent() && isEnable) {
+            bpr.get().enable();
+          }
           setRequestState(true);
         });
       } catch (AbsentInformationException e) {
@@ -314,6 +325,7 @@ public class BreakPoint {
       DebuggerInfo.printError("Cannot set breakpoint. Skipped.");
       return;
     }
+    setRequestState(true);
     if (!(vmMgr instanceof JDIManager)) {
       /* do nothing */
       return;  
@@ -322,7 +334,7 @@ public class BreakPoint {
     String className = getClassName();
     j.onClassPrep(p -> {
       if (p.referenceType().name().equals(className)) {
-        requestSetBreakPoint(vmMgr, bpm);
+        requestSetBreakPoint(vmMgr, bpm);   
       }
     });
     DebuggerInfo.print("Deferring breakpoint in " + className + ". It will be set after the class is loaded.");
@@ -335,6 +347,20 @@ public class BreakPoint {
    */
   void setRequestState(boolean state) {
     isRequested = state;
+  }
+  
+  public void enable() {
+    isEnable = true;
+    if (bpr.isPresent()) {
+      bpr.get().enable();
+    }
+  }
+  
+  public void disable() {
+    isEnable = false;
+    if (bpr.isPresent()) {
+      bpr.get().disable();
+    }
   }
 
   /**

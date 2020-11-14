@@ -2,6 +2,7 @@ package debug;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -113,17 +114,21 @@ class BreakPointManager {
    * Check current thread reference state
    * @return whether the current thread is suspended or not
    */
-  boolean checkCurrentTRef() {
+  boolean checkCurrentTRef(boolean isVerbose) {
     boolean isSuspended = false;
     if (currentTRef == null) {
       isSuspended = false;
     } else {
       isSuspended = currentTRef.isSuspended();
     }
-    if (! isSuspended) {
+    if (isVerbose && ! isSuspended) {
       DebuggerInfo.print("The target VM thread is not suspended now.");
     }
     return isSuspended;
+  }
+  
+  boolean checkCurrentTRef() {
+    return checkCurrentTRef(true);
   }
 
   /**
@@ -275,6 +280,7 @@ class BreakPointManager {
    */
   public void removeBreakPoint(String className, int lineNumber) {
     BreakPoint bp = new BreakPoint(className, lineNumber);
+    bp.disable();
     bps.remove(bp);
   }
 
@@ -286,6 +292,7 @@ class BreakPointManager {
    */
   public void removeBreakPoint(String className, String methodName) {
     BreakPoint bp = new BreakPoint(className, methodName);
+    bp.disable();
     bps.remove(bp);
   }
 
@@ -382,6 +389,9 @@ class BreakPointManager {
         drs.add(value); 
       });
     });
+    drs.sort(Comparator.comparing(DebugResult::getClassName)
+                       .thenComparing(DebugResult::getLineNumber)
+                       .thenComparing(DebugResult::getName));
     return drs;
   }
   
@@ -389,6 +399,9 @@ class BreakPointManager {
     ArrayList<DebugResult> drs = (ArrayList<DebugResult>) bps.stream().map(bp -> bp.getResult(varName))
                                                                       .filter(res -> res.isPresent())
                                                                       .map(res -> res.get())
+                                                                      .sorted(Comparator.comparing(DebugResult::getClassName)
+                                                                                        .thenComparing(DebugResult::getLineNumber)
+                                                                                        .thenComparing(DebugResult::getName))
                                                                       .collect(StreamUtil.toArrayList());
     return drs;
   }

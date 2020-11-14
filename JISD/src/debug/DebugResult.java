@@ -110,6 +110,10 @@ public class DebugResult {
   public String getName() {
     return varName;
   }
+  
+  public String getClassName() {
+    return className;
+  }
 
   /**
    * Get an observed value

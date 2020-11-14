@@ -489,7 +489,7 @@ public class Debugger {
    * @param lineNumber A line number in a target java file
    */
   public void clear(int lineNumber) {
-    bpm.removeBreakPoint(main, lineNumber);
+    clear(main, lineNumber);
   }
 
   /**
@@ -508,7 +508,7 @@ public class Debugger {
    * @param methodName A method name in a target java file
    */
   public void clear(String methodName) {
-    bpm.removeBreakPoint(main, methodName);
+    clear(main, methodName);
   }
 
   /**
