@@ -29,6 +29,7 @@ import com.sun.jdi.request.StepRequest;
 
 import probej.ProbeJ;
 import util.StreamUtil;
+import util.SrcUtil;
 
 /**
  * Breakpoint manager
@@ -94,21 +95,6 @@ class BreakPointManager {
     }
     return sb.substring(0, sb.length() - 1);
   }
-
-  /**
-   * generate a class path from a source path
-   * 
-   * @param sp source path
-   * @return class name
-   */
-  String toClassNameFromSourcePath(String sp) {
-    String className = sp.replace(File.separator.charAt(0), '.');
-    int length = className.length();
-    if (className.substring(length - 5, length).equals(".java")) {
-      return className.substring(0, length - 5);
-    }
-    return className;
-  }
   
   /**
    * Check current thread reference state
@@ -165,7 +151,7 @@ class BreakPointManager {
       int lineNumber = s.location().lineNumber();
       String methodName = s.location().method().name();
       try {
-        String className = toClassNameFromSourcePath(s.location().sourcePath());
+        String className = SrcUtil.toClassNameFromSourcePath(s.location().sourcePath());
         printCurrentLocation("Step completed", lineNumber, className, methodName);
       } catch (AbsentInformationException e) {
         printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
@@ -331,7 +317,7 @@ class BreakPointManager {
       Location currentLocation = currentTRef.frame(0).location();
       int lineNumber = currentLocation.lineNumber();
       String srcRelPath = currentLocation.sourcePath();
-      String className = toClassNameFromSourcePath(srcRelPath);
+      String className = SrcUtil.toClassNameFromSourcePath(srcRelPath);
       String methodName = currentLocation.method().name();
       printCurrentLocation(prefix, lineNumber, className, methodName);
       if (!srcDir.equals("")) {

@@ -21,6 +21,7 @@ import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Value;
 
+import util.SrcUtil;
 import util.StreamUtil;
 
 /**
@@ -245,7 +246,7 @@ public class BreakPoint {
       try {
         // search the breakpoint which caused this event.
         int bpLineNumber = be.location().lineNumber();
-        String bpClassName = bpm.toClassNameFromSourcePath(be.location().sourcePath());
+        String bpClassName = SrcUtil.toClassNameFromSourcePath(be.location().sourcePath());
         String bpMethodName = be.location().method().name();
         // get variable data from target VM
         var varNames = getVarNames();
