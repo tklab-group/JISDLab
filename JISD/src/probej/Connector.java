@@ -1,0 +1,205 @@
+/**
+ * 
+ */
+package probej;
+
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import debug.value.ValueInfo;
+
+/**
+ * @author sugiyama
+ *
+ */
+class Connector {
+  String host;
+  int port;
+  AsynchronousSocketChannel client;
+  Future<AsynchronousSocketChannel> acceptFuture;
+  Parser parser = new Parser();
+  
+  
+  
+  public Connector(String host, int port) {
+    this.host = host;
+    this.port = port;
+  }  
+  
+  public void openConnection() {
+    try {
+      client = AsynchronousSocketChannel.open();
+      client.connect(new InetSocketAddress(host, port), null, new CompletionHandler<Void, Void>() {
+        @Override
+        public void completed(Void result, Void attachment) {
+            // Writeˆ—
+        }
+
+        @Override
+        public void failed(Throwable exc, Void attachment){
+            // Errorˆ—
+        }
+      });
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  void sendCommand(String cmd) {
+    if ((client != null) && (client.isOpen())) {
+      Thread sender = new Thread(() -> {
+        ByteBuffer inBuf = ByteBuffer.allocate(1024);
+        String inputLine = cmd;
+        inBuf = ByteBuffer.wrap(inputLine.getBytes());
+        Future<Integer> writeResult = client.write(inBuf);
+        try {
+          writeResult.get();
+          System.out.println("sended");
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        } catch (ExecutionException e) {
+          e.printStackTrace();
+        }
+        inBuf.clear();
+      });
+      
+      sender.start();
+    }
+  }
+  
+  HashMap<Location, ArrayList<ValueInfo>> getResults(String className, String varName, int lineNumber) {
+    HashMap<Location, ArrayList<ValueInfo>> results = new HashMap<>();
+    Thread receiver = new Thread(() -> {
+      ByteBuffer outBuf = ByteBuffer.allocate(1024);
+      outBuf.clear();
+      outBuf.flip();
+      int noOfBP = 0;
+      try {
+        String noOfBPStr = readLine(client, outBuf);
+        noOfBP = Integer.parseInt(noOfBPStr);
+      } catch (NumberFormatException e) {
+        System.out.println("NAN");
+        return;
+      }
+      if (noOfBP < 1) {
+        return;
+      }
+      for (int i = 0; i < noOfBP; i++) {
+        String locStr = readLine(client, outBuf);
+        System.out.println(locStr);
+        Optional<Location> loc = parser.parseLocation(locStr);
+        if (loc.isEmpty()) {
+          continue;
+        }
+        try {
+          ArrayList<ValueInfo> values = new ArrayList<>();
+          String noOfValueStr = readLine(client, outBuf);
+          int noOfValue = Integer.parseInt(noOfValueStr);
+          if (noOfValue < 1) {
+            continue;
+          }
+          for (int j = 0; j < noOfValue; j++) {
+            String valueStr = readLine(client, outBuf);
+            System.out.println(valueStr);
+            Optional<ValueInfo> value = parser.parseValue(valueStr);
+            if (value.isPresent()) {
+              values.add(value.get());
+            }
+          }
+          results.put(loc.get(), values);
+          
+        } catch (NumberFormatException e) {
+          System.out.println("NAN");
+          continue;
+        }
+      }
+    });
+    receiver.start();
+    String cmd = "Print";
+    if (lineNumber > 0) {
+      cmd = "Print " + className + " " + varName + " " + lineNumber;
+    }
+    sendCommand(cmd);
+    try {
+      receiver.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    return results;
+  }
+  
+  String readLine(AsynchronousSocketChannel client, ByteBuffer b) {
+    StringBuilder buf = new StringBuilder(1024);
+    while(true) {
+      if (! b.hasRemaining()) {
+        try {
+          b.clear();
+          client.read(b).get();
+          b.flip();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+          return "";
+        } catch (ExecutionException e) {
+          return "";
+        }
+      }
+      while (b.hasRemaining()) {
+        char c = (char) b.get();
+        if (c == '\n') {
+          if (buf.length() == 0) {
+            return "0";
+          }
+          return buf.toString();
+        }
+        buf.append(c);
+      }
+    }
+  }
+  
+  void close() {
+    try {
+      client.close();
+      System.out.println("close");
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public static void main(String[] args) {
+    try {
+      Connector t = new Connector("127.0.0.1", 39876);
+      System.out.println("Listening...");
+      t.openConnection();
+      while (true) {
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        String inputLine = in.readLine();
+        if (inputLine.equals("Q")) {
+          break;
+        }
+        if (inputLine.equals("P")) {
+          t.getResults("", "", 0);
+        }
+        else if (inputLine.equals("on")) {
+          t.sendCommand("PrintSocketOn");
+        } else if (inputLine.equals("S")) {
+          t.sendCommand("Set LoopN.java var1 22");
+        }
+      }
+      try {
+        t.client.close();
+        System.out.println("close");
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+}
