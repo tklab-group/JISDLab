@@ -9,7 +9,7 @@ import com.sun.jdi.Value;
  * @author sugiyama
  *
  */
-public class ValueInfo {
+abstract public class ValueInfo {
   /** saved value */
   String value;
   /** time stamp */
@@ -35,6 +35,11 @@ public class ValueInfo {
     this.stratum = strutum;
     this.value = jValue.toString();
     this.jValue = jValue;
+  }
+  
+  public ValueInfo(String value) {
+    this.stratum = 0;
+    this.value = value;
   }
 
   /**

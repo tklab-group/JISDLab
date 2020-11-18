@@ -22,5 +22,10 @@ public class PrimitiveInfo extends ValueInfo {
     super(number, stratum, jValue);
     isExpanded = true;
   }
+  
+  public PrimitiveInfo(String value) {
+    super(value);
+    isExpanded = true;
+  }
 
 }

@@ -37,7 +37,7 @@ public class ValueInfoFactory {
     case 'L':
       return new ObjectInfo(number, stratum, jValue);
     default:
-      return new ValueInfo(number, stratum, jValue);
+      return new PrimitiveInfo(number, stratum, jValue);
     }
   }
 }
