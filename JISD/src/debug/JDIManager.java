@@ -62,7 +62,7 @@ class JDIManager extends VMManager {
     }
   }
   
-  JDIScript getJDI() {
+  public JDIScript getJDI() {
     return j;
   }
   
