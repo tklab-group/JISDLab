@@ -581,8 +581,7 @@ public class Debugger {
   public void clearResults() {
     ArrayList<BreakPoint> bps = getBreakPoints();
     bps.forEach(bp -> {
-      bp.clearDebugResults();
-      bp.setRequestState(false);
+      bp.reset();
     });
   }
 
@@ -597,6 +596,10 @@ public class Debugger {
     vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(bpm);
     run(sleepTime);
+  }
+  
+  public VMManager getVM() {
+    return vmManager;
   }
   //********** debugger control ************************************************************//
 

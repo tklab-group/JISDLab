@@ -113,6 +113,12 @@ public class BreakPoint {
     this.varNames = varNames;
     this.isBreak = isBreak;
   }
+  
+  void reset() {
+    clearDebugResults();
+    bpr = Optional.empty();
+    setRequestState(false);
+  }
 
   /**
    * Get a class name.
