@@ -1,9 +1,7 @@
-.classpath
-.project
-.settings
 .gradle
 build.xml
 /bin/
-/.externalToolBuilders/
 /src/demo/
 /data/
+/build/*/*
+!/build/libs/*

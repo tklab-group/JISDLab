@@ -35,7 +35,7 @@ WORKDIR $project_dir
 ARG cp1=${project_dir}/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar
 
 # JISD classpath
-ARG cp2=${project_dir}/JISD/lib/JISD.jar
+ARG cp2=${project_dir}/JISD/build/libs/jisd-0.0.1.jar
 
 # your application's absolute classpaths in a container(classpath1:classpath2:...)
 ARG cp3=${ws_dir}/sample

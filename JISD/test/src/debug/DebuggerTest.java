@@ -30,7 +30,7 @@ class DebuggerTest {
     bps.add(bpln2);
   }
   Debugger makeDebugger() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     bps.forEach(item -> {
       dbg.watch(item, false);
     });
@@ -79,7 +79,7 @@ class DebuggerTest {
 
   @Test
   void methodNameWatchPointTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     ArrayList<Integer> bps = new ArrayList<>();
     dbg.watch("java.io.PrintStream", "println", false);
     bps.forEach(item -> {
@@ -128,7 +128,7 @@ class DebuggerTest {
 
   @Test
   void watchPointSetByVarNamesTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     ArrayList<Integer> bps = new ArrayList<>();
     ArrayList<String> varNames = new ArrayList<>();
     bps.add(bpln1);
@@ -149,7 +149,7 @@ class DebuggerTest {
 
   @Test
   void illegalWatchPointSetTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     ArrayList<Integer> bps = new ArrayList<>();
     ArrayList<String> varNames = new ArrayList<>();
     bps.add(bpln1);
@@ -171,7 +171,7 @@ class DebuggerTest {
 
   @Test
   void breakPointTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
     dbg.stopAt(bpln1, varNames);
@@ -189,7 +189,7 @@ class DebuggerTest {
 
   @Test
   void valueInfoTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
     dbg.watch(34, varNames, false);
@@ -214,7 +214,7 @@ class DebuggerTest {
   
   @Test 
   void stepTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     ArrayList<String> varNames = new ArrayList<>();
     varNames.add("a");
     dbg.stopAt(bpln1, varNames).get();
@@ -231,7 +231,7 @@ class DebuggerTest {
   
   @Test
   void breakPointClearTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp build/classes/java/main");
     BreakPoint bp1 = dbg.watch(bpln1, false).get();
     BreakPoint bp2 = dbg.watch(bpln2, false).get();
     bp1.disable();
