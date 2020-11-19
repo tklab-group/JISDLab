@@ -39,7 +39,7 @@ class Connector {
       client.connect(new InetSocketAddress(host, port), null, new CompletionHandler<Void, Void>() {
         @Override
         public void completed(Void result, Void attachment) {
-            // Writeèàóù
+       
         }
 
         @Override
@@ -61,7 +61,7 @@ class Connector {
         Future<Integer> writeResult = client.write(inBuf);
         try {
           writeResult.get();
-          System.out.println("sended");
+          //System.out.println("sended");
         } catch (InterruptedException e) {
           e.printStackTrace();
         } catch (ExecutionException e) {
@@ -81,33 +81,39 @@ class Connector {
       outBuf.clear();
       outBuf.flip();
       int noOfBP = 0;
-      try {
-        String noOfBPStr = readLine(client, outBuf);
-        noOfBP = Integer.parseInt(noOfBPStr);
-      } catch (NumberFormatException e) {
-        System.out.println("NAN");
-        return;
-      }
-      if (noOfBP < 1) {
-        return;
+      if (lineNumber == 0) {
+        try {
+          String noOfBPStr = readLine(client, outBuf);
+          noOfBP = Integer.parseInt(noOfBPStr);
+        } catch (NumberFormatException e) {
+          //System.out.println("NAN");
+          return;
+        }
+        if (noOfBP < 1) {
+          return;
+        }
+      } else {
+        noOfBP = 1;
       }
       for (int i = 0; i < noOfBP; i++) {
         String locStr = readLine(client, outBuf);
         System.out.println(locStr);
         Optional<Location> loc = parser.parseLocation(locStr);
         if (loc.isEmpty()) {
+          //System.out.println("e");
           continue;
         }
         try {
           ArrayList<ValueInfo> values = new ArrayList<>();
           String noOfValueStr = readLine(client, outBuf);
+          //System.out.println(noOfValueStr);
           int noOfValue = Integer.parseInt(noOfValueStr);
           if (noOfValue < 1) {
             continue;
           }
           for (int j = 0; j < noOfValue; j++) {
             String valueStr = readLine(client, outBuf);
-            System.out.println(valueStr);
+            //System.out.println(valueStr);
             Optional<ValueInfo> value = parser.parseValue(valueStr);
             if (value.isPresent()) {
               values.add(value.get());
@@ -116,7 +122,7 @@ class Connector {
           results.put(loc.get(), values);
           
         } catch (NumberFormatException e) {
-          System.out.println("NAN");
+          //System.out.println("noOfValueNAN");
           continue;
         }
       }
@@ -124,7 +130,7 @@ class Connector {
     receiver.start();
     String cmd = "Print";
     if (lineNumber > 0) {
-      cmd = "Print " + className + " " + varName + " " + lineNumber;
+      cmd = "Print " + className + ".java " + varName + " " + lineNumber;
     }
     sendCommand(cmd);
     try {
@@ -166,39 +172,8 @@ class Connector {
   void close() {
     try {
       client.close();
-      System.out.println("close");
+      //System.out.println("close");
     } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  public static void main(String[] args) {
-    try {
-      Connector t = new Connector("127.0.0.1", 39876);
-      System.out.println("Listening...");
-      t.openConnection();
-      while (true) {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        String inputLine = in.readLine();
-        if (inputLine.equals("Q")) {
-          break;
-        }
-        if (inputLine.equals("P")) {
-          t.getResults("", "", 0);
-        }
-        else if (inputLine.equals("on")) {
-          t.sendCommand("PrintSocketOn");
-        } else if (inputLine.equals("S")) {
-          t.sendCommand("Set LoopN.java var1 22");
-        }
-      }
-      try {
-        t.client.close();
-        System.out.println("close");
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
-    } catch (Exception e) {
       e.printStackTrace();
     }
   }
