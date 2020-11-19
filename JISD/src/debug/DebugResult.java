@@ -10,6 +10,7 @@ import com.sun.jdi.Value;
 
 import debug.value.ValueInfo;
 import debug.value.ValueInfoFactory;
+import util.StreamUtil;
 
 /**
  * Debug result
@@ -56,6 +57,16 @@ public class DebugResult {
     this.varName = varName;
   }
 
+  void addValue(ValueInfo value) {
+    synchronized (this) {
+      if (values.size() >= maxRecordNoOfValue) {
+        values.pop();
+        values.add(value);
+        return;
+      }
+      values.add(value);
+    }
+  }
   /**
    * Add value to deque
    * 
@@ -79,14 +90,7 @@ public class DebugResult {
         break;
       }
     }
-    synchronized (this) {
-      if (values.size() >= maxRecordNoOfValue) {
-        values.pop();
-        values.add(value);
-        return;
-      }
-      values.add(value);
-    }
+    addValue(value);
   }
   
   static void resetNumber() {
@@ -120,8 +124,8 @@ public class DebugResult {
    * 
    * @return value
    */
-  public ValueInfo[] getValues() {
-    return values.toArray(ValueInfo[]::new);
+  public ArrayList<ValueInfo> getValues() {
+    return (ArrayList<ValueInfo>) values.stream().collect(StreamUtil.toArrayList());
   }
 
   /**
