@@ -9,6 +9,7 @@ sourceSets.test.java.srcDirs = ['test/src']
 jar {
     archiveBaseName = 'jisd'
     archiveVersion =  '0.0.1'
+    exclude('demo/**')
 }
 
 test {
