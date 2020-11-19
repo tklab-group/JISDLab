@@ -37,7 +37,7 @@ class DebuggerTest {
     return dbg;
   }
 
-  void showResult(DebugResult res) {
+  static void showResult(DebugResult res) {
     System.out.println("-----------------------------");
     System.out.println(res.getLineNumber());
     System.out.println(res.getName());
@@ -200,11 +200,11 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getValues().length, maxRecords);
+      Assertions.assertEquals(res.getValues().size(), maxRecords);
     }
-    ValueInfo[] values = results.get(0).getValues();
+    ArrayList<ValueInfo> values = results.get(0).getValues();
     IntStream.range(0, maxRecords).forEach(i -> {
-      System.out.print(values[i].getValue() + " ");
+      System.out.print(values.get(i).getValue() + " ");
       if (i % 10 == 9) {
         System.out.println("");
       }
@@ -245,5 +245,4 @@ class DebuggerTest {
     }
     dbg.exit();
   }
-
 }

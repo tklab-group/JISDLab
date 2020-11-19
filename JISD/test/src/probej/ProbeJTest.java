@@ -33,6 +33,8 @@ public class ProbeJTest {
         }
         if (inputLine.equals("P")) {
           p.getResults();
+        } else if (inputLine.equals("P1")) {
+          p.getResults("LoopN", "var1", 22);
         }
         else if (inputLine.equals("on")) {
           c.sendCommand("PrintSocketOn");
