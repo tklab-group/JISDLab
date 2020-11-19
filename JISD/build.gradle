@@ -4,7 +4,9 @@ apply plugin: 'idea'
 sourceCompatibility = 11
 targetCompatibility = 11
 sourceSets.main.java.srcDirs = ['src']
+sourceSets.main.java.outputDir = file('bin')
 sourceSets.test.java.srcDirs = ['test/src']
+// buildDir = 'build'
 
 jar {
     archiveBaseName = 'jisd'
