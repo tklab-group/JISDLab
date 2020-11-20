@@ -4,7 +4,7 @@ import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Value;
 import debug.value.ValueInfo;
 import debug.value.ValueInfoFactory;
-import util.StreamUtil;
+import util.Stream;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -133,7 +133,7 @@ public class DebugResult {
    * @return value
    */
   public ArrayList<ValueInfo> getValues() {
-    return (ArrayList<ValueInfo>) values.stream().collect(StreamUtil.toArrayList());
+    return (ArrayList<ValueInfo>) values.stream().collect(Stream.toArrayList());
   }
 
   public void setMaxRecordNoOfValue(int number) {
