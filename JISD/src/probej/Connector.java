@@ -44,7 +44,7 @@ class Connector {
 
         @Override
         public void failed(Throwable exc, Void attachment){
-            // Errorèàóù
+            // Error
         }
       });
     } catch (IOException e) {
