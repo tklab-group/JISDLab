@@ -26,11 +26,11 @@ public class Static {
     this.className = className;
   }
 
-  String getSrcDir() {
+  public String getSrcDir() {
     return srcDir;
   }
 
-  void setSrcDir(String srcDir) {
+  public void setSrcDir(String srcDir) {
     this.srcDir = srcDir;
   }
 
