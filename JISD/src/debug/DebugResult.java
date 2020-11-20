@@ -1,22 +1,19 @@
 package debug;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Map;
-
 import com.sun.jdi.LocalVariable;
-import com.sun.jdi.Location;
 import com.sun.jdi.Value;
-
 import debug.value.ValueInfo;
 import debug.value.ValueInfoFactory;
 import util.StreamUtil;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Map;
+
 /**
  * Debug result
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 public class DebugResult {
   /** class name */
@@ -31,23 +28,24 @@ public class DebugResult {
   ArrayDeque<ValueInfo> values = new ArrayDeque<>();
   /** the max record number of values */
   int maxRecordNoOfValue;
+  /** the default max record number of values */
+  static volatile int defaultMaxRecordNoOfValue = 100;
+  /** the default max number of the variable expantion strata */
+  static volatile int defaultMaxNoOfExpand = 1;
   /** the max number of the variable expantion strata */
   int maxNoOfExpand;
-  /** the default max record number of values */
-  static int defaultMaxRecordNoOfValue = 100;
-  /** the default max number of the variable expantion strata */
-  static int defaultMaxNoOfExpand = 1;
+
   /**
    * Constructor
-   * 
+   *
    * @param maxRecordNoOfValue the max record number of values
-   * @param maxNoOfExpand      the max number of the variable expantion strata
-   * @param number             time stamp
-   * @param className          class name
-   * @param lineNumber         line number
-   * @param varName            value name
-   * @param loc                An observed location
-   * @param entry              An observed variable and value
+   * @param maxNoOfExpand the max number of the variable expantion strata
+   * @param number time stamp
+   * @param className class name
+   * @param lineNumber line number
+   * @param varName value name
+   * @param loc An observed location
+   * @param entry An observed variable and value
    */
   DebugResult(String className, int lineNumber, String varName) {
     maxRecordNoOfValue = defaultMaxRecordNoOfValue;
@@ -67,11 +65,24 @@ public class DebugResult {
       values.add(value);
     }
   }
+
+  public static void setDefaultMaxNoOfExpand(int number) {
+    if (number < 0) {
+      DebuggerInfo.printError(
+          "A max number of the variable expansion must be a positive integer(>= 0).");
+    }
+    defaultMaxNoOfExpand = number;
+  }
+
+  static void resetNumber() {
+    number = 0;
+  }
+
   /**
    * Add value to deque
-   * 
+   *
    * @param number time stamp
-   * @param entry  entry An observed variable and value
+   * @param entry entry An observed variable and value
    */
   void addValue(Map.Entry<LocalVariable, Value> entry) {
     ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
@@ -83,60 +94,48 @@ public class DebugResult {
         break;
       }
       ArrayList<ValueInfo> childValues = v.expand();
-      childValues.forEach(cv -> {
-        valueExpansionQue.add(cv);
-      });
+      childValues.forEach(
+          cv -> {
+            valueExpansionQue.add(cv);
+          });
       if (valueExpansionQue.isEmpty()) {
         break;
       }
     }
     addValue(value);
   }
-  
-  static void resetNumber() {
-    number = 0;
-  }
 
   /**
    * Get a line number of an observed location in a target java file.
-   * 
+   *
    * @return line number
    */
   public int getLineNumber() {
     return lineNumber;
   }
 
-  /**
-   * Get a name of an observed variable.
-   * 
-   * @return variable name
-   */
-  public String getName() {
-    return varName;
-  }
-  
   public String getClassName() {
     return className;
   }
 
   /**
+   * Get a name of an observed variable.
+   *
+   * @return variable name
+   */
+  public String getName() {
+    return varName;
+  }
+
+  /**
    * Get an observed value
-   * 
+   *
    * @return value
    */
   public ArrayList<ValueInfo> getValues() {
     return (ArrayList<ValueInfo>) values.stream().collect(StreamUtil.toArrayList());
   }
 
-  /**
-   * Get the latest observed value
-   * 
-   * @return latest value
-   */
-  public ValueInfo getLatestValue() {
-    return values.getLast();
-  }
-  
   public void setMaxRecordNoOfValue(int number) {
     if (number <= 0) {
       DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
@@ -144,14 +143,16 @@ public class DebugResult {
     }
     maxRecordNoOfValue = number;
   }
-  
-  public void setMaxNoOfExpand(int number) {
-    if (number < 0) {
-      DebuggerInfo.printError("A max number of the variable expansion must be a positive integer(>= 0).");
-    }
-    maxNoOfExpand =number;
+
+  /**
+   * Get the latest observed value
+   *
+   * @return latest value
+   */
+  public ValueInfo getLatestValue() {
+    return values.getLast();
   }
-  
+
   public static void setDefaultMaxRecordNoOfValue(int number) {
     if (number <= 0) {
       DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
@@ -159,12 +160,13 @@ public class DebugResult {
     }
     defaultMaxRecordNoOfValue = number;
   }
-  
-  public static void setDefaultMaxNoOfExpand(int number) {
+
+  public void setMaxNoOfExpand(int number) {
     if (number < 0) {
-      DebuggerInfo.printError("A max number of the variable expansion must be a positive integer(>= 0).");
+      DebuggerInfo.printError(
+          "A max number of the variable expansion must be a positive integer(>= 0).");
     }
-    defaultMaxNoOfExpand =number;
+    maxNoOfExpand = number;
   }
 
   @Override
@@ -179,26 +181,33 @@ public class DebugResult {
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
+    if (this == obj) {
       return true;
-    if (obj == null)
+    }
+    if (obj == null) {
       return false;
-    if (getClass() != obj.getClass())
+    }
+    if (getClass() != obj.getClass()) {
       return false;
+    }
     DebugResult other = (DebugResult) obj;
     if (className == null) {
-      if (other.className != null)
+      if (other.className != null) {
         return false;
-    } else if (!className.equals(other.className))
+      }
+    } else if (!className.equals(other.className)) {
       return false;
-    if (lineNumber != other.lineNumber)
+    }
+    if (lineNumber != other.lineNumber) {
       return false;
+    }
     if (varName == null) {
-      if (other.varName != null)
+      if (other.varName != null) {
         return false;
-    } else if (!varName.equals(other.varName))
+      }
+    } else if (!varName.equals(other.varName)) {
       return false;
+    }
     return true;
   }
-
 }

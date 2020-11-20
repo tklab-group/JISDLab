@@ -8,6 +8,10 @@ sourceSets.main.java.outputDir = file('bin')
 sourceSets.test.java.srcDirs = ['test/src']
 // buildDir = 'build'
 
+wrapper {
+    gradleVersion = '6.6'
+}
+
 jar {
     archiveBaseName = 'jisd'
     archiveVersion =  '0.0.1'
@@ -32,6 +36,7 @@ dependencies {
   // https://mvnrepository.com/artifact/org.json/json
   implementation 'org.json:json:20171018'
 
+  // jdiscript
   implementation files('../jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar')
 
   // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
