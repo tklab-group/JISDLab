@@ -20,6 +20,6 @@ public class Class extends Static {
   }
 
   public ArrayList<String> fields() {
-    return StaticFile.getfieldNames(className);
+    return StaticFile.getFieldNames(className);
   }
 }

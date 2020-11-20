@@ -13,7 +13,6 @@ public abstract class Static {
   String className;
   String name;
   String srcDir;
-  final String separator = File.separator;
 
   public Static(String srcDir, String className, String name) {
     this.srcDir = srcDir;
@@ -48,11 +47,11 @@ public abstract class Static {
   }
 
   public String path() {
-    return srcDir + separator + Name.toSourcePathFromClassName(className);
+    return srcDir + File.separator + Name.toSourcePathFromClassName(className);
   }
 
   public String absPath() {
-    return System.getProperty("user.dir") + separator + path();
+    return System.getProperty("user.dir") + File.separator + path();
   }
 
   public String className() {
