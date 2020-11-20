@@ -8,22 +8,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 
-public class Static {
+public class Class {
   final String className;
-  HashSet<String> methodNames;
-  HashSet<String> fieldNames;
+  final String name;
   String srcDir;
   final String separator = File.separator;
 
-  public Static(String className) {
+  public Class(String className) {
     this(".", className);
   }
 
-  public Static(String srcDir, String className) {
+  public Class(String srcDir, String className) {
+    this(srcDir, className, className);
+  }
+
+  Class(String srcDir, String className, String name) {
     this.srcDir = srcDir;
     this.className = className;
+    this.name = name;
   }
 
   public String getSrcDir() {
@@ -58,5 +61,13 @@ public class Static {
 
   public String absPath() {
     return System.getProperty("user.dir") + separator + path();
+  }
+
+  public String className() {
+    return className;
+  }
+
+  public String name() {
+    return name;
   }
 }

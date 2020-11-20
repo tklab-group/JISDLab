@@ -8,7 +8,7 @@ import static util.Print.p;
 public class StaticTest {
   @Test
   public void basicTest() {
-    Static s = new Static("src", "demo.HelloWorld");
+    Class s = new Class("src", "demo.HelloWorld");
     Assertions.assertEquals(s.path(), "src\\demo\\HelloWorld.java");
     p(s.path());
     p(s.absPath());
