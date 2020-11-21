@@ -50,7 +50,7 @@ public class SrtVal {
       } else {
         typekind_tmp = 1;
         // typekind_tmp = 2;// cannot
-        // typename_tmp = typename_tmp.replace('/', '.');
+        typename_tmp = typename_tmp.replace('/', '.');
       }
     } else {
       typekind_tmp = 0; // can

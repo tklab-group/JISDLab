@@ -109,7 +109,7 @@ public class LysMain {
       ClassNode cn = cn_entry.getValue();
 
       Map<String, Object> pobj_class_ps = new HashMap<>();
-      Map<String, Object> pobj_class_md = new HashMap<>();
+      Map<String, Object> pobj_methods_md = new HashMap<>();
 
       /* for each method ********************************************************/
       List<MethodNode> methodlist = cn.methods;
@@ -304,8 +304,19 @@ public class LysMain {
 
         String mfullname = mname + "(" + String.join(", ", argtype) + ")";
         pobj_class_ps.put(mfullname, pobj_method_ps);
-        pobj_class_md.put(mfullname, parr_method_md);
+        pobj_methods_md.put(mfullname, parr_method_md);
       }
+      // for each fields
+      HashMap<String, Object> pobj_fields_md = new HashMap<>();
+      var fieldVals = fields.get(cn.name);
+      fieldVals.forEach(
+          val -> {
+            pobj_fields_md.put(val.name, val.typename);
+          });
+      HashMap<String, Object> pobj_class_md = new HashMap<>();
+
+      pobj_class_md.put("methods", pobj_methods_md);
+      pobj_class_md.put("fields", pobj_fields_md);
 
       // put pobj_class_xx to corresponding pobj_package_xx
       String packagename = packagenames.get(cn.name);
