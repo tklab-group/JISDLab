@@ -1,5 +1,10 @@
 package _static;
 
+import org.json.JSONException;
+import util.Name;
+import util.Print;
+import util.Stream;
+
 import java.util.ArrayList;
 
 public class Class extends Static {
@@ -16,10 +21,25 @@ public class Class extends Static {
   }
 
   public ArrayList<String> methods() {
-    return StaticFile.getMethodNames(className);
+    var ps = StaticFile.getPs();
+    var packageAndClassName = Name.splitClassName(className);
+    if (ps.isEmpty()) {
+      return new ArrayList<>();
+    }
+    var psObj = ps.get();
+    try {
+      var packageObj = psObj.getJSONObject(packageAndClassName.get("package"));
+      var classObj = packageObj.getJSONObject("class");
+      var names = (ArrayList<String>) classObj.keySet().stream().collect(Stream.toArrayList());
+      return names;
+    } catch (JSONException e) {
+      Print.out("Class not found");
+      return new ArrayList<>();
+    }
   }
 
   public ArrayList<String> fields() {
-    return StaticFile.getFieldNames(className);
+    // Todo: get data from field_data.json
+    return null;
   }
 }

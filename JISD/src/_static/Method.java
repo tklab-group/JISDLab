@@ -12,6 +12,6 @@ public class Method extends Static {
   }
 
   public ArrayList<String> locals() {
-    return StaticFile.getLocalNames(className);
+    return null;
   }
 }

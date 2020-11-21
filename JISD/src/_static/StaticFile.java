@@ -67,13 +67,4 @@ class StaticFile {
       return new ArrayList<>();
     }
   }
-
-  static ArrayList<String> getFieldNames(String className) {
-    // Todo: get data from field_data.json
-    return null;
-  }
-
-  static ArrayList<String> getLocalNames(String className) {
-    return null;
-  }
 }
