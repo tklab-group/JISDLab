@@ -13,7 +13,7 @@ public class Name {
    * @return class name
    */
   public static String toClassNameFromSourcePath(String sp) {
-    String className = sp.replace(File.separator.charAt(0), '.');
+    String className = sp.replace('/', '.').replace(File.separator.charAt(0), '.');
     int length = className.length();
     if (className.substring(length - 5, length).equals(".java")) {
       return className.substring(0, length - 5);
@@ -28,7 +28,7 @@ public class Name {
   }
 
   public static HashMap<String, String> splitClassName(String name) {
-    var cns = name.split(".");
+    var cns = name.split("\\.");
     var cnsLen = cns.length;
     HashMap<String, String> map = new HashMap<>();
     if (cnsLen == 0) {

@@ -1,11 +1,11 @@
 package util;
 
 public class Print {
-  public static void out(String s) {
-    System.out.println(s);
+  public static void out(Object o) {
+    System.out.println(o);
   }
 
-  public static void err(String s) {
-    System.err.println(s);
+  public static void err(Object o) {
+    System.err.println(o);
   }
 }
