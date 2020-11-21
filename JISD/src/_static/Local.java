@@ -1,4 +1,4 @@
-package debug._static;
+package _static;
 
 public class Local extends Static {
   String methodName;

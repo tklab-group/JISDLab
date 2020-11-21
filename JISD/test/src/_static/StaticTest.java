@@ -1,4 +1,4 @@
-package debug._static;
+package _static;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

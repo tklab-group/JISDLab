@@ -1,4 +1,4 @@
-package debug._static;
+package _static;
 
 public class Field extends Static {
   public Field(String srcDir, String className, String fieldName) {
