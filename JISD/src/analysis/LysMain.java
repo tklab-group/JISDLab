@@ -2,6 +2,7 @@ package analysis;
 
 import org.json.JSONObject;
 import org.objectweb.asm.tree.*;
+import util.Name;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -313,10 +314,17 @@ public class LysMain {
           val -> {
             pobj_fields_md.put(val.name, val.typename);
           });
-      HashMap<String, Object> pobj_class_md = new HashMap<>();
 
+      HashMap<String, Object> pobj_class_md = new HashMap<>();
       pobj_class_md.put("methods", pobj_methods_md);
       pobj_class_md.put("fields", pobj_fields_md);
+      pobj_class_md.put("supers", Name.toClassNameFromSourcePath(cn.superName));
+      ArrayList<String> interfacesStr = new ArrayList<>();
+      cn.interfaces.forEach(
+          in -> {
+            interfacesStr.add(Name.toClassNameFromSourcePath(in));
+          });
+      pobj_class_md.put("interfaces", interfacesStr);
 
       // put pobj_class_xx to corresponding pobj_package_xx
       String packagename = packagenames.get(cn.name);
@@ -354,7 +362,7 @@ public class LysMain {
       bw = new BufferedWriter(new FileWriter(output_dir + "/program_structure.json", false));
       bw.write(sresult_ps);
       bw.close();
-      bw = new BufferedWriter(new FileWriter(output_dir + "/method_data.json", false));
+      bw = new BufferedWriter(new FileWriter(output_dir + "/class_data.json", false));
       bw.write(sresult_md);
       bw.close();
       bw = new BufferedWriter(new FileWriter(output_dir + "/defined_filename.json", false));
