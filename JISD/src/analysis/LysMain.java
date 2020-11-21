@@ -153,18 +153,20 @@ public class LysMain {
           } else if (sf.typekind == 1) {
             Map<String, Object> pobj_val = new HashMap<>();
             ArrayList<SrtVal> inside_sfs = fields.get(sf.typename); // should exist
-            for (SrtVal inside_sf : inside_sfs) {
-              if (inside_sf.typekind == 0) { // if can
-                Set<Object> parr_canset = new LinkedHashSet<>();
-                Set<Object> parr_recom = new LinkedHashSet<>();
-                for (Integer ml : method_lines) {
-                  parr_canset.add(ml.toString());
-                  parr_recom.add(ml.toString()); // temporary<<<
+            if (inside_sfs != null) {
+              for (SrtVal inside_sf : inside_sfs) {
+                if (inside_sf.typekind == 0) { // if can
+                  Set<Object> parr_canset = new LinkedHashSet<>();
+                  Set<Object> parr_recom = new LinkedHashSet<>();
+                  for (Integer ml : method_lines) {
+                    parr_canset.add(ml.toString());
+                    parr_recom.add(ml.toString()); // temporary<<<
+                  }
+                  List<Object> parr_field = new ArrayList<>();
+                  parr_field.add(parr_canset);
+                  parr_field.add(parr_recom);
+                  pobj_val.put(inside_sf.name, parr_field);
                 }
-                List<Object> parr_field = new ArrayList<>();
-                parr_field.add(parr_canset);
-                parr_field.add(parr_recom);
-                pobj_val.put(inside_sf.name, parr_field);
               }
             }
             pobj_method_ps.put(sf.name, pobj_val);
@@ -211,18 +213,19 @@ public class LysMain {
             } else if (sl.typekind == 1) {
               Map<String, Object> pobj_val = new HashMap<>();
               ArrayList<SrtVal> inside_sfs = fields.get(sl.typename); // should exist
+              if (inside_sfs != null) {
+                for (SrtVal inside_sf : inside_sfs) {
+                  if (inside_sf.typekind == 0) { // if can
+                    Set<Object> parr_canset = new LinkedHashSet<>();
+                    Set<Object> parr_recom = new LinkedHashSet<>();
 
-              for (SrtVal inside_sf : inside_sfs) {
-                if (inside_sf.typekind == 0) { // if can
-                  Set<Object> parr_canset = new LinkedHashSet<>();
-                  Set<Object> parr_recom = new LinkedHashSet<>();
+                    int idx_start = method_line_labels.getIndexOfValue(startlabel);
+                    int idx_end = method_line_labels.getIndexOfValue(endlabel);
+                    method_lines.getSubset(idx_start, idx_end, parr_canset);
+                    parr_recom = parr_canset; // temporary<<<
 
-                  int idx_start = method_line_labels.getIndexOfValue(startlabel);
-                  int idx_end = method_line_labels.getIndexOfValue(endlabel);
-                  method_lines.getSubset(idx_start, idx_end, parr_canset);
-                  parr_recom = parr_canset; // temporary<<<
-
-                  addLines(pobj_val, inside_sf.name, parr_canset, parr_recom);
+                    addLines(pobj_val, inside_sf.name, parr_canset, parr_recom);
+                  }
                 }
               }
 
