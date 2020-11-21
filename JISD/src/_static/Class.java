@@ -6,8 +6,12 @@ import util.Print;
 import util.Stream;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Class extends Static {
+  private Optional<ArrayList<String>> methods = Optional.empty();
+  private Optional<ArrayList<String>> fields = Optional.empty();
+
   public Class(String srcDir, String className) {
     super(srcDir, className, className);
   }
@@ -21,25 +25,48 @@ public class Class extends Static {
   }
 
   public ArrayList<String> methods() {
-    var ps = StaticFile.getPs();
+    if (methods.isPresent()) {
+      return methods.get();
+    }
+    var cd = StaticFile.getCd();
     var packageAndClassName = Name.splitClassName(className);
-    if (ps.isEmpty()) {
+    if (cd.isEmpty()) {
       return new ArrayList<>();
     }
-    var psObj = ps.get();
+    var cdObj = cd.get();
     try {
-      var packageObj = psObj.getJSONObject(packageAndClassName.get("package"));
-      var classObj = packageObj.getJSONObject("class");
-      var names = (ArrayList<String>) classObj.keySet().stream().collect(Stream.toArrayList());
+      var packageObj = cdObj.getJSONObject(packageAndClassName.get("package"));
+      var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
+      var methodsObj = classObj.getJSONObject("methods");
+      var names = (ArrayList<String>) methodsObj.keySet().stream().collect(Stream.toArrayList());
+      methods = Optional.of(names);
       return names;
     } catch (JSONException e) {
-      Print.out("Class not found");
+      Print.out("Data not found");
       return new ArrayList<>();
     }
   }
 
   public ArrayList<String> fields() {
-    // Todo: get data from field_data.json
-    return null;
+    if (fields.isPresent()) {
+      return fields.get();
+    }
+    var cd = StaticFile.getCd();
+    var packageAndClassName = Name.splitClassName(className);
+    if (cd.isEmpty()) {
+      return new ArrayList<>();
+    }
+    var cdObj = cd.get();
+    try {
+      var packageObj = cdObj.getJSONObject(packageAndClassName.get("package"));
+      var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
+      var methodsObj = classObj.getJSONObject("fields");
+      var names = (ArrayList<String>) methodsObj.keySet().stream().collect(Stream.toArrayList());
+      fields = Optional.of(names);
+      return names;
+    } catch (JSONException e) {
+      Print.out("Data not found");
+      return new ArrayList<>();
+    }
   }
 }
