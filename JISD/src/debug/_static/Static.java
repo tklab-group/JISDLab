@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 public abstract class Static {
   String className;
@@ -30,20 +29,14 @@ public abstract class Static {
 
   public String src() {
     Path path = Paths.get(path());
-    ArrayList<String> lines;
+    String str;
     try {
-      lines = (ArrayList) Files.readAllLines(path);
+      str = Files.readString(path);
     } catch (IOException e) {
       e.printStackTrace();
       return "";
     }
-    StringBuilder sb = new StringBuilder();
-    lines.forEach(
-        (l) -> {
-          sb.append(l);
-          sb.append("\n");
-        });
-    return sb.toString();
+    return str;
   }
 
   public String path() {
