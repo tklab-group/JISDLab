@@ -1,40 +1,28 @@
 package debug;
 
-import static org.junit.jupiter.api.Assertions.*;
+import debug.value.ValueInfo;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import debug.BreakPoint;
-import debug.DebugResult;
-import debug.Debugger;
-import debug.value.ValueInfo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Debugger Test
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 class DebuggerTest {
   /* line numbers a breakpoint is set */
   static final int bpln1 = 29;
   static final int bpln2 = 31;
   ArrayList<Integer> bps = new ArrayList<>();
-  
+
   DebuggerTest() {
     bps.add(bpln1);
     bps.add(bpln2);
-  }
-  Debugger makeDebugger() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
-    bps.forEach(item -> {
-      dbg.watch(item, false);
-    });
-    return dbg;
   }
 
   static void showResult(DebugResult res) {
@@ -43,6 +31,15 @@ class DebuggerTest {
     System.out.println(res.getName());
     System.out.println(res.getLatestValue());
     System.out.println("");
+  }
+
+  Debugger makeDebugger() {
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    bps.forEach(
+        item -> {
+          dbg.watch(item, false);
+        });
+    return dbg;
   }
 
   @Test
@@ -82,9 +79,10 @@ class DebuggerTest {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<Integer> bps = new ArrayList<>();
     dbg.watch("java.io.PrintStream", "println", false);
-    bps.forEach(item -> {
-      dbg.watch(item);
-    });
+    bps.forEach(
+        item -> {
+          dbg.watch(item);
+        });
     dbg.run(1000);
     dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
@@ -134,9 +132,10 @@ class DebuggerTest {
     bps.add(bpln1);
     bps.add(bpln2);
     varNames.add("a");
-    bps.forEach(item -> {
-      dbg.watch(item, varNames, false);
-    });
+    bps.forEach(
+        item -> {
+          dbg.watch(item, varNames, false);
+        });
     dbg.run(1000);
     dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
@@ -156,9 +155,10 @@ class DebuggerTest {
     bps.add(bpln2);
     bps.add(0);
     varNames.add("a");
-    bps.forEach(item -> {
-      dbg.watch(item, varNames, false);
-    });
+    bps.forEach(
+        item -> {
+          dbg.watch(item, varNames, false);
+        });
     dbg.run(1000);
     dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
@@ -203,16 +203,18 @@ class DebuggerTest {
       Assertions.assertEquals(res.getValues().size(), maxRecords);
     }
     ArrayList<ValueInfo> values = results.get(0).getValues();
-    IntStream.range(0, maxRecords).forEach(i -> {
-      System.out.print(values.get(i).getValue() + " ");
-      if (i % 10 == 9) {
-        System.out.println("");
-      }
-    });
+    IntStream.range(0, maxRecords)
+        .forEach(
+            i -> {
+              System.out.print(values.get(i).getValue() + " ");
+              if (i % 10 == 9) {
+                System.out.println("");
+              }
+            });
     dbg.exit();
   }
-  
-  @Test 
+
+  @Test
   void stepTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<String> varNames = new ArrayList<>();
@@ -225,10 +227,14 @@ class DebuggerTest {
     dbg.next();
     dbg.next();
     dbg.locals();
-    dbg.getResults().forEach((r)->{System.out.println(r.getLineNumber()+": "+r.getName());});
+    dbg.getResults()
+        .forEach(
+            (r) -> {
+              System.out.println(r.getLineNumber() + ": " + r.getName());
+            });
     dbg.exit();
   }
-  
+
   @Test
   void breakPointClearTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");

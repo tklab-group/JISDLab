@@ -17,16 +17,16 @@ public class StaticTest {
 
   @Test
   public void jsonFileReadTest() {
-    var s = new StaticFile();
+    StaticFile s = new StaticFile("src", "bin/");
     Assertions.assertNotNull(s.getCd());
     Assertions.assertNotNull(s.getPs());
-    out(s.getPs().toString());
+    out(StaticFile.getPs().toString());
   }
 
   @Test
   public void getStaticTest() {
-    var s = new StaticFile();
-    Class c = new Class("src", "demo.HelloWorld");
+    StaticFile s = new StaticFile("src", "bin/");
+    Class c = new Class("demo.HelloWorld");
     out(c.fields());
     out(c.methods());
     var f = c.field("helloTo");

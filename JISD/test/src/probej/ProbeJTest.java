@@ -1,26 +1,25 @@
-/**
- * 
- */
+/** */
 package probej;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 import org.junit.jupiter.api.Test;
 
-import probej.ProbeJ;
+import static util.Print.out;
 
-/**
- * @author sugiyama
- *
- */
+/** @author sugiyama */
 public class ProbeJTest {
+
   @Test
   public void basicTest() {
-    ProbeJ p = new ProbeJ("127.0.0.1", 39876);
+    ProbeJ p = new ProbeJ("127.0.0.1", 39876, new VirtualMachine("demo.LoopN", "-cp bin", 39876));
+    p.run();
+    p.requestSetProbePoint("demo.LoopN", "var1", 22);
+    out(p.getResults("demo.LoopN", "var1", 22));
+    p.exit();
+  }
+  /*
+  @Test
+  public void manualTest() {
+    ProbeJ p = new ProbeJ("127.0.0.1", 39876, new VirtualMachine("demo.LoopN", "-cp bin", 39876));
     p.run();
     Connector c = p.getConnector();
     while (true) {
@@ -35,8 +34,7 @@ public class ProbeJTest {
           p.getResults();
         } else if (inputLine.equals("P1")) {
           p.getResults("LoopN", "var1", 22);
-        }
-        else if (inputLine.equals("on")) {
+        } else if (inputLine.equals("on")) {
           c.sendCommand("PrintSocketOn");
         } else if (inputLine.equals("S")) {
           c.sendCommand("Set LoopN.java var1 22");
@@ -47,4 +45,5 @@ public class ProbeJTest {
     }
     p.exit();
   }
+   */
 }
