@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "java",
+    "-jar",
+    "/root/.local/share/jupyter/kernels/java/ijava-1.3.0.jar",
+    "{connection_file}"
+  ],
+  "display_name": "Java",
+  "language": "java",
+  "interrupt_mode": "message",
+  "env": {
+    "IJAVA_CLASSPATH": "/JISDLab/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:/JISDLab/JISD/build/libs/jisd-all.jar:/workspaces/sample"
+  }
+}
