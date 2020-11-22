@@ -1,19 +1,12 @@
-/**
- * 
- */
+/** */
 package debug;
 
 import probej.ProbeJ;
 
-/**
- * @author sugiyama
- *
- */
+/** @author sugiyama */
 class ProbeJManager extends VMManager {
   ProbeJ probeJ;
-  /**
-   * 
-   */
+  /** */
   public ProbeJManager(ProbeJ probeJ) {
     this.probeJ = probeJ;
   }
@@ -25,17 +18,16 @@ class ProbeJManager extends VMManager {
 
   @Override
   void shutdown() {
-    // TODO Auto-generated method stub
     probeJ.exit();
   }
 
   @Override
   void prepareStart(BreakPointManager bpm) {
     // TODO Auto-generated method stub
-    
+
   }
-  
+
   public ProbeJ getProbeJ() {
-    return probeJ;  
+    return probeJ;
   }
 }

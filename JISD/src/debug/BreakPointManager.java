@@ -33,12 +33,12 @@ class BreakPointManager {
     this.isProcessing = isProcessing;
   }
 
-  void setCurrentTRef(ThreadReference tRef) {
-    this.currentTRef = tRef;
-  }
-
   ThreadReference getCurrentTRef() {
     return currentTRef;
+  }
+
+  void setCurrentTRef(ThreadReference tRef) {
+    this.currentTRef = tRef;
   }
 
   void init() {
