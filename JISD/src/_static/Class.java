@@ -16,6 +16,10 @@ public class Class extends Static {
     super(srcDir, className, className);
   }
 
+  public Class(String className) {
+    super(StaticFile.getSrcDir(), className, className);
+  }
+
   public Field field(String name) {
     return new Field(srcDir, className, name);
   }

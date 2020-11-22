@@ -1,28 +1,47 @@
 package _static;
 
+import analysis.LysMain;
 import lombok.Getter;
+import lombok.Setter;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
-class StaticFile {
+import static util.Json.readJsonFile;
+
+public class StaticFile {
   static final String rootDir = "data" + File.separator;
   static final String methodDataFilePath = rootDir + "class_data.json";
   static final String programStructureFilePath = rootDir + "program_structure.json";
+  @Getter @Setter static String srcDir = ".", binDir = ".";
 
-  @Getter static Optional<JSONObject> cd;
-  @Getter static Optional<JSONObject> ps;
+  @Getter static Optional<JSONObject> cd = Optional.empty();
+  @Getter static Optional<JSONObject> ps = Optional.empty();
 
-  public StaticFile() {
-    readData();
+  public StaticFile(String srcDir, String binDir) {
+    init(srcDir, binDir);
   }
 
-  public void readData() {
+  public void init(String srcDir, String binDir) {
+    if (!srcDir.isBlank()) {
+      setSrcDir(srcDir);
+    }
+    if (!binDir.isBlank()) {
+      setBinDir(binDir);
+    }
+    createStaticData();
+    readStaticData();
+  }
+
+  public void createStaticData() {
+    String[] args = new String[2];
+    args[0] = binDir + "/data/";
+    args[1] = binDir;
+    LysMain.main(args);
+  }
+
+  public void readStaticData() {
     readCd();
     readPs();
   }
@@ -33,18 +52,5 @@ class StaticFile {
 
   void readPs() {
     ps = readJsonFile(programStructureFilePath);
-  }
-
-  Optional<JSONObject> readJsonFile(String jsonFilePath) {
-    Path path = Paths.get(jsonFilePath);
-    String jsonStr;
-    try {
-      jsonStr = Files.readString(path);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return Optional.empty();
-    }
-    JSONObject jsonObj = new JSONObject(jsonStr);
-    return Optional.ofNullable(jsonObj);
   }
 }
