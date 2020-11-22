@@ -18,6 +18,9 @@ public class Name {
     if (className.substring(length - 5, length).equals(".java")) {
       return className.substring(0, length - 5);
     }
+    while (className.length() > 0 && className.charAt(className.length() - 1) == '.') {
+      className = className.substring(0, className.length() - 1);
+    }
     return className;
   }
 
