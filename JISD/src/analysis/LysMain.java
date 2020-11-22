@@ -41,12 +41,11 @@ public class LysMain {
      * preparation (get all cns & fields)
      *******************************************/
 
-    String root = "bin/"; // directory to find class files of this analysis program (from the root
+    String root = "."; // directory to find class files of this analysis program (from the root
     // directory)
     if (args.length > 1) {
       root = args[1];
     }
-
     // find class files recursively
     Path start = Paths.get(root);
     FileVisitor<Path> visitor = new ClassFileVisitor(cns, root.length());
