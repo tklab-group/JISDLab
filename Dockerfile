@@ -35,10 +35,14 @@ WORKDIR $project_dir
 ARG cp1=${project_dir}/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar
 
 # JISD classpath
-ARG cp2=${project_dir}/JISD/build/libs/jisd-0.0.1.jar
+ARG cp2=${project_dir}/JISD/build/libs/jisd-all.jar
 
 # your application's absolute classpaths in a container(classpath1:classpath2:...)
 ARG cp3=${ws_dir}/sample
 
 # IJava install
 RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3}
+
+#Modify kernel.json
+RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=/root/.local/share/jupyter/kernels/java/kernel.json -Pcp=${cp3}
+
