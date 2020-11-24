@@ -1,41 +1,20 @@
 package debug;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.jdiscript.JDIScript;
-import org.jdiscript.handlers.OnBreakpoint;
-import org.jdiscript.handlers.OnStep;
-import org.jdiscript.handlers.OnVMStart;
-
-import com.sun.jdi.AbsentInformationException;
-import com.sun.jdi.IncompatibleThreadStateException;
-import com.sun.jdi.LocalVariable;
-import com.sun.jdi.Location;
-import com.sun.jdi.ReferenceType;
-import com.sun.jdi.StackFrame;
-import com.sun.jdi.ThreadReference;
-import com.sun.jdi.Value;
+import com.sun.jdi.*;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.sun.jdi.request.StepRequest;
+import org.jdiscript.JDIScript;
+import org.jdiscript.handlers.OnStep;
+import util.Name;
+import util.Stream;
 
-import probej.ProbeJ;
-import util.StreamUtil;
-import util.SrcUtil;
+import java.io.File;
+import java.util.*;
 
 /**
  * Breakpoint manager
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 class BreakPointManager {
   /** breakpoints */
@@ -44,26 +23,24 @@ class BreakPointManager {
   ThreadReference currentTRef;
   /** is processing now? */
   volatile boolean isProcessing;
-  
-  /**
-   * 
-   */
+
+  /** */
   BreakPointManager() {
     init();
   }
-  
+
   void setIsProcessing(boolean isProcessing) {
     this.isProcessing = isProcessing;
   }
-  
-  void setCurrentTRef(ThreadReference tRef) {
-    this.currentTRef = tRef;
-  }
-  
+
   ThreadReference getCurrentTRef() {
     return currentTRef;
   }
-  
+
+  void setCurrentTRef(ThreadReference tRef) {
+    this.currentTRef = tRef;
+  }
+
   void init() {
     setIsProcessing(false);
     setCurrentTRef(null);
@@ -71,33 +48,32 @@ class BreakPointManager {
 
   /**
    * A stacktrace string
-   * 
+   *
    * @param t Thread
    * @return A stacktrace string
-   * @throws IncompatibleThreadStateException Thrown to indicate that the
-   *                                          requested operation cannot
-   *                                          becompleted while the specified
-   *                                          thread is in its current state.
+   * @throws IncompatibleThreadStateException Thrown to indicate that the requested operation cannot
+   *     becompleted while the specified thread is in its current state.
    */
   String stackTraceKey(ThreadReference t) throws IncompatibleThreadStateException {
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (StackFrame f : t.frames()) {
       Location loc = f.location();
-      sb.append("["+i+"] ")
-        .append(loc.declaringType().name())
-        .append(".")
-        .append(loc.method().name())
-        .append(" (line: ")
-        .append(loc.lineNumber())
-        .append(")\n");
+      sb.append("[" + i + "] ")
+          .append(loc.declaringType().name())
+          .append(".")
+          .append(loc.method().name())
+          .append(" (line: ")
+          .append(loc.lineNumber())
+          .append(")\n");
       i++;
     }
     return sb.substring(0, sb.length() - 1);
   }
-  
+
   /**
    * Check current thread reference state
+   *
    * @return whether the current thread is suspended or not
    */
   boolean checkCurrentTRef(boolean isVerbose) {
@@ -107,59 +83,60 @@ class BreakPointManager {
     } else {
       isSuspended = currentTRef.isSuspended();
     }
-    if (isVerbose && ! isSuspended) {
+    if (isVerbose && !isSuspended) {
       DebuggerInfo.print("The target VM thread is not suspended now.");
     }
     return isSuspended;
   }
-  
+
   boolean checkCurrentTRef() {
     return checkCurrentTRef(true);
   }
 
-  /**
-   * resume current thread
-   */
+  /** resume current thread */
   void resumeThread() {
-    if (! checkCurrentTRef()) return;
+    if (!checkCurrentTRef()) {
+      return;
+    }
     currentTRef.resume();
     currentTRef = null;
   }
-  
+
   /**
    * request step execution
+   *
    * @param depth depth of step
    */
   void requestStep(VMManager vmMgr, int depth) {
-    if (! checkCurrentTRef()) {
+    if (!checkCurrentTRef()) {
       return;
     }
     isProcessing = true;
-    /**
-     * A procedure on step.
-     */
+    /** A procedure on step. */
     if (!(vmMgr instanceof JDIManager)) {
       /* do nothing */
-      return;  
+      return;
     }
     JDIScript j = ((JDIManager) vmMgr).getJDI();
-    OnStep onStep = j.once((s) -> {
-      if (! isProcessing) {
-        DebuggerInfo.print("Step completed");
-        return;
-      }
-      int lineNumber = s.location().lineNumber();
-      String methodName = s.location().method().name();
-      try {
-        String className = SrcUtil.toClassNameFromSourcePath(s.location().sourcePath());
-        printCurrentLocation("Step completed", lineNumber, className, methodName);
-      } catch (AbsentInformationException e) {
-        printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
-      }
-      currentTRef = s.thread();
-      currentTRef.suspend();
-      isProcessing = false;
-    });
+    OnStep onStep =
+        j.once(
+            (s) -> {
+              if (!isProcessing) {
+                DebuggerInfo.print("Step completed");
+                return;
+              }
+              int lineNumber = s.location().lineNumber();
+              String methodName = s.location().method().name();
+              try {
+                String className = Name.toClassNameFromSourcePath(s.location().sourcePath());
+                printCurrentLocation("Step completed", lineNumber, className, methodName);
+              } catch (AbsentInformationException e) {
+                printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
+              }
+              currentTRef = s.thread();
+              currentTRef.suspend();
+              isProcessing = false;
+            });
     try {
       j.onStep(currentTRef, StepRequest.STEP_LINE, depth, onStep);
     } catch (DuplicateRequestException e) {
@@ -167,54 +144,53 @@ class BreakPointManager {
     }
     resumeThread();
   }
-  
-  /**
-   * request step into execution
-   */
+
+  /** request step into execution */
   void requestStepInto(VMManager vm) {
     requestStep(vm, StepRequest.STEP_INTO);
   }
-  
-  /**
-   * request step over execution
-   */
+
+  /** request step over execution */
   void requestStepOver(VMManager vm) {
     requestStep(vm, StepRequest.STEP_OVER);
   }
-  
-  /**
-   * request step out execution
-   */
+
+  /** request step out execution */
   void requestStepOut(VMManager vm) {
     requestStep(vm, StepRequest.STEP_OUT);
   }
-  
-  /**
-   * Request VM to set a breakpoint
-   */
+
+  /** Request VM to set a breakpoint */
   void requestSetBreakPoints(VMManager vm) {
-    bps.forEach(bp -> {
-      bp.requestSetBreakPoint(vm, this);
-    });
+    bps.forEach(
+        bp -> {
+          bp.requestSetBreakPoint(vm, this);
+        });
   }
 
   /**
    * Set breakpoint by a line number.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param lineNumber line number
-   * @param varNames   variable names
-   * @param isBreak    break or not at points
+   * @param varNames variable names
+   * @param isBreak break or not at points
    * @return breakpoint
    */
-  public Optional<BreakPoint> setBreakPoint(VMManager vm, String className, int lineNumber, ArrayList<String> varNames,
-      boolean isBreak, boolean isProbe) {
+  public Optional<BreakPoint> setBreakPoint(
+      VMManager vm,
+      String className,
+      int lineNumber,
+      ArrayList<String> varNames,
+      boolean isBreak,
+      boolean isProbe) {
     if (className.length() == 0) {
       DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
       return Optional.empty();
     }
     if (lineNumber <= 0) {
-      DebuggerInfo.printError("Breakpoint is not set. A line number must be a non-negative integer(> 0).");
+      DebuggerInfo.printError(
+          "Breakpoint is not set. A line number must be a non-negative integer(> 0).");
       return Optional.empty();
     }
     BreakPoint bp;
@@ -230,15 +206,20 @@ class BreakPointManager {
 
   /**
    * Set breakpoint by a method name.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param methodName method name
-   * @param varNames   value name
-   * @param isBreak    break or not at points
+   * @param varNames value name
+   * @param isBreak break or not at points
    * @return breakpoint
    */
-  public Optional<BreakPoint> setBreakPoint(VMManager vm, String className, String methodName, ArrayList<String> varNames,
-      boolean isBreak, boolean isProbe) {
+  public Optional<BreakPoint> setBreakPoint(
+      VMManager vm,
+      String className,
+      String methodName,
+      ArrayList<String> varNames,
+      boolean isBreak,
+      boolean isProbe) {
     if (className.length() == 0) {
       DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
       return Optional.empty();
@@ -260,8 +241,8 @@ class BreakPointManager {
 
   /**
    * Remove breakpoint.
-   * 
-   * @param className  A target class file name
+   *
+   * @param className A target class file name
    * @param lineNumber A line number in a target java file
    */
   public void removeBreakPoint(String className, int lineNumber) {
@@ -272,8 +253,8 @@ class BreakPointManager {
 
   /**
    * Remove breakpoint.
-   * 
-   * @param className  A target class file name
+   *
+   * @param className A target class file name
    * @param methodName A method name a class has
    */
   public void removeBreakPoint(String className, String methodName) {
@@ -284,7 +265,7 @@ class BreakPointManager {
 
   /**
    * Get breakpoints
-   * 
+   *
    * @return breakpoints
    */
   Set<BreakPoint> getBreakPoints() {
@@ -293,31 +274,32 @@ class BreakPointManager {
 
   /**
    * Print current location infomation
-   * 
-   * @param prefix     print reason
+   *
+   * @param prefix print reason
    * @param lineNumber line number
-   * @param className  class name
+   * @param className class name
    * @param methodName method name
    */
   void printCurrentLocation(String prefix, int lineNumber, String className, String methodName) {
-    DebuggerInfo.print(prefix + ": line=" + lineNumber + ", class=" + className + ", method=" + methodName);
+    DebuggerInfo.print(
+        prefix + ": line=" + lineNumber + ", class=" + className + ", method=" + methodName);
   }
 
   /**
    * Print source code.
-   * 
+   *
    * @param prefix print reason
    * @param srcDir source directory
    */
   void printSrcAtCurrentLocation(String prefix, String srcDir) {
-    if (! checkCurrentTRef()) {
+    if (!checkCurrentTRef()) {
       return;
     }
     try {
       Location currentLocation = currentTRef.frame(0).location();
       int lineNumber = currentLocation.lineNumber();
       String srcRelPath = currentLocation.sourcePath();
-      String className = SrcUtil.toClassNameFromSourcePath(srcRelPath);
+      String className = Name.toClassNameFromSourcePath(srcRelPath);
       String methodName = currentLocation.method().name();
       printCurrentLocation(prefix, lineNumber, className, methodName);
       if (!srcDir.equals("")) {
@@ -330,11 +312,9 @@ class BreakPointManager {
     }
   }
 
-  /**
-   * Print local variables
-   */
+  /** Print local variables */
   void printLocals() {
-    if (! checkCurrentTRef()) {
+    if (!checkCurrentTRef()) {
       return;
     }
     try {
@@ -342,24 +322,30 @@ class BreakPointManager {
       List<LocalVariable> vars = stackFrame.visibleVariables();
       Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
       System.out.println("Method arguments:");
-      visibleVariables.entrySet().stream().filter(entry -> entry.getKey().isArgument()).forEach(entry -> {
-        System.out.println(entry.getKey().name() + " = " + entry.getValue().toString());
-      });
+      visibleVariables.entrySet().stream()
+          .filter(entry -> entry.getKey().isArgument())
+          .forEach(
+              entry -> {
+                System.out.println(entry.getKey().name() + " = " + entry.getValue().toString());
+              });
       System.out.println("\nLocal variables:");
-      visibleVariables.entrySet().stream().filter(entry -> !entry.getKey().isArgument()).forEach(entry -> {
-        System.out.println(entry.getKey().name() + " = " + entry.getValue().toString());
-      });
+      visibleVariables.entrySet().stream()
+          .filter(entry -> !entry.getKey().isArgument())
+          .forEach(
+              entry -> {
+                System.out.println(entry.getKey().name() + " = " + entry.getValue().toString());
+              });
     } catch (IncompatibleThreadStateException | AbsentInformationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
   }
-  
-  /**
-   * Print stacktrace 
-   */
+
+  /** Print stacktrace */
   void printStackTrace() {
-    if (! checkCurrentTRef()) return;
+    if (!checkCurrentTRef()) {
+      return;
+    }
     try {
       System.out.println();
       System.out.println(stackTraceKey(currentTRef));
@@ -367,29 +353,36 @@ class BreakPointManager {
       e.printStackTrace();
     }
   }
-  
+
   public ArrayList<DebugResult> getResults() {
     ArrayList<DebugResult> drs = new ArrayList<>();
-    bps.forEach(bp -> {
-      bp.getResults().forEach((key, value) -> {
-        drs.add(value); 
-      });
-    });
-    drs.sort(Comparator.comparing(DebugResult::getClassName)
-                       .thenComparing(DebugResult::getLineNumber)
-                       .thenComparing(DebugResult::getName));
+    bps.forEach(
+        bp -> {
+          bp.getResults()
+              .forEach(
+                  (key, value) -> {
+                    drs.add(value);
+                  });
+        });
+    drs.sort(
+        Comparator.comparing(DebugResult::getClassName)
+            .thenComparing(DebugResult::getLineNumber)
+            .thenComparing(DebugResult::getName));
     return drs;
   }
-  
+
   public ArrayList<DebugResult> getResults(String varName) {
-    ArrayList<DebugResult> drs = (ArrayList<DebugResult>) bps.stream().map(bp -> bp.getResult(varName))
-                                                                      .filter(res -> res.isPresent())
-                                                                      .map(res -> res.get())
-                                                                      .sorted(Comparator.comparing(DebugResult::getClassName)
-                                                                                        .thenComparing(DebugResult::getLineNumber)
-                                                                                        .thenComparing(DebugResult::getName))
-                                                                      .collect(StreamUtil.toArrayList());
+    ArrayList<DebugResult> drs =
+        (ArrayList<DebugResult>)
+            bps.stream()
+                .map(bp -> bp.getResult(varName))
+                .filter(res -> res.isPresent())
+                .map(res -> res.get())
+                .sorted(
+                    Comparator.comparing(DebugResult::getClassName)
+                        .thenComparing(DebugResult::getLineNumber)
+                        .thenComparing(DebugResult::getName))
+                .collect(Stream.toArrayList());
     return drs;
   }
- 
 }

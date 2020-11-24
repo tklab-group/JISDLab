@@ -1,11 +1,10 @@
 package debug;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import _static.StaticFile;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -17,19 +16,21 @@ public class Debugger {
   /** Manage breakpoints */
   BreakPointManager bpm;
   /** Target class setting items */
-  String main, options, srcDir;
+  @Getter @Setter String main, options, srcDir, binDir;
   /** JDI thread */
   Thread vmThread;
   /** VM manager */
   VMManager vmManager;
   /** use attaching connector or not */
-  boolean isRemoteDebug = false;
+  boolean isRemoteDebug;
   /** uses ProbeJ ? */
-  boolean usesProbeJ = false;
+  boolean usesProbeJ;
   /** attaching port */
-  int port = 39876;
+  @Getter int port;
   /** */
-  String host = "localhost";
+  @Getter @Setter String host;
+  /** static data * */
+  StaticFile staticFile;
 
   /**
    * Constructor
@@ -88,13 +89,11 @@ public class Debugger {
    * @param srcDir source directory
    */
   public Debugger(String main, String options, String srcDir, boolean usesProbeJ) {
-    setMain(main);
-    this.options = options;
-    this.usesProbeJ = usesProbeJ;
-    setSrcDir(srcDir);
-    bpm = new BreakPointManager();
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
-    vmManager.prepareStart(bpm);
+    init(main, options, "localhost", 39876, srcDir, "", false, usesProbeJ);
+  }
+
+  public Debugger(String main, String options, String srcDir, String binDir, boolean usesProbeJ) {
+    init(main, options, "localhost", 39876, srcDir, binDir, false, usesProbeJ);
   }
 
   /**
@@ -114,14 +113,11 @@ public class Debugger {
    * @param port attaching port
    */
   public Debugger(String host, int port, String srcDir, boolean usesProbeJ) {
-    setSrcDir(srcDir);
-    this.host = host;
-    this.usesProbeJ = usesProbeJ;
-    bpm = new BreakPointManager();
-    this.isRemoteDebug = true;
-    setPort(port);
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
-    vmManager.prepareStart(bpm);
+    init("", "", host, port, srcDir, "", true, usesProbeJ);
+  }
+
+  public Debugger(String host, int port, String srcDir, String binDir, boolean usesProbeJ) {
+    init("", "", host, port, srcDir, binDir, true, usesProbeJ);
   }
 
   /**
@@ -139,7 +135,31 @@ public class Debugger {
    * @param port attaching port
    */
   public Debugger(String host, int port, boolean usesProbeJ) {
-    this(host, port, "", usesProbeJ);
+    this(host, port, ".", usesProbeJ);
+  }
+
+  void init(
+      String main,
+      String options,
+      String host,
+      int port,
+      String srcDir,
+      String binDir,
+      boolean isRemoteDebug,
+      boolean usesProbeJ) {
+    setMain(main);
+    setOptions(options);
+    setSrcDir(srcDir);
+    setHost(host);
+    setPort(port);
+    this.usesProbeJ = usesProbeJ;
+    setSrcDir(srcDir);
+    setBinDir(binDir);
+    this.isRemoteDebug = isRemoteDebug;
+    bpm = new BreakPointManager();
+    staticFile = new StaticFile(srcDir, binDir);
+    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager.prepareStart(bpm);
   }
 
   // ********** debugger settings ************************************************************//
@@ -153,20 +173,10 @@ public class Debugger {
     }
   }
 
-  public void setMain(String main) {
-    this.main = main;
-  }
-
-  public void setOptions(String options) {
-    this.options = options;
-  }
-
-  public void setSrcDir(String srcDir) {
-    this.srcDir = srcDir;
-  }
   // ********** debugger settings ************************************************************//
 
   // ********** stop ************************************************************//
+
   /**
    * Set breakpoint with a line number.
    *
@@ -261,9 +271,10 @@ public class Debugger {
     }
     return bpm.setBreakPoint(vmManager, className, methodName, varNames, true, false);
   }
-  // ********** stopAta ************************************************************//
+  // ********** stopAt ************************************************************//
 
   // ********** watch ************************************************************//
+
   /**
    * Set watchpoint with a line number.
    *
@@ -352,9 +363,11 @@ public class Debugger {
       String className, String methodName, ArrayList<String> varNames) {
     return watch(className, methodName, varNames, usesProbeJ);
   }
+
   // ********** watch ************************************************************//
 
   // ********** watch or probe ************************************************************//
+
   /**
    * Set watchpoint with a line number.
    *
@@ -429,9 +442,11 @@ public class Debugger {
       String className, String methodName, ArrayList<String> varNames, boolean isProbe) {
     return bpm.setBreakPoint(vmManager, className, methodName, varNames, false, isProbe);
   }
+
   // ********** watch or probe ************************************************************//
 
   // ********** on breakpoint ************************************************************//
+
   /** Execute "step in"/"step into" */
   public void step() {
     bpm.requestStepInto(vmManager);
@@ -464,14 +479,15 @@ public class Debugger {
   public void locals() {
     bpm.printLocals();
   }
+  // ********** on breakpoint ************************************************************//
+
+  // ********** remove breakpoint ************************************************************//
 
   /** Print stacktrace in current stack frame. */
   public void where() {
     bpm.printStackTrace();
   }
-  // ********** on breakpoint ************************************************************//
 
-  // ********** remove breakpoint ************************************************************//
   /**
    * Remove breakpoint with a line number.
    *
@@ -509,9 +525,11 @@ public class Debugger {
   public void clear(String className, String methodName) {
     bpm.removeBreakPoint(className, methodName);
   }
+
   // ********** remove breakpoint ************************************************************//
 
   // ********** debugger control ************************************************************//
+
   /**
    * Start up the debugger.
    *
@@ -557,15 +575,6 @@ public class Debugger {
     exit();
   }
 
-  /** Clear debug results all. */
-  public void clearResults() {
-    ArrayList<BreakPoint> bps = getBreakPoints();
-    bps.forEach(
-        bp -> {
-          bp.reset();
-        });
-  }
-
   /**
    * Restart the debugger.
    *
@@ -576,15 +585,22 @@ public class Debugger {
     clearResults();
     vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(bpm);
+    staticFile.init(srcDir, binDir);
     run(sleepTime);
-  }
-
-  public VMManager getVM() {
-    return vmManager;
   }
   // ********** debugger control ************************************************************//
 
   // ********** debug result ************************************************************//
+
+  /** Clear debug results all. */
+  public void clearResults() {
+    ArrayList<BreakPoint> bps = getBreakPoints();
+    bps.forEach(
+        bp -> {
+          bp.reset();
+        });
+  }
+
   /**
    * Get debug results.
    *
@@ -606,6 +622,7 @@ public class Debugger {
   // ********** debug result ************************************************************//
 
   // ********** breakpoint ************************************************************//
+
   /**
    * Get breakpoints.
    *
@@ -615,60 +632,4 @@ public class Debugger {
     return new ArrayList<>(bpm.getBreakPoints());
   }
   // ********** breakpoint ************************************************************//
-
-  // ********** external process ************************************************************//
-  /**
-   * Execute external command.
-   *
-   * @param command command (wildcard * is unavailable)
-   * @return [stdout, stderr, exit code] (optional)
-   */
-  public static Optional<String[]> exec(String command) {
-    String lineSeparator = System.getProperty("line.separator");
-    String[] results = new String[3];
-    Arrays.fill(results, "");
-    try {
-      Process p = Runtime.getRuntime().exec(command);
-      InputStream in = null;
-      BufferedReader br = null;
-      try {
-        in = p.getInputStream();
-        StringBuffer out = new StringBuffer();
-        br = new BufferedReader(new InputStreamReader(in));
-        String line;
-        while ((line = br.readLine()) != null) {
-          out.append(line + lineSeparator);
-        }
-        results[0] = out.toString();
-        br.close();
-        in.close();
-        in = p.getErrorStream();
-        StringBuffer err = new StringBuffer();
-        br = new BufferedReader(new InputStreamReader(in));
-        while ((line = br.readLine()) != null) {
-          err.append(line + lineSeparator);
-        }
-        results[1] = err.toString();
-        results[2] = Integer.toString(p.waitFor());
-        System.out.print(results[0]);
-        System.err.print(results[1]);
-      } finally {
-        if (br != null) {
-          br.close();
-        }
-        if (in != null) {
-          in.close();
-        }
-      }
-      p.destroy();
-      return Optional.of(results);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return Optional.empty();
-    } catch (InterruptedException e) {
-      DebuggerInfo.print("Interrupted.");
-      return Optional.empty();
-    }
-  }
-  // ********** external process ************************************************************//
 }

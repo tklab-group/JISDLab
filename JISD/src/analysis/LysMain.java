@@ -2,6 +2,7 @@ package analysis;
 
 import org.json.JSONObject;
 import org.objectweb.asm.tree.*;
+import util.Name;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -40,12 +41,11 @@ public class LysMain {
      * preparation (get all cns & fields)
      *******************************************/
 
-    String root = "bin/"; // directory to find class files of this analysis program (from the root
+    String root = "."; // directory to find class files of this analysis program (from the root
     // directory)
     if (args.length > 1) {
       root = args[1];
     }
-
     // find class files recursively
     Path start = Paths.get(root);
     FileVisitor<Path> visitor = new ClassFileVisitor(cns, root.length());
@@ -109,7 +109,7 @@ public class LysMain {
       ClassNode cn = cn_entry.getValue();
 
       Map<String, Object> pobj_class_ps = new HashMap<>();
-      Map<String, Object> pobj_class_md = new HashMap<>();
+      Map<String, Object> pobj_methods_md = new HashMap<>();
 
       /* for each method ********************************************************/
       List<MethodNode> methodlist = cn.methods;
@@ -153,18 +153,20 @@ public class LysMain {
           } else if (sf.typekind == 1) {
             Map<String, Object> pobj_val = new HashMap<>();
             ArrayList<SrtVal> inside_sfs = fields.get(sf.typename); // should exist
-            for (SrtVal inside_sf : inside_sfs) {
-              if (inside_sf.typekind == 0) { // if can
-                Set<Object> parr_canset = new LinkedHashSet<>();
-                Set<Object> parr_recom = new LinkedHashSet<>();
-                for (Integer ml : method_lines) {
-                  parr_canset.add(ml.toString());
-                  parr_recom.add(ml.toString()); // temporary<<<
+            if (inside_sfs != null) {
+              for (SrtVal inside_sf : inside_sfs) {
+                if (inside_sf.typekind == 0) { // if can
+                  Set<Object> parr_canset = new LinkedHashSet<>();
+                  Set<Object> parr_recom = new LinkedHashSet<>();
+                  for (Integer ml : method_lines) {
+                    parr_canset.add(ml.toString());
+                    parr_recom.add(ml.toString()); // temporary<<<
+                  }
+                  List<Object> parr_field = new ArrayList<>();
+                  parr_field.add(parr_canset);
+                  parr_field.add(parr_recom);
+                  pobj_val.put(inside_sf.name, parr_field);
                 }
-                List<Object> parr_field = new ArrayList<>();
-                parr_field.add(parr_canset);
-                parr_field.add(parr_recom);
-                pobj_val.put(inside_sf.name, parr_field);
               }
             }
             pobj_method_ps.put(sf.name, pobj_val);
@@ -211,18 +213,19 @@ public class LysMain {
             } else if (sl.typekind == 1) {
               Map<String, Object> pobj_val = new HashMap<>();
               ArrayList<SrtVal> inside_sfs = fields.get(sl.typename); // should exist
+              if (inside_sfs != null) {
+                for (SrtVal inside_sf : inside_sfs) {
+                  if (inside_sf.typekind == 0) { // if can
+                    Set<Object> parr_canset = new LinkedHashSet<>();
+                    Set<Object> parr_recom = new LinkedHashSet<>();
 
-              for (SrtVal inside_sf : inside_sfs) {
-                if (inside_sf.typekind == 0) { // if can
-                  Set<Object> parr_canset = new LinkedHashSet<>();
-                  Set<Object> parr_recom = new LinkedHashSet<>();
+                    int idx_start = method_line_labels.getIndexOfValue(startlabel);
+                    int idx_end = method_line_labels.getIndexOfValue(endlabel);
+                    method_lines.getSubset(idx_start, idx_end, parr_canset);
+                    parr_recom = parr_canset; // temporary<<<
 
-                  int idx_start = method_line_labels.getIndexOfValue(startlabel);
-                  int idx_end = method_line_labels.getIndexOfValue(endlabel);
-                  method_lines.getSubset(idx_start, idx_end, parr_canset);
-                  parr_recom = parr_canset; // temporary<<<
-
-                  addLines(pobj_val, inside_sf.name, parr_canset, parr_recom);
+                    addLines(pobj_val, inside_sf.name, parr_canset, parr_recom);
+                  }
                 }
               }
 
@@ -301,8 +304,26 @@ public class LysMain {
 
         String mfullname = mname + "(" + String.join(", ", argtype) + ")";
         pobj_class_ps.put(mfullname, pobj_method_ps);
-        pobj_class_md.put(mfullname, parr_method_md);
+        pobj_methods_md.put(mfullname, parr_method_md);
       }
+      // for each fields
+      HashMap<String, Object> pobj_fields_md = new HashMap<>();
+      var fieldVals = fields.get(cn.name);
+      fieldVals.forEach(
+          val -> {
+            pobj_fields_md.put(val.name, val.typename);
+          });
+
+      HashMap<String, Object> pobj_class_md = new HashMap<>();
+      pobj_class_md.put("methods", pobj_methods_md);
+      pobj_class_md.put("fields", pobj_fields_md);
+      pobj_class_md.put("supers", Name.toClassNameFromSourcePath(cn.superName));
+      ArrayList<String> interfacesStr = new ArrayList<>();
+      cn.interfaces.forEach(
+          in -> {
+            interfacesStr.add(Name.toClassNameFromSourcePath(in));
+          });
+      pobj_class_md.put("interfaces", interfacesStr);
 
       // put pobj_class_xx to corresponding pobj_package_xx
       String packagename = packagenames.get(cn.name);
@@ -340,7 +361,7 @@ public class LysMain {
       bw = new BufferedWriter(new FileWriter(output_dir + "/program_structure.json", false));
       bw.write(sresult_ps);
       bw.close();
-      bw = new BufferedWriter(new FileWriter(output_dir + "/method_data.json", false));
+      bw = new BufferedWriter(new FileWriter(output_dir + "/class_data.json", false));
       bw.write(sresult_md);
       bw.close();
       bw = new BufferedWriter(new FileWriter(output_dir + "/defined_filename.json", false));

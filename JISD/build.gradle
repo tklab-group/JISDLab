@@ -1,3 +1,7 @@
+plugins {
+  id 'com.github.johnrengelman.shadow' version '5.1.0'
+}
+
 apply plugin: 'java'
 apply plugin: 'idea'
 
@@ -9,26 +13,30 @@ sourceSets.test.java.srcDirs = ['test/src']
 // buildDir = 'build'
 
 wrapper {
-    gradleVersion = '6.6'
+  gradleVersion = '6.6'
 }
 
 jar {
-    archiveBaseName = 'jisd'
-    archiveVersion =  '0.0.1'
-    exclude('demo/**')
+  archiveBaseName = 'jisd'
+  archiveVersion = '0.0.1'
+  exclude('demo/**')
+}
+
+shadowJar {
+  exclude('demo/**')
 }
 
 test {
-    useJUnitPlatform()
+  useJUnitPlatform()
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
   // https://mvnrepository.com/artifact/org.ow2.asm/asm
-  implementation'org.ow2.asm:asm:9.0'
+  implementation 'org.ow2.asm:asm:9.0'
 
   // https://mvnrepository.com/artifact/org.ow2.asm/asm-tree
   implementation 'org.ow2.asm:asm-tree:9.0'
@@ -43,4 +51,18 @@ dependencies {
   testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
   testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.6.2'
 
+  // https://mvnrepository.com/artifact/org.projectlombok/lombok
+  compileOnly 'org.projectlombok:lombok:1.18.16'
+  annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
 }
+
+task createKernelJson(type: JavaExec) {
+  main = "util.JISDPreProcess"
+  classpath = sourceSets.main.runtimeClasspath
+  def path = project.hasProperty("jsonpath") ? project.property("jsonpath") : ""
+  def cp = project.hasProperty("cp") ? project.property("cp") : ""
+  args(path, path, cp)
+}
+
+shadowJar.dependsOn jar
