@@ -41,7 +41,7 @@ ARG cp2=${project_dir}/JISD/build/libs/jisd-all.jar
 ARG cp3=${ws_dir}/sample
 
 # IJava install
-RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3}
+RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3} --param startup-scripts-path:$project_dir/JISD/startup.jshell
 
 #Modify kernel.json
 RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=/root/.local/share/jupyter/kernels/java/kernel.json -Pcp=${cp3}
