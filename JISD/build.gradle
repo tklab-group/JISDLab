@@ -16,6 +16,11 @@ wrapper {
   gradleVersion = '6.6'
 }
 
+javadoc {
+  exclude('demo/**')
+  destinationDir = file("../JISD-doc")
+}
+
 jar {
   archiveBaseName = 'jisd'
   archiveVersion = '0.0.1'

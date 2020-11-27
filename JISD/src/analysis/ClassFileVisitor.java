@@ -24,7 +24,7 @@ public class ClassFileVisitor implements FileVisitor<Path> {
   /**
    * @param classNodes HashMap which will contain ClassNodes of all class files
    * @param offset offset to remove first several letters from the full paths of class files (eg.
-   *     when setting 4 offset, "bin\src\Test.class" -> "src\Test.class")
+   *     when setting 4 offset, "bin\src\Test.class" to "src\Test.class")
    */
   public ClassFileVisitor(HashMap<String, ClassNode> classNodes, int offset) {
     this.classNodes = classNodes;
