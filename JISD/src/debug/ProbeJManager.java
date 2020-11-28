@@ -22,7 +22,7 @@ class ProbeJManager extends VMManager {
   }
 
   @Override
-  void prepareStart(BreakPointManager bpm) {
+  void prepareStart(PointManager bpm) {
     // TODO Auto-generated method stub
 
   }

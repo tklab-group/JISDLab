@@ -19,12 +19,13 @@ class VMManagerFactory {
     // ProbeJ
     if (usesProbeJ) {
       DebuggerInfo.print("Try to connect to " + host + ":" + port);
+      ProbeJ probeJ;
       if (!isRemoteDebug) {
         probej.VirtualMachine vm = new probej.VirtualMachine(main, options, port);
-        ProbeJ probeJ = new ProbeJ(host, port, vm);
+        probeJ = new ProbeJ(host, port, vm);
+      } else {
+        probeJ = new ProbeJ(host, port);
       }
-      ProbeJ probeJ = new ProbeJ(host, port);
-      DebuggerInfo.print("Successflly connected to " + host + ":" + port);
       return new ProbeJManager(probeJ);
     }
 

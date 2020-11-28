@@ -18,6 +18,8 @@ public class VirtualMachine implements Runnable {
   @Override
   public void run() {
     try {
+      System.out.println(
+          "java -agentpath:lib/ProbeJ_ex.dll=options_none:" + port + " " + options + " " + main);
       p =
           Optional.ofNullable(
               Runtime.getRuntime()

@@ -13,6 +13,9 @@ public class Name {
    * @return class name
    */
   public static String toClassNameFromSourcePath(String sp) {
+    if (sp == null) {
+      return "";
+    }
     String className = sp.replace('/', '.').replace(File.separator.charAt(0), '.');
     int length = className.length();
     if (className.substring(length - 5, length).equals(".java")) {

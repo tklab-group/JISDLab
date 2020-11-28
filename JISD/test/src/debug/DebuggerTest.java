@@ -34,7 +34,7 @@ class DebuggerTest {
   }
 
   Debugger makeDebugger() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin", "src", "bin");
     bps.forEach(
         item -> {
           dbg.watch(item, false);
@@ -65,12 +65,12 @@ class DebuggerTest {
       assertEquals(res.getLineNumber(), bps.get(i / 4));
     }
     dbg.clear(bpln2);
-    assertEquals(dbg.getBreakPoints().size(), 1);
-    assertEquals(dbg.getBreakPoints().get(0).getLineNumber(), bps.get(0));
+    assertEquals(dbg.getPoints().size(), 1);
+    assertEquals(dbg.getPoints().get(0).getLineNumber(), bps.get(0));
     dbg.stopAt("sayHello");
-    assertEquals(dbg.getBreakPoints().size(), 2);
+    assertEquals(dbg.getPoints().size(), 2);
     dbg.clear("sayHello");
-    assertEquals(dbg.getBreakPoints().size(), 1);
+    assertEquals(dbg.getPoints().size(), 1);
     dbg.exit();
   }
 
@@ -104,7 +104,7 @@ class DebuggerTest {
       assertEquals(res.getLineNumber(), bps.get(i / 4));
     }
     dbg.clear(bpln2);
-    assertEquals(dbg.getBreakPoints().size(), 1);
+    assertEquals(dbg.getPoints().size(), 1);
     dbg.restart(sleepTime);
     results = dbg.getResults();
     assertEquals(results.size(), 4);
@@ -238,8 +238,8 @@ class DebuggerTest {
   @Test
   void breakPointClearTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
-    BreakPoint bp1 = dbg.watch(bpln1, false).get();
-    BreakPoint bp2 = dbg.watch(bpln2, false).get();
+    Point bp1 = dbg.watch(bpln1, false).get();
+    Point bp2 = dbg.watch(bpln2, false).get();
     bp1.disable();
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();

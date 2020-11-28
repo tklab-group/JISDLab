@@ -1,138 +1,145 @@
-/**
- * 
- */
+/** */
 package probej;
 
-import java.io.*;
+import debug.value.ValueInfo;
+import util.Print;
+
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import debug.value.ValueInfo;
-
-/**
- * @author sugiyama
- *
- */
+/** @author sugiyama */
 class Connector {
   String host;
   int port;
   AsynchronousSocketChannel client;
   Future<AsynchronousSocketChannel> acceptFuture;
   Parser parser = new Parser();
-  
-  
-  
+
   public Connector(String host, int port) {
     this.host = host;
     this.port = port;
-  }  
-  
+  }
+
   public void openConnection() {
     try {
       client = AsynchronousSocketChannel.open();
-      client.connect(new InetSocketAddress(host, port), null, new CompletionHandler<Void, Void>() {
-        @Override
-        public void completed(Void result, Void attachment) {
-       
-        }
+      client.connect(
+          new InetSocketAddress(host, port),
+          null,
+          new CompletionHandler<Void, Void>() {
+            @Override
+            public void completed(Void result, Void attachment) {
+              Print.out("Successflly connected to " + host + ":" + port);
+            }
 
-        @Override
-        public void failed(Throwable exc, Void attachment){
-            // Error
-        }
-      });
+            @Override
+            public void failed(Throwable exc, Void attachment) {
+              // Error
+            }
+          });
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
-  
+
   void sendCommand(String cmd) {
     if ((client != null) && (client.isOpen())) {
-      Thread sender = new Thread(() -> {
-        ByteBuffer inBuf = ByteBuffer.allocate(1024);
-        String inputLine = cmd;
-        inBuf = ByteBuffer.wrap(inputLine.getBytes());
-        Future<Integer> writeResult = client.write(inBuf);
-        try {
-          writeResult.get();
-          //System.out.println("sended");
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        } catch (ExecutionException e) {
-          e.printStackTrace();
-        }
-        inBuf.clear();
-      });
-      
+      Thread sender =
+          new Thread(
+              () -> {
+                ByteBuffer inBuf = ByteBuffer.allocate(1024);
+                String inputLine = cmd;
+                inBuf = ByteBuffer.wrap(inputLine.getBytes());
+                Future<Integer> writeResult = client.write(inBuf);
+                try {
+                  writeResult.get();
+                  // System.out.println("sended");
+                } catch (InterruptedException e) {
+                  e.printStackTrace();
+                } catch (ExecutionException e) {
+                  e.printStackTrace();
+                }
+                inBuf.clear();
+              });
+
       sender.start();
     }
   }
-  
-  HashMap<Location, ArrayList<ValueInfo>> getResults(String className, String varName, int lineNumber) {
+
+  HashMap<Location, ArrayList<ValueInfo>> getResults(
+      String className, String varName, int lineNumber) {
     HashMap<Location, ArrayList<ValueInfo>> results = new HashMap<>();
-    Thread receiver = new Thread(() -> {
-      ByteBuffer outBuf = ByteBuffer.allocate(1024);
-      outBuf.clear();
-      outBuf.flip();
-      int noOfBP = 0;
-      if (lineNumber == 0) {
-        try {
-          String noOfBPStr = readLine(client, outBuf);
-          noOfBP = Integer.parseInt(noOfBPStr);
-        } catch (NumberFormatException e) {
-          //System.out.println("NAN");
-          return;
-        }
-        if (noOfBP < 1) {
-          return;
-        }
-      } else {
-        noOfBP = 1;
-      }
-      for (int i = 0; i < noOfBP; i++) {
-        String locStr = readLine(client, outBuf);
-        System.out.println(locStr);
-        Optional<Location> loc = parser.parseLocation(locStr);
-        if (loc.isEmpty()) {
-          //System.out.println("e");
-          continue;
-        }
-        try {
-          ArrayList<ValueInfo> values = new ArrayList<>();
-          String noOfValueStr = readLine(client, outBuf);
-          //System.out.println(noOfValueStr);
-          int noOfValue = Integer.parseInt(noOfValueStr);
-          if (noOfValue < 1) {
-            continue;
-          }
-          for (int j = 0; j < noOfValue; j++) {
-            String valueStr = readLine(client, outBuf);
-            //System.out.println(valueStr);
-            Optional<ValueInfo> value = parser.parseValue(valueStr);
-            if (value.isPresent()) {
-              values.add(value.get());
-            }
-          }
-          results.put(loc.get(), values);
-          
-        } catch (NumberFormatException e) {
-          //System.out.println("noOfValueNAN");
-          continue;
-        }
-      }
-    });
+    Thread receiver =
+        new Thread(
+            () -> {
+              ByteBuffer outBuf = ByteBuffer.allocate(1024);
+              outBuf.clear();
+              outBuf.flip();
+              int noOfBP = 0;
+              if (lineNumber == 0) {
+                try {
+                  String noOfBPStr = readLine(client, outBuf);
+                  noOfBP = Integer.parseInt(noOfBPStr);
+                } catch (NumberFormatException e) {
+                  // System.out.println("NAN");
+                  return;
+                }
+                if (noOfBP < 1) {
+                  return;
+                }
+              } else {
+                noOfBP = 1;
+              }
+              for (int i = 0; i < noOfBP; i++) {
+                String locStr = readLine(client, outBuf);
+                System.out.println(locStr);
+                Optional<Location> loc = parser.parseLocation(locStr);
+                if (loc.isEmpty()) {
+                  // System.out.println("e");
+                  continue;
+                }
+                try {
+                  ArrayList<ValueInfo> values = new ArrayList<>();
+                  String noOfValueStr = readLine(client, outBuf);
+                  // System.out.println(noOfValueStr);
+                  int noOfValue = Integer.parseInt(noOfValueStr);
+                  if (noOfValue < 1) {
+                    continue;
+                  }
+                  for (int j = 0; j < noOfValue; j++) {
+                    String valueStr = readLine(client, outBuf);
+                    // System.out.println(valueStr);
+                    Optional<ValueInfo> value = parser.parseValue(valueStr);
+                    if (value.isPresent()) {
+                      values.add(value.get());
+                    }
+                  }
+                  results.put(loc.get(), values);
+
+                } catch (NumberFormatException e) {
+                  // System.out.println("noOfValueNAN");
+                  continue;
+                }
+              }
+            });
     receiver.start();
+
+    // Generate Print command.
     String cmd = "Print";
     if (lineNumber > 0) {
       cmd = "Print " + className + ".java " + varName + " " + lineNumber;
     }
     sendCommand(cmd);
+
+    // Wait until the receiver get results.
     try {
       receiver.join();
     } catch (InterruptedException e) {
@@ -140,11 +147,11 @@ class Connector {
     }
     return results;
   }
-  
+
   String readLine(AsynchronousSocketChannel client, ByteBuffer b) {
     StringBuilder buf = new StringBuilder(1024);
-    while(true) {
-      if (! b.hasRemaining()) {
+    while (true) {
+      if (!b.hasRemaining()) {
         try {
           b.clear();
           client.read(b).get();
@@ -168,11 +175,11 @@ class Connector {
       }
     }
   }
-  
+
   void close() {
     try {
       client.close();
-      //System.out.println("close");
+      // System.out.println("close");
     } catch (IOException e) {
       e.printStackTrace();
     }

@@ -12,7 +12,7 @@ public class ProbePointTest {
     ArrayList<String> vars = new ArrayList<>();
     vars.add("var1");
     dbg.run(1000);
-    BreakPoint p = dbg.watch("LoopN", 22, vars).get();
+    Point p = dbg.watch("LoopN", 22, vars).get();
     dbg.sleep(1000);
     var results = p.getResults();
     var dr = results.get("var1");
@@ -27,13 +27,14 @@ public class ProbePointTest {
 
   @Test
   void basicTest() {
-    Debugger dbg = new Debugger("demo.LoopN", "-cp bin", "./src", true);
+    Debugger dbg = new Debugger("demo.LoopN", "-cp bin", "./src", "bin", true);
     testProbeDebugger(dbg);
   }
 
+  // remote vm with probej required
   @Test
   void probePointTest() {
-    Debugger dbg = new Debugger(39876, true);
+    Debugger dbg = new Debugger("localhost", 39876, "./src", "bin", true);
     testProbeDebugger(dbg);
   }
 }
