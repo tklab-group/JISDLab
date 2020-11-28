@@ -93,7 +93,7 @@ public class Debugger {
    * @param srcDir source directory
    */
   public Debugger(String main, String options, String srcDir, boolean usesProbeJ) {
-    init(main, options, "localhost", 39876, srcDir, "", false, usesProbeJ);
+    init(main, options, "localhost", 39876, srcDir, ".", false, usesProbeJ);
   }
 
   public Debugger(String main, String options, String srcDir, String binDir, boolean usesProbeJ) {
@@ -117,7 +117,7 @@ public class Debugger {
    * @param port attaching port
    */
   public Debugger(String host, int port, String srcDir, boolean usesProbeJ) {
-    init("", "", host, port, srcDir, "", true, usesProbeJ);
+    init("", "", host, port, srcDir, ".", true, usesProbeJ);
   }
 
   public Debugger(String host, int port, String srcDir, String binDir, boolean usesProbeJ) {

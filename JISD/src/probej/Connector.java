@@ -131,11 +131,15 @@ class Connector {
               }
             });
     receiver.start();
+
+    // Generate Print command.
     String cmd = "Print";
     if (lineNumber > 0) {
       cmd = "Print " + className + ".java " + varName + " " + lineNumber;
     }
     sendCommand(cmd);
+
+    // Wait until the receiver get results.
     try {
       receiver.join();
     } catch (InterruptedException e) {

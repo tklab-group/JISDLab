@@ -11,9 +11,9 @@ import java.util.Optional;
 import static util.Json.readJsonFile;
 
 public class StaticFile {
-  static final String rootDir = "data" + File.separator;
-  static final String methodDataFilePath = rootDir + "class_data.json";
-  static final String programStructureFilePath = rootDir + "program_structure.json";
+  @Setter static String rootDir = "data" + File.separator;
+  @Setter static String methodDataFilePath = rootDir + "class_data.json";
+  @Setter static String programStructureFilePath = rootDir + "program_structure.json";
   @Getter @Setter static String srcDir = ".", binDir = ".";
 
   @Getter static Optional<JSONObject> cd = Optional.empty();
@@ -30,8 +30,15 @@ public class StaticFile {
     if (!binDir.isBlank()) {
       setBinDir(binDir);
     }
+    setStaticFilePath(binDir);
     createStaticData();
     readStaticData();
+  }
+
+  void setStaticFilePath(String binDir) {
+    setRootDir(binDir + File.separator + "data" + File.separator);
+    setMethodDataFilePath(rootDir + "class_data.json");
+    setProgramStructureFilePath(rootDir + "program_structure.json");
   }
 
   public void createStaticData() {
