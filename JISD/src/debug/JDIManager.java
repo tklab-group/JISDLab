@@ -58,11 +58,11 @@ class JDIManager extends VMManager {
   }
 
   @Override
-  void prepareStart(BreakPointManager bpm) {
+  void prepareStart(PointManager bpm) {
     start =
         se -> {
           /* procedure when vm starts. */
-          bpm.requestSetBreakPoints(this);
+          bpm.requestSetPoints(this);
         };
     bpm.init();
   }

@@ -1,28 +1,18 @@
 package debug;
 
-import org.jdiscript.JDIScript;
-import org.jdiscript.handlers.OnVMStart;
-
-import com.sun.jdi.VMDisconnectedException;
-
 /**
  * Target JavaVM manager
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 abstract class VMManager implements Runnable {
 
-  /**
-   * Run the debugger.
-   */
+  /** Run the debugger. */
   @Override
-  abstract public void run();
+  public abstract void run();
 
-  /**
-   * Shut down the debugger.
-   */
+  /** Shut down the debugger. */
   abstract void shutdown();
-  
-  abstract void prepareStart(BreakPointManager bpm);
+
+  abstract void prepareStart(PointManager bpm);
 }

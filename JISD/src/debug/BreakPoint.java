@@ -4,40 +4,20 @@ package debug;
 import com.sun.jdi.*;
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnBreakpoint;
-import org.jdiscript.requests.ChainingBreakpointRequest;
 import util.Name;
 import util.Stream;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Breakpoint infomation
  *
  * @author sugiyama
  */
-public class BreakPoint {
-  /** class name */
-  String className;
-  /** line number */
-  int lineNumber;
-  /** method name */
-  String methodName;
-  /** varNames and debugresult */
-  HashMap<String, DebugResult> drs = new HashMap<>();
-  /** varNames and maxRecordNoOfValue */
-  HashMap<String, Integer> maxRecords = new HashMap<>();
-  /** varNames and maxNoOfExpand */
-  HashMap<String, Integer> maxExpands = new HashMap<>();
-
-  Optional<ChainingBreakpointRequest> bpr = Optional.empty();
-  boolean isEnable = true;
-  /** variable names */
-  ArrayList<String> varNames;
-  /** break or not at points */
-  boolean isBreak;
-  /** already request to set Breakpoint? */
-  boolean isRequested = false;
-
+public class BreakPoint extends Point {
   /**
    * Constructor
    *
@@ -97,98 +77,14 @@ public class BreakPoint {
       String methodName,
       ArrayList<String> varNames,
       boolean isBreak) {
-    this.className = className;
-    this.lineNumber = lineNumber;
-    this.methodName = methodName;
-    varNames.remove("");
-    this.varNames = varNames;
-    this.isBreak = isBreak;
+    super(className, lineNumber, methodName, varNames, isBreak);
   }
 
+  @Override
   void reset() {
     clearDebugResults();
     bpr = Optional.empty();
-    setRequestState(false);
-  }
-
-  /**
-   * Get a class name.
-   *
-   * @return class name
-   */
-  public String getClassName() {
-    return className;
-  }
-
-  /**
-   * Get a line number
-   *
-   * @return line number
-   */
-  public int getLineNumber() {
-    return lineNumber;
-  }
-
-  /**
-   * Get a method name
-   *
-   * @return method name
-   */
-  public String getMethodName() {
-    return methodName;
-  }
-
-  /**
-   * Get variable names
-   *
-   * @return variable names
-   */
-  public ArrayList<String> getVarNames() {
-    return varNames;
-  }
-
-  /**
-   * Get whether the debugger breaks or not at points
-   *
-   * @return break or not at points
-   */
-  public boolean getIsBreak() {
-    return isBreak;
-  }
-
-  /**
-   * Get DebugResult a variable name matches.
-   *
-   * @param varName variable name
-   * @return debug result
-   */
-  public Optional<DebugResult> getResult(String varName) {
-    Optional<DebugResult> result = Optional.ofNullable(drs.get(varName));
-    return result;
-  }
-
-  /**
-   * Get DebugResults.
-   *
-   * @return debug result
-   */
-  public HashMap<String, DebugResult> getResults() {
-    return drs;
-  }
-
-  /**
-   * Set DebugResult
-   *
-   * @param dr debugresult
-   */
-  public void addDebugResult(String varName, DebugResult dr) {
-    drs.put(varName, dr);
-  }
-
-  /** Clear DebugResult */
-  public void clearDebugResults() {
-    drs = new HashMap<>();
-    DebugResult.resetNumber();
+    setRequested(false);
   }
 
   void addValue(
@@ -210,12 +106,9 @@ public class BreakPoint {
       addDebugResult(varName, dr);
     }
   }
-  /**
-   * Request VM to set a breakpoint
-   *
-   * @param bp breakpoint
-   */
-  void requestSetBreakPoint(VMManager vmMgr, BreakPointManager bpm) {
+  /** Request VM to set a breakpoint */
+  @Override
+  void requestSetPoint(VMManager vmMgr, PointManager bpm) {
     if (!(vmMgr instanceof JDIManager)) {
       /* do nothing */
       return;
@@ -224,8 +117,8 @@ public class BreakPoint {
     String className = getClassName();
     List<ReferenceType> rts = j.vm().classesByName(className);
     if (rts.size() < 1) {
-      if (!getRequestState()) {
-        deferSetBreakPoint(vmMgr, bpm);
+      if (!isRequested()) {
+        deferSetPoint(vmMgr, bpm);
       }
       return;
     }
@@ -270,7 +163,7 @@ public class BreakPoint {
               addValue(bpClassName, bpLineNumber, varName, entry);
             }
             // if isBreak is true
-            if (getIsBreak()) {
+            if (isBreak()) {
               bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
               if (isNotSuspended) {
                 ThreadReference currentTRef = bpm.getCurrentTRef();
@@ -293,7 +186,7 @@ public class BreakPoint {
                     if (bpr.isPresent() && isEnable) {
                       bpr.get().enable();
                     }
-                    setRequestState(true);
+                    setRequested(true);
                   }
                   ;
                 } catch (AbsentInformationException e) {
@@ -309,7 +202,7 @@ public class BreakPoint {
                   if (bpr.isPresent() && isEnable) {
                     bpr.get().enable();
                   }
-                  setRequestState(true);
+                  setRequested(true);
                 });
       } catch (AbsentInformationException e) {
         e.printStackTrace();
@@ -317,17 +210,13 @@ public class BreakPoint {
     }
   }
 
-  /**
-   * Defer to set breakpoint until the class loaded.
-   *
-   * @param bp breakpoint
-   */
-  void deferSetBreakPoint(VMManager vmMgr, BreakPointManager bpm) {
-    if (getRequestState()) {
+  /** Defer to set breakpoint until the class loaded. */
+  void deferSetPoint(VMManager vmMgr, PointManager bpm) {
+    if (isRequested()) {
       DebuggerInfo.printError("Cannot set breakpoint. Skipped.");
       return;
     }
-    setRequestState(true);
+    setRequested(true);
     if (!(vmMgr instanceof JDIManager)) {
       /* do nothing */
       return;
@@ -337,45 +226,14 @@ public class BreakPoint {
     j.onClassPrep(
         p -> {
           if (p.referenceType().name().equals(className)) {
-            requestSetBreakPoint(vmMgr, bpm);
+            requestSetPoint(vmMgr, bpm);
           }
         });
     DebuggerInfo.print(
         "Deferring breakpoint in " + className + ". It will be set after the class is loaded.");
   }
 
-  /**
-   * Set request state
-   *
-   * @param state already request to set breakpoint?
-   */
-  void setRequestState(boolean state) {
-    isRequested = state;
-  }
-
-  public void enable() {
-    isEnable = true;
-    if (bpr.isPresent()) {
-      bpr.get().enable();
-    }
-  }
-
-  public void disable() {
-    isEnable = false;
-    if (bpr.isPresent()) {
-      bpr.get().disable();
-    }
-  }
-
-  /**
-   * Get request state
-   *
-   * @return request state
-   */
-  boolean getRequestState() {
-    return isRequested;
-  }
-
+  @Override
   public void setMaxRecordNoOfValue(String varName, int number) {
     if (number <= 0) {
       DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
@@ -388,6 +246,7 @@ public class BreakPoint {
     }
   }
 
+  @Override
   public void setMaxNoOfExpand(String varName, int number) {
     if (number < 0) {
       DebuggerInfo.printError(
@@ -398,48 +257,5 @@ public class BreakPoint {
     if (dr.isPresent()) {
       dr.get().setMaxNoOfExpand(number);
     }
-  }
-
-  @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((className == null) ? 0 : className.hashCode());
-    result = prime * result + lineNumber;
-    result = prime * result + ((methodName == null) ? 0 : methodName.hashCode());
-    result = prime * result + ((this instanceof ProbePoint) ? 1231 : 1237);
-    return result;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    BreakPoint other = (BreakPoint) obj;
-    if (className == null) {
-      if (other.className != null) {
-        return false;
-      }
-    } else if (!className.equals(other.className)) {
-      return false;
-    }
-    if (lineNumber != other.lineNumber) {
-      return false;
-    }
-    if (methodName == null) {
-      if (other.methodName != null) {
-        return false;
-      }
-    } else if (!methodName.equals(other.methodName)) {
-      return false;
-    }
-    return true;
   }
 }

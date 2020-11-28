@@ -12,20 +12,20 @@ import java.io.File;
 import java.util.*;
 
 /**
- * Breakpoint manager
+ * point manager
  *
  * @author sugiyama
  */
-class BreakPointManager {
-  /** breakpoints */
-  private final Set<BreakPoint> bps = new HashSet<>();
+class PointManager {
+  /** points */
+  private final Set<Point> ps = new HashSet<>();
   /** Current Thread Reference */
   ThreadReference currentTRef;
   /** is processing now? */
   volatile boolean isProcessing;
 
   /** */
-  BreakPointManager() {
+  PointManager() {
     init();
   }
 
@@ -160,24 +160,24 @@ class BreakPointManager {
     requestStep(vm, StepRequest.STEP_OUT);
   }
 
-  /** Request VM to set a breakpoint */
-  void requestSetBreakPoints(VMManager vm) {
-    bps.forEach(
+  /** Request VM to set a point */
+  void requestSetPoints(VMManager vm) {
+    ps.forEach(
         bp -> {
-          bp.requestSetBreakPoint(vm, this);
+          bp.requestSetPoint(vm, this);
         });
   }
 
   /**
-   * Set breakpoint by a line number.
+   * Set point by a line number.
    *
    * @param className class name
    * @param lineNumber line number
    * @param varNames variable names
    * @param isBreak break or not at points
-   * @return breakpoint
+   * @return point
    */
-  public Optional<BreakPoint> setBreakPoint(
+  public Optional<Point> setPoint(
       VMManager vm,
       String className,
       int lineNumber,
@@ -185,35 +185,35 @@ class BreakPointManager {
       boolean isBreak,
       boolean isProbe) {
     if (className.length() == 0) {
-      DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
+      DebuggerInfo.printError("Point is not set. A class name must be one or more letters.");
       return Optional.empty();
     }
     if (lineNumber <= 0) {
       DebuggerInfo.printError(
-          "Breakpoint is not set. A line number must be a non-negative integer(> 0).");
+          "Point is not set. A line number must be a non-negative integer(> 0).");
       return Optional.empty();
     }
-    BreakPoint bp;
+    Point bp;
     if (isProbe) {
       bp = new ProbePoint(className, lineNumber, varNames, isBreak);
     } else {
       bp = new BreakPoint(className, lineNumber, varNames, isBreak);
     }
-    bp.requestSetBreakPoint(vm, this);
-    bps.add(bp);
+    bp.requestSetPoint(vm, this);
+    ps.add(bp);
     return Optional.of(bp);
   }
 
   /**
-   * Set breakpoint by a method name.
+   * Set point by a method name.
    *
    * @param className class name
    * @param methodName method name
    * @param varNames value name
    * @param isBreak break or not at points
-   * @return breakpoint
+   * @return point
    */
-  public Optional<BreakPoint> setBreakPoint(
+  public Optional<Point> setPoint(
       VMManager vm,
       String className,
       String methodName,
@@ -221,55 +221,69 @@ class BreakPointManager {
       boolean isBreak,
       boolean isProbe) {
     if (className.length() == 0) {
-      DebuggerInfo.printError("Breakpoint is not set. A class name must be one or more letters.");
+      DebuggerInfo.printError("Point is not set. A class name must be one or more letters.");
       return Optional.empty();
     }
     if (methodName.length() == 0) {
-      DebuggerInfo.printError("Breakpoint is not set. A method name must be one or more letters.");
+      DebuggerInfo.printError("Point is not set. A method name must be one or more letters.");
       return Optional.empty();
     }
-    BreakPoint bp;
+    Point bp;
     if (isProbe) {
       bp = new ProbePoint(className, methodName, varNames, isBreak);
     } else {
       bp = new BreakPoint(className, methodName, varNames, isBreak);
     }
-    bp.requestSetBreakPoint(vm, this);
-    bps.add(bp);
+    bp.requestSetPoint(vm, this);
+    ps.add(bp);
     return Optional.of(bp);
   }
 
   /**
-   * Remove breakpoint.
+   * Remove point.
    *
    * @param className A target class file name
    * @param lineNumber A line number in a target java file
    */
-  public void removeBreakPoint(String className, int lineNumber) {
-    BreakPoint bp = new BreakPoint(className, lineNumber);
-    bp.disable();
-    bps.remove(bp);
+  public void removePoint(String className, int lineNumber) {
+    ArrayList<Point> psArray = new ArrayList<>(ps);
+    for (int i = 0; i < psArray.size(); i++) {
+      Point point = psArray.get(i);
+      if (point.getClassName().equals(className)) {
+        if (point.getLineNumber() == lineNumber) {
+          point.disable();
+          ps.remove(point);
+        }
+      }
+    }
   }
 
   /**
-   * Remove breakpoint.
+   * Remove point.
    *
    * @param className A target class file name
    * @param methodName A method name a class has
    */
-  public void removeBreakPoint(String className, String methodName) {
-    BreakPoint bp = new BreakPoint(className, methodName);
-    bp.disable();
-    bps.remove(bp);
+  public void removePoint(String className, String methodName) {
+    ArrayList<Point> psArray = new ArrayList<>(ps);
+    for (int i = 0; i < psArray.size(); i++) {
+      Point point = psArray.get(i);
+      if (point.getClassName().equals(className)) {
+        if (point.getMethodName().equals(methodName)) {
+          point.disable();
+          ps.remove(point);
+        }
+      }
+    }
   }
 
   /**
-   * Get breakpoints
+   * Get points
    *
-   * @return breakpoints
+   * @return points
    */
-  Set<BreakPoint> getBreakPoints() {
-    return bps;
+  Set<Point> getPoints() {
+    return ps;
   }
 
   /**
@@ -356,7 +370,7 @@ class BreakPointManager {
 
   public ArrayList<DebugResult> getResults() {
     ArrayList<DebugResult> drs = new ArrayList<>();
-    bps.forEach(
+    ps.forEach(
         bp -> {
           bp.getResults()
               .forEach(
@@ -374,7 +388,7 @@ class BreakPointManager {
   public ArrayList<DebugResult> getResults(String varName) {
     ArrayList<DebugResult> drs =
         (ArrayList<DebugResult>)
-            bps.stream()
+            ps.stream()
                 .map(bp -> bp.getResult(varName))
                 .filter(res -> res.isPresent())
                 .map(res -> res.get())
