@@ -43,8 +43,13 @@ public class ClassFileVisitor implements FileVisitor<Path> {
 
       // create ClassNode
       classNodes.put(classname, new ClassNode());
-      ClassReader cr = new ClassReader(classname);
-      cr.accept(classNodes.get(classname), 0);
+      try {
+        ClassReader cr = new ClassReader(classname);
+        cr.accept(classNodes.get(classname), 0);
+      } catch (IOException e) {
+        /* Todo: if class is not loaded...*/
+        // System.err.println("Class not found");
+      }
     }
 
     return FileVisitResult.CONTINUE;

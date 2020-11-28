@@ -77,6 +77,9 @@ public class LysMain {
 
       String packagename, onlyclassname;
       String classname = cn.name;
+      if (classname == null) {
+        classname = "Not Found";
+      }
       int pos = classname.lastIndexOf("/");
       if (pos == -1) {
         packagename = "default";
@@ -328,6 +331,7 @@ public class LysMain {
       // put pobj_class_xx to corresponding pobj_package_xx
       String packagename = packagenames.get(cn.name);
       String onlyclassname = onlyclassnames.get(cn.name);
+
       map_pobj_package_ps.get(packagename).put(onlyclassname, pobj_class_ps);
       map_pobj_package_md.get(packagename).put(onlyclassname, pobj_class_md);
       map_pobj_package_df
