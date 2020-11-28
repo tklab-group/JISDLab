@@ -11,9 +11,10 @@ import java.util.Optional;
 import static util.Json.readJsonFile;
 
 public class StaticFile {
-  @Setter static String rootDir = "data" + File.separator;
-  @Setter static String methodDataFilePath = rootDir + "class_data.json";
-  @Setter static String programStructureFilePath = rootDir + "program_structure.json";
+  static final String rootDirName = ".jisd_static_data";
+  @Setter static String rootDirPath = rootDirName + File.separator;
+  @Setter static String classDataFilePath = rootDirPath + "class_data.json";
+  @Setter static String programStructureFilePath = rootDirPath + "program_structure.json";
   @Getter @Setter static String srcDir = ".", binDir = ".";
 
   @Getter static Optional<JSONObject> cd = Optional.empty();
@@ -36,14 +37,14 @@ public class StaticFile {
   }
 
   void setStaticFilePath(String binDir) {
-    setRootDir(binDir + File.separator + "data" + File.separator);
-    setMethodDataFilePath(rootDir + "class_data.json");
-    setProgramStructureFilePath(rootDir + "program_structure.json");
+    setRootDirPath(binDir + File.separator + rootDirName + File.separator);
+    setClassDataFilePath(rootDirPath + "class_data.json");
+    setProgramStructureFilePath(rootDirPath + "program_structure.json");
   }
 
   public void createStaticData() {
     String[] args = new String[2];
-    args[0] = binDir + "/data/";
+    args[0] = rootDirPath;
     args[1] = binDir;
     LysMain.main(args);
   }
@@ -54,7 +55,7 @@ public class StaticFile {
   }
 
   void readCd() {
-    cd = readJsonFile(methodDataFilePath);
+    cd = readJsonFile(classDataFilePath);
   }
 
   void readPs() {
