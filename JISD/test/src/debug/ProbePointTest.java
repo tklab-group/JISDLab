@@ -27,14 +27,14 @@ public class ProbePointTest {
 
   @Test
   void basicTest() {
-    Debugger dbg = new Debugger("demo.LoopN", "-cp bin", "./src", "bin", true);
+    Debugger dbg = new Debugger("demo.LoopN", "-cp bin", true);
     testProbeDebugger(dbg);
   }
 
   // remote vm with probej required
   @Test
   void probePointTest() {
-    Debugger dbg = new Debugger("localhost", 39876, "./src", "bin", true);
+    Debugger dbg = new Debugger("localhost", 39876, true);
     testProbeDebugger(dbg);
   }
 }

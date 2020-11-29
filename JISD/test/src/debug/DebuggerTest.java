@@ -34,7 +34,7 @@ class DebuggerTest {
   }
 
   Debugger makeDebugger() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin", "src", "bin");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     bps.forEach(
         item -> {
           dbg.watch(item, false);

@@ -8,7 +8,8 @@ import static util.Print.out;
 public class StaticTest {
   @Test
   public void basicTest() {
-    Class s = new Class("src", "demo.HelloWorld");
+    StaticFile sf = new StaticFile("src", "bin");
+    Class s = new Class(sf, "demo.HelloWorld");
     Assertions.assertEquals(s.path(), "src\\demo\\HelloWorld.java");
     out(s.path());
     out(s.absPath());
@@ -17,16 +18,16 @@ public class StaticTest {
 
   @Test
   public void jsonFileReadTest() {
-    StaticFile s = new StaticFile("src", "bin/");
-    Assertions.assertNotNull(s.getCd());
-    Assertions.assertNotNull(s.getPs());
-    out(StaticFile.getPs().toString());
+    StaticFile sf = new StaticFile("src", "bin");
+    Assertions.assertNotNull(sf.getCd());
+    Assertions.assertNotNull(sf.getPs());
+    out(sf.getPs().toString());
   }
 
   @Test
   public void getStaticTest() {
-    StaticFile s = new StaticFile("src", "bin/");
-    Class c = new Class("demo.HelloWorld");
+    StaticFile sf = new StaticFile("src", "bin");
+    Class c = new Class(sf, "demo.HelloWorld");
     out(c.fields());
     out(c.methods());
     var f = c.field("helloTo");

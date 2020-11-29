@@ -1,6 +1,5 @@
 package debug;
 
-import _static.StaticFile;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +15,7 @@ public class Debugger {
   /** Manage breakpoints */
   PointManager pm;
   /** Target class setting items */
-  @Getter @Setter String main, options, srcDir, binDir;
+  @Getter @Setter String main, options;
   /** JDI thread */
   Thread vmThread;
   /** VM manager */
@@ -29,23 +28,6 @@ public class Debugger {
   @Getter int port;
   /** */
   @Getter @Setter String host;
-  /** static data * */
-  StaticFile staticFile;
-
-  /**
-   * Constructor
-   *
-   * @param main A target class file name
-   * @param options A target class path setting
-   * @param srcDir source directory
-   */
-  public Debugger(String main, String options, String srcDir) {
-    this(main, options, srcDir, false);
-  }
-
-  public Debugger(String main, String options, String srcDir, String binDir) {
-    this(main, options, srcDir, binDir, false);
-  }
 
   /**
    * Constructor
@@ -57,89 +39,24 @@ public class Debugger {
     this(main, options, false);
   }
 
-  /**
-   * Constructor
-   *
-   * @param srcDir source directory
-   * @param port attaching port
-   */
-  public Debugger(String host, int port, String srcDir) {
-    this(host, port, srcDir, false);
+  public Debugger(String main, String options, boolean usesProbeJ) {
+    init(main, options, "localhost", 39876, false, usesProbeJ);
   }
 
-  /**
-   * Constructor
-   *
-   * @param port attaching port
-   */
   public Debugger(int port) {
     this(port, false);
   }
 
-  /**
-   * Constructor
-   *
-   * @param port attaching port
-   */
   public Debugger(String host, int port) {
     this(host, port, false);
   }
 
-  /**
-   * Constructor
-   *
-   * @param main A target class file name
-   * @param options A target class path setting
-   * @param srcDir source directory
-   */
-  public Debugger(String main, String options, String srcDir, boolean usesProbeJ) {
-    init(main, options, "localhost", 39876, srcDir, ".", false, usesProbeJ);
-  }
-
-  public Debugger(String main, String options, String srcDir, String binDir, boolean usesProbeJ) {
-    init(main, options, "localhost", 39876, srcDir, binDir, false, usesProbeJ);
-  }
-
-  /**
-   * Constructor
-   *
-   * @param main A target class file name
-   * @param options A target class path setting
-   */
-  public Debugger(String main, String options, boolean usesProbeJ) {
-    this(main, options, ".", usesProbeJ);
-  }
-
-  /**
-   * Constructor
-   *
-   * @param srcDir source directory
-   * @param port attaching port
-   */
-  public Debugger(String host, int port, String srcDir, boolean usesProbeJ) {
-    init("", "", host, port, srcDir, ".", true, usesProbeJ);
-  }
-
-  public Debugger(String host, int port, String srcDir, String binDir, boolean usesProbeJ) {
-    init("", "", host, port, srcDir, binDir, true, usesProbeJ);
-  }
-
-  /**
-   * Constructor
-   *
-   * @param port attaching port
-   */
   public Debugger(int port, boolean usesProbeJ) {
     this("localhost", port, usesProbeJ);
   }
 
-  /**
-   * Constructor
-   *
-   * @param port attaching port
-   */
   public Debugger(String host, int port, boolean usesProbeJ) {
-    this(host, port, ".", usesProbeJ);
+    init("", "", host, port, true, usesProbeJ);
   }
 
   void init(
@@ -147,21 +64,15 @@ public class Debugger {
       String options,
       String host,
       int port,
-      String srcDir,
-      String binDir,
       boolean isRemoteDebug,
       boolean usesProbeJ) {
     setMain(main);
     setOptions(options);
-    setSrcDir(srcDir);
     setHost(host);
     setPort(port);
     this.usesProbeJ = usesProbeJ;
-    setSrcDir(srcDir);
-    setBinDir(binDir);
     this.isRemoteDebug = isRemoteDebug;
     pm = new PointManager();
-    staticFile = new StaticFile(srcDir, binDir);
     vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
   }
@@ -472,7 +383,7 @@ public class Debugger {
   }
 
   /** Print source code */
-  public void list() {
+  public void list(String srcDir) {
     pm.printSrcAtCurrentLocation("Current location,", srcDir);
   }
 
@@ -586,7 +497,6 @@ public class Debugger {
     clearResults();
     vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
-    staticFile.init(srcDir, binDir);
     run(sleepTime);
   }
   // ********** debugger control ************************************************************//

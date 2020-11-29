@@ -11,14 +11,14 @@ import java.util.Optional;
 import static util.Json.readJsonFile;
 
 public class StaticFile {
-  static final String rootDirName = ".jisd_static_data";
-  @Setter static String rootDirPath = rootDirName + File.separator;
-  @Setter static String classDataFilePath = rootDirPath + "class_data.json";
-  @Setter static String programStructureFilePath = rootDirPath + "program_structure.json";
-  @Getter @Setter static String srcDir = ".", binDir = ".";
+  private static final String rootDirName = ".jisd_static_data";
+  @Setter String rootDirPath = rootDirName + File.separator;
+  @Setter String classDataFilePath = rootDirPath + "class_data.json";
+  @Setter String programStructureFilePath = rootDirPath + "program_structure.json";
+  @Getter @Setter String srcDir = ".", binDir = ".";
 
-  @Getter static Optional<JSONObject> cd = Optional.empty();
-  @Getter static Optional<JSONObject> ps = Optional.empty();
+  @Getter Optional<JSONObject> cd = Optional.empty();
+  @Getter Optional<JSONObject> ps = Optional.empty();
 
   public StaticFile(String srcDir, String binDir) {
     init(srcDir, binDir);
