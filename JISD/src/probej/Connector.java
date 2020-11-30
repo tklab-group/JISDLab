@@ -33,7 +33,7 @@ class Connector {
       client = AsynchronousSocketChannel.open();
       Future<Void> future = client.connect(new InetSocketAddress(host, port));
       future.get();
-      Print.out("Successflly connected to " + host + ":" + port);
+      Print.out("Successfully connected to " + host + ":" + port);
     } catch (IOException e) {
       e.printStackTrace();
     } catch (InterruptedException e) {
@@ -93,7 +93,7 @@ class Connector {
               }
               for (int i = 0; i < noOfBP; i++) {
                 String locStr = readLine(client, outBuf);
-                //System.out.println(locStr);
+                // System.out.println(locStr);
                 Optional<Location> loc = parser.parseLocation(locStr);
                 if (loc.isEmpty()) {
                   // System.out.println("e");
@@ -103,7 +103,9 @@ class Connector {
                   ArrayList<ValueInfo> values = new ArrayList<>();
                   String noOfValueStr = readLine(client, outBuf);
                   // System.out.println(noOfValueStr);
-                  int noOfValue = Integer.parseInt(noOfc
+                  int noOfValue = Integer.parseInt(noOfValueStr);
+                  if (noOfValue < 1) {
+                    continue;
                   }
                   for (int j = 0; j < noOfValue; j++) {
                     String valueStr = readLine(client, outBuf);
