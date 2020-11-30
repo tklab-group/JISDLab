@@ -8,20 +8,20 @@ import util.Stream;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class Class extends Static {
+public class ClassInfo extends StaticInfo {
   private Optional<ArrayList<String>> methods = Optional.empty();
   private Optional<ArrayList<String>> fields = Optional.empty();
 
-  public Class(StaticFile staticFile, String className) {
+  public ClassInfo(StaticFile staticFile, String className) {
     super(staticFile, className, className);
   }
 
-  public Field field(String name) {
-    return new Field(staticFile, className, name);
+  public FieldInfo field(String name) {
+    return new FieldInfo(staticFile, className, name);
   }
 
-  public Method method(String name) {
-    return new Method(staticFile, className, name);
+  public MethodInfo method(String name) {
+    return new MethodInfo(staticFile, className, name);
   }
 
   public ArrayList<String> methods() {

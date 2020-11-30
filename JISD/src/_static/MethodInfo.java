@@ -8,15 +8,15 @@ import util.Stream;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class Method extends Static {
+public class MethodInfo extends StaticInfo {
   private Optional<ArrayList<String>> locals = Optional.empty();
 
-  public Method(StaticFile staticFile, String className, String methodName) {
+  public MethodInfo(StaticFile staticFile, String className, String methodName) {
     super(staticFile, className, methodName);
   }
 
-  public Local local(String localName) {
-    return new Local(staticFile, className, name, localName);
+  public LocalInfo local(String localName) {
+    return new LocalInfo(staticFile, className, name, localName);
   }
 
   public ArrayList<String> locals() {

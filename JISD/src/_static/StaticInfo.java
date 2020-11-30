@@ -8,12 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public abstract class Static {
+public abstract class StaticInfo {
   String className;
   String name;
   StaticFile staticFile;
 
-  public Static(StaticFile staticFile, String className, String name) {
+  public StaticInfo(StaticFile staticFile, String className, String name) {
     this.staticFile = staticFile;
     this.className = className;
     this.name = name;

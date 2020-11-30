@@ -1,9 +1,9 @@
 package _static;
 
-public class Local extends Static {
+public class LocalInfo extends StaticInfo {
   String methodName;
 
-  public Local(StaticFile staticFile, String className, String methodName, String name) {
+  public LocalInfo(StaticFile staticFile, String className, String methodName, String name) {
     super(staticFile, className, name);
     this.methodName = methodName;
   }

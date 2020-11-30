@@ -9,7 +9,7 @@ public class StaticTest {
   @Test
   public void basicTest() {
     StaticFile sf = new StaticFile("src", "bin");
-    Class s = new Class(sf, "demo.HelloWorld");
+    ClassInfo s = new ClassInfo(sf, "demo.HelloWorld");
     Assertions.assertEquals(s.path(), "src\\demo\\HelloWorld.java");
     out(s.path());
     out(s.absPath());
@@ -27,7 +27,7 @@ public class StaticTest {
   @Test
   public void getStaticTest() {
     StaticFile sf = new StaticFile("src", "bin");
-    Class c = new Class(sf, "demo.HelloWorld");
+    ClassInfo c = new ClassInfo(sf, "demo.HelloWorld");
     out(c.fields());
     out(c.methods());
     var f = c.field("helloTo");
