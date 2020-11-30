@@ -1,6 +1,7 @@
 /** */
 package probej;
 
+import debug.Location;
 import debug.value.PrimitiveInfo;
 import debug.value.ValueInfo;
 import util.Name;

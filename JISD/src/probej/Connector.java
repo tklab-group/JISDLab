@@ -1,6 +1,7 @@
 /** */
 package probej;
 
+import debug.Location;
 import debug.value.ValueInfo;
 import util.Print;
 
@@ -8,7 +9,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -31,21 +31,14 @@ class Connector {
   public void openConnection() {
     try {
       client = AsynchronousSocketChannel.open();
-      client.connect(
-          new InetSocketAddress(host, port),
-          null,
-          new CompletionHandler<Void, Void>() {
-            @Override
-            public void completed(Void result, Void attachment) {
-              Print.out("Successflly connected to " + host + ":" + port);
-            }
-
-            @Override
-            public void failed(Throwable exc, Void attachment) {
-              // Error
-            }
-          });
+      Future<Void> future = client.connect(new InetSocketAddress(host, port));
+      future.get();
+      Print.out("Successflly connected to " + host + ":" + port);
     } catch (IOException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
       e.printStackTrace();
     }
   }
@@ -100,7 +93,7 @@ class Connector {
               }
               for (int i = 0; i < noOfBP; i++) {
                 String locStr = readLine(client, outBuf);
-                System.out.println(locStr);
+                //System.out.println(locStr);
                 Optional<Location> loc = parser.parseLocation(locStr);
                 if (loc.isEmpty()) {
                   // System.out.println("e");
@@ -110,9 +103,7 @@ class Connector {
                   ArrayList<ValueInfo> values = new ArrayList<>();
                   String noOfValueStr = readLine(client, outBuf);
                   // System.out.println(noOfValueStr);
-                  int noOfValue = Integer.parseInt(noOfValueStr);
-                  if (noOfValue < 1) {
-                    continue;
+                  int noOfValue = Integer.parseInt(noOfc
                   }
                   for (int j = 0; j < noOfValue; j++) {
                     String valueStr = readLine(client, outBuf);

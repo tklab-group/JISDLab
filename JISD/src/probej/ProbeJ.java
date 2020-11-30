@@ -1,6 +1,7 @@
 /** */
 package probej;
 
+import debug.Location;
 import debug.value.ValueInfo;
 import util.Name;
 
@@ -10,21 +11,15 @@ import java.util.Optional;
 
 /** @author sugiyama */
 public class ProbeJ {
-  String host;
-  int port;
   Connector connector;
   Optional<VirtualMachine> vm = Optional.empty();
   Optional<Thread> vmThread = Optional.empty();
 
   public ProbeJ(String host, int port) {
-    this.host = host;
-    this.port = port;
     connector = new Connector(host, port);
   }
 
   public ProbeJ(String host, int port, VirtualMachine vm) {
-    this.host = host;
-    this.port = port;
     connector = new Connector(host, port);
     this.vm = Optional.ofNullable(vm);
   }

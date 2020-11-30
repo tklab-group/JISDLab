@@ -58,7 +58,7 @@ class PointManager {
     StringBuilder sb = new StringBuilder();
     int i = 0;
     for (StackFrame f : t.frames()) {
-      Location loc = f.location();
+      com.sun.jdi.Location loc = f.location();
       sb.append("[" + i + "] ")
           .append(loc.declaringType().name())
           .append(".")
@@ -310,7 +310,7 @@ class PointManager {
       return;
     }
     try {
-      Location currentLocation = currentTRef.frame(0).location();
+      com.sun.jdi.Location currentLocation = currentTRef.frame(0).location();
       int lineNumber = currentLocation.lineNumber();
       String srcRelPath = currentLocation.sourcePath();
       String className = Name.toClassNameFromSourcePath(srcRelPath);

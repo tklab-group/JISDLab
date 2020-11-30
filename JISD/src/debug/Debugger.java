@@ -43,6 +43,14 @@ public class Debugger {
     init(main, options, "localhost", 39876, false, usesProbeJ);
   }
 
+  public Debugger(String main, String options, String host, boolean usesProbeJ) {
+    init(main, options, host, 39876, false, usesProbeJ);
+  }
+
+  public Debugger(String main, String options, String host, int port, boolean usesProbeJ) {
+    init(main, options, host, port, false, usesProbeJ);
+  }
+
   public Debugger(int port) {
     this(port, false);
   }

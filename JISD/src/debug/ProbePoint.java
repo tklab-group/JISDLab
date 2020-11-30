@@ -2,7 +2,6 @@
 package debug;
 
 import debug.value.ValueInfo;
-import probej.Location;
 import probej.ProbeJ;
 
 import java.util.ArrayList;

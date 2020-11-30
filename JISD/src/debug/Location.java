@@ -1,44 +1,32 @@
-/**
- * 
- */
-package probej;
+/** */
+package debug;
 
-/**
- * @author sugiyama
- *
- */
+/** @author sugiyama */
 public class Location {
   String className;
   String methodName;
   int lineNumber;
   String varName;
-  Location(String className, String methodName, int lineNumber, String varName) {
+
+  public Location(String className, String methodName, int lineNumber, String varName) {
     this.className = className;
     this.methodName = methodName;
     this.lineNumber = lineNumber;
     this.varName = varName;
   }
-  /**
-   * @return the className
-   */
+  /** @return the className */
   public String getClassName() {
     return className;
   }
-  /**
-   * @return the methodName
-   */
+  /** @return the methodName */
   public String getMethodName() {
     return methodName;
   }
-  /**
-   * @return the lineNumber
-   */
+  /** @return the lineNumber */
   public int getLineNumber() {
     return lineNumber;
   }
-  /**
-   * @return the varName
-   */
+  /** @return the varName */
   public String getVarName() {
     return varName;
   }
