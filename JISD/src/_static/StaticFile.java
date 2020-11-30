@@ -40,14 +40,14 @@ public class StaticFile {
     setProgramStructureFilePath(rootDirPath + "program_structure.json");
   }
 
-  public static void createStaticData() {
+  static void createStaticData() {
     String[] args = new String[2];
     args[0] = rootDirPath;
     args[1] = binDir;
     LysMain.main(args);
   }
 
-  public static void readStaticData() {
+  static void readStaticData() {
     readCd();
     readPs();
   }
