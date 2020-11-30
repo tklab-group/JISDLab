@@ -8,3 +8,5 @@ sample/demo/HelloWorld2.class
 *.cld
 JISD/.idea/uiDesigner.xml
 */.jisd_static_data/*
+docs/
+out/
