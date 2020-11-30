@@ -11,19 +11,19 @@ import java.util.Optional;
 public class MethodInfo extends StaticInfo {
   private Optional<ArrayList<String>> locals = Optional.empty();
 
-  public MethodInfo(StaticFile staticFile, String className, String methodName) {
-    super(staticFile, className, methodName);
+  public MethodInfo(String className, String methodName) {
+    super(className, methodName);
   }
 
   public LocalInfo local(String localName) {
-    return new LocalInfo(staticFile, className, name, localName);
+    return new LocalInfo(className, name, localName);
   }
 
   public ArrayList<String> locals() {
     if (locals.isPresent()) {
       return locals.get();
     }
-    var ps = staticFile.getPs();
+    var ps = StaticFile.getPs();
     var packageAndClassName = Name.splitClassName(className);
     if (ps.isEmpty()) {
       return new ArrayList<>();

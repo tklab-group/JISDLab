@@ -3,13 +3,14 @@ package _static;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static _static.StaticFile.*;
 import static util.Print.out;
 
 public class StaticTest {
   @Test
   public void basicTest() {
-    StaticFile sf = new StaticFile("src", "bin");
-    ClassInfo s = new ClassInfo(sf, "demo.HelloWorld");
+    init("src", "bin");
+    ClassInfo s = new ClassInfo("demo.HelloWorld");
     Assertions.assertEquals(s.path(), "src\\demo\\HelloWorld.java");
     out(s.path());
     out(s.absPath());
@@ -18,16 +19,16 @@ public class StaticTest {
 
   @Test
   public void jsonFileReadTest() {
-    StaticFile sf = new StaticFile("src", "bin");
-    Assertions.assertNotNull(sf.getCd());
-    Assertions.assertNotNull(sf.getPs());
-    out(sf.getPs().toString());
+    init("src", "bin");
+    Assertions.assertNotNull(getCd());
+    Assertions.assertNotNull(getPs());
+    out(getPs().toString());
   }
 
   @Test
   public void getStaticTest() {
-    StaticFile sf = new StaticFile("src", "bin");
-    ClassInfo c = new ClassInfo(sf, "demo.HelloWorld");
+    init("src", "bin");
+    ClassInfo c = new ClassInfo("demo.HelloWorld");
     out(c.fields());
     out(c.methods());
     var f = c.field("helloTo");
