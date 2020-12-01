@@ -1,6 +1,7 @@
 /** */
 package probej;
 
+import debug.Debugger;
 import debug.Location;
 import debug.value.ValueInfo;
 import util.Name;
@@ -29,6 +30,8 @@ public class ProbeJ {
       Thread tmp = new Thread(vm.get());
       tmp.start();
       vmThread = Optional.of(tmp);
+      Debugger.sleep(1000);
+      System.out.println("VM with ProbeJ started.");
     }
   }
 
