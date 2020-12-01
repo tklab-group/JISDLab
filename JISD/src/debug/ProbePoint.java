@@ -38,7 +38,9 @@ public class ProbePoint extends Point {
 
   @Override
   void reset() {
-    /* Todo: Implementation */
+    clearDebugResults();
+    p = Optional.empty();
+    setRequested(false);
   }
 
   @Override
@@ -48,7 +50,15 @@ public class ProbePoint extends Point {
       return;
     }
     p = Optional.of(((ProbeJManager) vmMgr).getProbeJ());
+    requestSetPoint(p);
+  }
+
+  void requestSetPoint(Optional<ProbeJ> p) {
+    if (p.isEmpty()) {
+      return;
+    }
     if (varNames.isEmpty()) {
+      // Todo: *
       return;
     }
     varNames.forEach(
@@ -56,6 +66,33 @@ public class ProbePoint extends Point {
           p.get().requestSetProbePoint(className, varName, lineNumber);
         });
     setRequested(true);
+  }
+
+  @Override
+  public void remove(String varName) {
+    if (p.isEmpty()) {
+      return;
+    }
+    p.get().requestRemoveProbePoint(className, varName, lineNumber);
+    removeVarName(varName);
+  }
+
+  @Override
+  public void enable() {
+    isEnable = true;
+    varNames.forEach(
+        varName -> {
+          requestSetPoint(p);
+        });
+  }
+
+  @Override
+  public void disable() {
+    isEnable = false;
+    varNames.forEach(
+        varName -> {
+          remove(varName);
+        });
   }
 
   @Override

@@ -77,4 +77,15 @@ public class ProbeJ {
     vm = Optional.empty();
     vmThread = Optional.empty();
   }
+
+  public void requestRemoveProbePoint(String className, String varName, int lineNumber) {
+    String cmd =
+        "Clear "
+            + Name.splitClassName(className).get("class")
+            + ".java "
+            + varName
+            + " "
+            + lineNumber;
+    connector.sendCommand(cmd);
+  }
 }

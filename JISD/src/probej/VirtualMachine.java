@@ -38,9 +38,7 @@ public class VirtualMachine implements Runnable {
                           + options
                           + " "
                           + main));
-      p.get().waitFor();
-      shutdown();
-    } catch (IOException | InterruptedException e) {
+    } catch (IOException e) {
       e.printStackTrace();
       shutdown();
     }

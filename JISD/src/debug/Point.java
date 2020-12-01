@@ -2,7 +2,6 @@ package debug;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.jdiscript.requests.ChainingBreakpointRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +21,6 @@ public abstract class Point {
   /** varNames and maxNoOfExpand */
   HashMap<String, Integer> maxExpands = new HashMap<>();
 
-  Optional<ChainingBreakpointRequest> bpr = Optional.empty();
   boolean isEnable = true;
   /** variable names */
   @Getter ArrayList<String> varNames;
@@ -109,19 +107,9 @@ public abstract class Point {
   /** Request VM to set a breakpoint */
   abstract void requestSetPoint(VMManager vmMgr, PointManager bpm);
 
-  public void enable() {
-    isEnable = true;
-    if (bpr.isPresent()) {
-      bpr.get().enable();
-    }
-  }
+  public abstract void enable();
 
-  public void disable() {
-    isEnable = false;
-    if (bpr.isPresent()) {
-      bpr.get().disable();
-    }
-  }
+  public abstract void disable();
 
   public void clear() {
     disable();
@@ -149,6 +137,15 @@ public abstract class Point {
     if (dr.isPresent()) {
       dr.get().setMaxNoOfExpand(number);
     }
+  }
+
+  public abstract void remove(String varName);
+
+  void removeVarName(String varName) {
+    drs.remove(varName);
+    maxExpands.remove(varName);
+    maxRecords.remove(varName);
+    varNames.remove(varName);
   }
 
   @Override
