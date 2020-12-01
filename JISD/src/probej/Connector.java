@@ -3,7 +3,6 @@ package probej;
 
 import debug.Location;
 import debug.value.ValueInfo;
-import util.Print;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -33,7 +32,6 @@ class Connector {
       client = AsynchronousSocketChannel.open();
       Future<Void> future = client.connect(new InetSocketAddress(host, port));
       future.get();
-      Print.out("Successfully connected to " + host + ":" + port);
     } catch (IOException e) {
       e.printStackTrace();
     } catch (InterruptedException e) {
@@ -48,23 +46,25 @@ class Connector {
       Thread sender =
           new Thread(
               () -> {
-                ByteBuffer inBuf = ByteBuffer.allocate(1024);
-                String inputLine = cmd;
-                inBuf = ByteBuffer.wrap(inputLine.getBytes());
-                Future<Integer> writeResult = client.write(inBuf);
-                try {
-                  writeResult.get();
-                  // System.out.println("sended");
-                } catch (InterruptedException e) {
-                  e.printStackTrace();
-                } catch (ExecutionException e) {
-                  e.printStackTrace();
-                }
-                inBuf.clear();
+                sendCommandSync(cmd);
               });
-
       sender.start();
     }
+  }
+
+  void sendCommandSync(String cmd) {
+    ByteBuffer inBuf = ByteBuffer.allocate(1024);
+    String inputLine = cmd;
+    inBuf = ByteBuffer.wrap(inputLine.getBytes());
+    Future<Integer> writeResult = client.write(inBuf);
+    try {
+      writeResult.get();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    }
+    inBuf.clear();
   }
 
   HashMap<Location, ArrayList<ValueInfo>> getResults(

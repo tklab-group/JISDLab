@@ -24,13 +24,16 @@ public class ProbeJ {
     this.vm = Optional.ofNullable(vm);
   }
 
+  public void runVM() {
+    if (vm.isPresent()) {
+      Thread tmp = new Thread(vm.get());
+      tmp.start();
+      vmThread = Optional.of(tmp);
+    }
+  }
+
   public void run() {
     try {
-      if (vm.isPresent()) {
-        Thread tmp = new Thread(vm.get());
-        tmp.start();
-        vmThread = Optional.of(tmp);
-      }
       connector.openConnection();
       connector.sendCommand("PrintSocketOn");
     } catch (Exception e) {

@@ -1,5 +1,7 @@
 package probej;
 
+import util.Print;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -20,6 +22,12 @@ public class VirtualMachine implements Runnable {
     try {
       System.out.println(
           "java -agentpath:lib/ProbeJ_ex.dll=options_none:" + port + " " + options + " " + main);
+      Runtime.getRuntime()
+          .addShutdownHook(
+              new Thread(
+                  () -> {
+                    shutdown();
+                  }));
       p =
           Optional.ofNullable(
               Runtime.getRuntime()
@@ -30,14 +38,18 @@ public class VirtualMachine implements Runnable {
                           + options
                           + " "
                           + main));
-    } catch (IOException e) {
+      p.get().waitFor();
+      shutdown();
+    } catch (IOException | InterruptedException e) {
       e.printStackTrace();
+      shutdown();
     }
   }
 
   public void shutdown() {
     if (p.isPresent()) {
       p.get().destroy();
+      Print.out("VM shutdown.");
       p = Optional.empty();
     }
   }
