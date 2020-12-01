@@ -9,6 +9,7 @@ import util.Name;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 /** @author sugiyama */
 public class ProbeJ {
@@ -39,7 +40,7 @@ public class ProbeJ {
     try {
       connector.openConnection();
       connector.sendCommand("PrintSocketOn");
-    } catch (Exception e) {
+    } catch (TimeoutException e) {
       e.printStackTrace();
     }
   }

@@ -13,13 +13,14 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /** @author sugiyama */
 class Connector {
   String host;
   int port;
   AsynchronousSocketChannel client;
-  Future<AsynchronousSocketChannel> acceptFuture;
   Parser parser = new Parser();
 
   public Connector(String host, int port) {
@@ -27,11 +28,13 @@ class Connector {
     this.port = port;
   }
 
-  public void openConnection() {
+  public void openConnection() throws TimeoutException {
     try {
       client = AsynchronousSocketChannel.open();
+      System.out.println("Try to connect to " + host + ":" + port);
       Future<Void> future = client.connect(new InetSocketAddress(host, port));
-      future.get();
+      future.get(5, TimeUnit.SECONDS);
+      System.out.println("Succeccfully connected to " + host + ":" + port);
     } catch (IOException e) {
       e.printStackTrace();
     } catch (InterruptedException e) {
@@ -58,10 +61,12 @@ class Connector {
     inBuf = ByteBuffer.wrap(inputLine.getBytes());
     Future<Integer> writeResult = client.write(inBuf);
     try {
-      writeResult.get();
+      writeResult.get(5, TimeUnit.SECONDS);
     } catch (InterruptedException e) {
       e.printStackTrace();
     } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (TimeoutException e) {
       e.printStackTrace();
     }
     inBuf.clear();
@@ -81,8 +86,8 @@ class Connector {
                 try {
                   String noOfBPStr = readLine(client, outBuf);
                   noOfBP = Integer.parseInt(noOfBPStr);
-                } catch (NumberFormatException e) {
-                  // System.out.println("NAN");
+                } catch (NumberFormatException | TimeoutException e) {
+                  e.printStackTrace();
                   return;
                 }
                 if (noOfBP < 1) {
@@ -92,7 +97,12 @@ class Connector {
                 noOfBP = 1;
               }
               for (int i = 0; i < noOfBP; i++) {
-                String locStr = readLine(client, outBuf);
+                String locStr = null;
+                try {
+                  locStr = readLine(client, outBuf);
+                } catch (TimeoutException e) {
+                  e.printStackTrace();
+                }
                 // System.out.println(locStr);
                 Optional<Location> loc = parser.parseLocation(locStr);
                 if (loc.isEmpty()) {
@@ -117,8 +127,8 @@ class Connector {
                   }
                   results.put(loc.get(), values);
 
-                } catch (NumberFormatException e) {
-                  // System.out.println("noOfValueNAN");
+                } catch (NumberFormatException | TimeoutException e) {
+                  e.printStackTrace();
                   continue;
                 }
               }
@@ -141,14 +151,17 @@ class Connector {
     return results;
   }
 
-  String readLine(AsynchronousSocketChannel client, ByteBuffer b) {
+  String readLine(AsynchronousSocketChannel client, ByteBuffer b) throws TimeoutException {
     StringBuilder buf = new StringBuilder(1024);
     while (true) {
       if (!b.hasRemaining()) {
         try {
           b.clear();
-          client.read(b).get();
+          int len = client.read(b).get(5, TimeUnit.SECONDS);
           b.flip();
+          if (len == -1) {
+            return "0";
+          }
         } catch (InterruptedException e) {
           e.printStackTrace();
           return "";
