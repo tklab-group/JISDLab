@@ -5,6 +5,7 @@ import static debug.Utility.exec;
 
 // static analysis classes
 import _static.*;
+import static _static.StaticFile.load;
 
 // often use classes
 import java.util.ArrayList;
