@@ -45,24 +45,24 @@ public class ProbeJ {
     }
   }
 
-  public void requestSetProbePoint(String className, String varName, int lineNumber) {
+  public void requestSetProbePoint(Location loc) {
     String cmd =
         "Set "
-            + Name.splitClassName(className).get("class")
+            + Name.splitClassName(loc.getClassName()).get("class")
             + ".java "
-            + varName
+            + loc.getVarName()
             + " "
-            + lineNumber;
+            + loc.getLineNumber();
     connector.sendCommand(cmd);
   }
 
   public HashMap<Location, ArrayList<ValueInfo>> getResults() {
-    return getResults("", "", 0);
+    Location loc = new Location("", "", 0, "");
+    return getResults(loc);
   }
 
-  public HashMap<Location, ArrayList<ValueInfo>> getResults(
-      String className, String varName, int lineNumber) {
-    return connector.getResults(Name.splitClassName(className).get("class"), varName, lineNumber);
+  public HashMap<Location, ArrayList<ValueInfo>> getResults(Location loc) {
+    return connector.getResults(loc);
   }
 
   Connector getConnector() {
@@ -78,14 +78,14 @@ public class ProbeJ {
     vmThread = Optional.empty();
   }
 
-  public void requestRemoveProbePoint(String className, String varName, int lineNumber) {
+  public void requestRemoveProbePoint(Location loc) {
     String cmd =
         "Clear "
-            + Name.splitClassName(className).get("class")
+            + Name.splitClassName(loc.getClassName()).get("class")
             + ".java "
-            + varName
+            + loc.getVarName()
             + " "
-            + lineNumber;
+            + loc.getLineNumber();
     connector.sendCommand(cmd);
   }
 }

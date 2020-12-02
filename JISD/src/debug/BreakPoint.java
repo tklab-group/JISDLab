@@ -89,15 +89,15 @@ public class BreakPoint extends Point {
     setRequested(false);
   }
 
-  void addValue(
-      String className, int lineNumber, String varName, Map.Entry<LocalVariable, Value> entry) {
+  void addValue(Location loc, Map.Entry<LocalVariable, Value> entry) {
+    String varName = loc.getVarName();
     synchronized (this) {
       Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
       if (res.isPresent()) {
         res.get().addValue(entry);
         return;
       }
-      DebugResult dr = new DebugResult(className, lineNumber, varName);
+      DebugResult dr = new DebugResult(loc);
       if (maxRecords.containsKey(varName)) {
         dr.setMaxRecordNoOfValue(maxRecords.get(varName));
       }
@@ -161,7 +161,8 @@ public class BreakPoint extends Point {
             // add debug result
             for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
               String varName = entry.getKey().name();
-              addValue(bpClassName, bpLineNumber, varName, entry);
+              Location loc = new Location(bpClassName, bpMethodName, lineNumber, varName);
+              addValue(loc, entry);
             }
             // if isBreak is true
             if (isBreak()) {

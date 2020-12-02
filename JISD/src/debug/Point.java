@@ -1,5 +1,6 @@
 package debug;
 
+import debug.value.ValueInfo;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,9 +18,9 @@ public abstract class Point {
   /** varNames and debugresult */
   HashMap<String, DebugResult> drs = new HashMap<>();
   /** varNames and maxRecordNoOfValue */
-  HashMap<String, Integer> maxRecords = new HashMap<>();
+  @Getter HashMap<String, Integer> maxRecords = new HashMap<>();
   /** varNames and maxNoOfExpand */
-  HashMap<String, Integer> maxExpands = new HashMap<>();
+  @Getter HashMap<String, Integer> maxExpands = new HashMap<>();
 
   boolean isEnable = true;
   /** variable names */
@@ -101,7 +102,7 @@ public abstract class Point {
   /** Clear DebugResult */
   public void clearDebugResults() {
     drs = new HashMap<>();
-    DebugResult.resetNumber();
+    ValueInfo.resetNumber();
   }
 
   /** Request VM to set a breakpoint */

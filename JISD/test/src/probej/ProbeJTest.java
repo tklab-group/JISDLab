@@ -1,6 +1,7 @@
 /** */
 package probej;
 
+import debug.Location;
 import org.junit.jupiter.api.Test;
 
 import static util.Print.out;
@@ -12,8 +13,9 @@ public class ProbeJTest {
   public void basicTest() {
     ProbeJ p = new ProbeJ("127.0.0.1", 39876, new VirtualMachine("demo.LoopN", "-cp bin", 39876));
     p.run();
-    p.requestSetProbePoint("demo.LoopN", "var1", 22);
-    out(p.getResults("demo.LoopN", "var1", 22));
+    var loc = new Location("demo.LoopN", "main", 22, "var1");
+    p.requestSetProbePoint(loc);
+    out(p.getResults(loc));
     p.exit();
   }
   /*

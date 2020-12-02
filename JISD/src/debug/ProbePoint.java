@@ -63,7 +63,7 @@ public class ProbePoint extends Point {
     }
     varNames.forEach(
         (varName) -> {
-          p.get().requestSetProbePoint(className, varName, lineNumber);
+          p.get().requestSetProbePoint(new Location(className, methodName, lineNumber, varName));
         });
     setRequested(true);
   }
@@ -73,7 +73,7 @@ public class ProbePoint extends Point {
     if (p.isEmpty()) {
       return;
     }
-    p.get().requestRemoveProbePoint(className, varName, lineNumber);
+    p.get().requestRemoveProbePoint(new Location(className, methodName, lineNumber, varName));
     removeVarName(varName);
   }
 
@@ -109,8 +109,8 @@ public class ProbePoint extends Point {
 
     varNames.forEach(
         (varName) -> {
-          HashMap<Location, ArrayList<ValueInfo>> results =
-              p.get().getResults(className, varName, lineNumber);
+          var results =
+              p.get().getResults(new Location(className, methodName, lineNumber, varName));
           results.forEach(
               (key, values) -> {
                 values.forEach(
@@ -128,7 +128,8 @@ public class ProbePoint extends Point {
         res.get().addValue(value);
         return;
       }
-      DebugResult dr = new DebugResult(className, lineNumber, varName);
+      Location loc = new Location(className, methodName, lineNumber, varName);
+      DebugResult dr = new DebugResult(loc);
       if (maxRecords.containsKey(varName)) {
         dr.setMaxRecordNoOfValue(maxRecords.get(varName));
       }

@@ -27,8 +27,9 @@ class DebuggerTest {
 
   static void showResult(DebugResult res) {
     System.out.println("-----------------------------");
-    System.out.println(res.getLineNumber());
-    System.out.println(res.getName());
+    var loc = res.getLoc();
+    System.out.println(loc.getLineNumber());
+    System.out.println(loc.getVarName());
     System.out.println(res.getLatestValue());
     System.out.println("");
   }
@@ -50,7 +51,7 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bps.get(i / 4));
+      Assertions.assertEquals(res.getLoc().getLineNumber(), bps.get(i / 4));
     }
     dbg.exit();
   }
@@ -62,7 +63,7 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      assertEquals(res.getLineNumber(), bps.get(i / 4));
+      assertEquals(res.getLoc().getLineNumber(), bps.get(i / 4));
     }
     dbg.clear(bpln2);
     assertEquals(dbg.getPoints().size(), 1);
@@ -101,7 +102,7 @@ class DebuggerTest {
     assertEquals(results.size(), 8);
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      assertEquals(res.getLineNumber(), bps.get(i / 4));
+      assertEquals(res.getLoc().getLineNumber(), bps.get(i / 4));
     }
     dbg.clear(bpln2);
     assertEquals(dbg.getPoints().size(), 1);
@@ -120,7 +121,7 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bps.get(i / 4));
+      Assertions.assertEquals(res.getLoc().getLineNumber(), bps.get(i / 4));
     }
   }
 
@@ -142,7 +143,7 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getName(), "a");
+      Assertions.assertEquals(res.getLoc().getVarName(), "a");
     }
   }
 
@@ -165,7 +166,7 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getName(), "a");
+      Assertions.assertEquals(res.getLoc().getVarName(), "a");
     }
   }
 
@@ -181,7 +182,7 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bpln1);
+      Assertions.assertEquals(res.getLoc().getLineNumber(), bpln1);
     }
     dbg.cont();
     dbg.exit();
@@ -230,7 +231,8 @@ class DebuggerTest {
     dbg.getResults()
         .forEach(
             (r) -> {
-              System.out.println(r.getLineNumber() + ": " + r.getName());
+              var loc = r.getLoc();
+              System.out.println(loc.getLineNumber() + ": " + loc.getVarName());
             });
     dbg.exit();
   }
@@ -247,7 +249,8 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bpln2);
+      var loc = res.getLoc();
+      Assertions.assertEquals(loc.getLineNumber(), bpln2);
     }
     dbg.exit();
   }

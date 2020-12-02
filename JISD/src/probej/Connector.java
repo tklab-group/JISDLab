@@ -3,6 +3,7 @@ package probej;
 
 import debug.Location;
 import debug.value.ValueInfo;
+import util.Name;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -72,8 +73,7 @@ class Connector {
     inBuf.clear();
   }
 
-  HashMap<Location, ArrayList<ValueInfo>> getResults(
-      String className, String varName, int lineNumber) {
+  HashMap<Location, ArrayList<ValueInfo>> getResults(Location loc) {
     HashMap<Location, ArrayList<ValueInfo>> results = new HashMap<>();
     Thread receiver =
         new Thread(
@@ -82,7 +82,7 @@ class Connector {
               outBuf.clear();
               outBuf.flip();
               int noOfBP = 0;
-              if (lineNumber == 0) {
+              if (loc.getLineNumber() == 0) {
                 try {
                   String noOfBPStr = readLine(client, outBuf);
                   noOfBP = Integer.parseInt(noOfBPStr);
@@ -104,8 +104,8 @@ class Connector {
                   e.printStackTrace();
                 }
                 // System.out.println(locStr);
-                Optional<Location> loc = parser.parseLocation(locStr);
-                if (loc.isEmpty()) {
+                Optional<Location> parsedLoc = parser.parseLocation(locStr);
+                if (parsedLoc.isEmpty()) {
                   // System.out.println("e");
                   continue;
                 }
@@ -119,13 +119,12 @@ class Connector {
                   }
                   for (int j = 0; j < noOfValue; j++) {
                     String valueStr = readLine(client, outBuf);
-                    // System.out.println(valueStr);
                     Optional<ValueInfo> value = parser.parseValue(valueStr);
                     if (value.isPresent()) {
                       values.add(value.get());
                     }
                   }
-                  results.put(loc.get(), values);
+                  results.put(parsedLoc.get(), values);
 
                 } catch (NumberFormatException | TimeoutException e) {
                   e.printStackTrace();
@@ -137,8 +136,14 @@ class Connector {
 
     // Generate Print command.
     String cmd = "Print";
-    if (lineNumber > 0) {
-      cmd = "Print " + className + ".java " + varName + " " + lineNumber;
+    if (loc.getLineNumber() > 0) {
+      cmd =
+          "Print "
+              + Name.splitClassName(loc.getClassName()).get("class")
+              + ".java "
+              + loc.getVarName()
+              + " "
+              + loc.getLineNumber();
     }
     sendCommand(cmd);
 
