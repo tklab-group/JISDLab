@@ -11,4 +11,9 @@ public class LocalInfo extends StaticInfo {
   public String methodName() {
     return methodName;
   }
+
+  @Override
+  public void clearCache() {
+    return;
+  }
 }

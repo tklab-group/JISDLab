@@ -69,4 +69,10 @@ public class ClassInfo extends StaticInfo {
       return new ArrayList<>();
     }
   }
+
+  @Override
+  public void clearCache() {
+    methods = Optional.empty();
+    fields = Optional.empty();
+  }
 }

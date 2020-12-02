@@ -41,4 +41,9 @@ public class MethodInfo extends StaticInfo {
       return new ArrayList<>();
     }
   }
+
+  @Override
+  public void clearCache() {
+    locals = Optional.empty();
+  }
 }

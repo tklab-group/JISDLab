@@ -44,4 +44,6 @@ public abstract class StaticInfo {
   public String name() {
     return name;
   }
+
+  public abstract void clearCache();
 }
