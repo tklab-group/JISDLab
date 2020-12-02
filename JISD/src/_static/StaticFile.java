@@ -12,19 +12,17 @@ import static util.Json.readJsonFile;
 
 public class StaticFile {
   private static final String rootDirName = ".jisd_static_data";
-  @Setter String rootDirPath = rootDirName + File.separator;
-  @Setter String classDataFilePath = rootDirPath + "class_data.json";
-  @Setter String programStructureFilePath = rootDirPath + "program_structure.json";
-  @Getter @Setter String srcDir = ".", binDir = ".";
+  @Setter static String rootDirPath = rootDirName + File.separator;
+  @Setter static String classDataFilePath = rootDirPath + "class_data.json";
+  @Setter static String programStructureFilePath = rootDirPath + "program_structure.json";
+  @Getter @Setter static String srcDir = ".", binDir = ".";
+  @Getter static Optional<JSONObject> cd = Optional.empty();
+  @Getter static Optional<JSONObject> ps = Optional.empty();
+  // private static StaticFile me = new StaticFile();
 
-  @Getter Optional<JSONObject> cd = Optional.empty();
-  @Getter Optional<JSONObject> ps = Optional.empty();
+  private StaticFile() {}
 
-  public StaticFile(String srcDir, String binDir) {
-    init(srcDir, binDir);
-  }
-
-  public void init(String srcDir, String binDir) {
+  public static void init(String srcDir, String binDir) {
     if (!srcDir.isBlank()) {
       setSrcDir(srcDir);
     }
@@ -36,29 +34,29 @@ public class StaticFile {
     readStaticData();
   }
 
-  void setStaticFilePath(String binDir) {
+  static void setStaticFilePath(String binDir) {
     setRootDirPath(binDir + File.separator + rootDirName + File.separator);
     setClassDataFilePath(rootDirPath + "class_data.json");
     setProgramStructureFilePath(rootDirPath + "program_structure.json");
   }
 
-  public void createStaticData() {
+  static void createStaticData() {
     String[] args = new String[2];
     args[0] = rootDirPath;
     args[1] = binDir;
     LysMain.main(args);
   }
 
-  public void readStaticData() {
+  static void readStaticData() {
     readCd();
     readPs();
   }
 
-  void readCd() {
+  static void readCd() {
     cd = readJsonFile(classDataFilePath);
   }
 
-  void readPs() {
+  static void readPs() {
     ps = readJsonFile(programStructureFilePath);
   }
 }

@@ -24,7 +24,7 @@ public class JISDPreProcess {
       }
       argvObj.put(originalArgvObj.get(0)); // java
       argvObj.put("-cp"); // -cp
-      String allClasspath = originalArgvObj.get(2) + ":" + classpath;
+      String allClasspath = originalArgvObj.get(2) + cpSeparator() + classpath;
       argvObj.put(allClasspath); // classpath
       argvObj.put("io.github.spencerpark.ijava.IJava"); // main class
       argvObj.put("{connection_file}"); // jupyter connection file
@@ -33,6 +33,15 @@ public class JISDPreProcess {
     } catch (JSONException e) {
       e.printStackTrace();
       return;
+    }
+  }
+
+  static String cpSeparator() {
+    var os = System.getProperty("os.name").toLowerCase();
+    if (os.startsWith("windows")) {
+      return ";";
+    } else {
+      return ":";
     }
   }
 }

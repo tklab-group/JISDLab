@@ -10,3 +10,4 @@ JISD/.idea/uiDesigner.xml
 */.jisd_static_data/*
 docs/
 out/
+.gradle/

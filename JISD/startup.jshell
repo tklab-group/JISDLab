@@ -3,12 +3,9 @@ import debug.*;
 import debug.value.*;
 import static debug.Utility.exec;
 
-// static analysis classes(separate them from java.lang.*)
-import _static.StaticFile;
-import _static.Class;
-import _static.Method;
-import _static.Field;
-import _static.Local;
+// static analysis classes
+import _static.*;
+import static _static.StaticFile.load;
 
 // often use classes
 import java.util.ArrayList;
