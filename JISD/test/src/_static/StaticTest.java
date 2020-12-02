@@ -35,7 +35,8 @@ public class StaticTest {
     f.name();
     var m = c.method("main(java.lang.String[])");
     out(m.locals());
-    var l = m.local("s");
+    var l = m.local("a");
     l.name();
+    out(l.canSet());
   }
 }
