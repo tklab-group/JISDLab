@@ -18,11 +18,16 @@ class VMManagerFactory {
       boolean usesProbeJ) {
     // ProbeJ
     if (usesProbeJ) {
-      DebuggerInfo.print("Try to connect to " + host + ":" + port);
       ProbeJ probeJ;
       if (!isRemoteDebug) {
-        probej.VirtualMachine vm = new probej.VirtualMachine(main, options, port);
-        probeJ = new ProbeJ(host, port, vm);
+        if (System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+          probej.VirtualMachine vm = new probej.VirtualMachine(main, options, port);
+          probeJ = new ProbeJ(host, port, vm);
+        } else {
+          DebuggerInfo.printError(
+              "ProbeJ Not Supported for " + System.getProperty("os.name") + ".");
+          throw new IllegalArgumentException();
+        }
       } else {
         probeJ = new ProbeJ(host, port);
       }

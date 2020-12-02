@@ -1,6 +1,7 @@
 /** */
 package debug;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -36,5 +37,20 @@ public class ProbePointTest {
   void probePointTest() {
     Debugger dbg = new Debugger("localhost", 39876, true);
     testProbeDebugger(dbg);
+  }
+
+  @Test
+  void probePointClearTest() {
+    Debugger dbg = new Debugger("demo.LoopN", "-cp bin", true);
+    ArrayList<String> vars = new ArrayList<>();
+    vars.add("var1");
+    dbg.run(1000);
+    Point p = dbg.watch("LoopN", 22, vars).get();
+    dbg.sleep(1000);
+    Assertions.assertTrue(p.getVarNames().get(0).equals("var1"));
+    p.remove("var1");
+    Assertions.assertTrue(p.getVarNames().isEmpty());
+    dbg.sleep(1000);
+    dbg.exit();
   }
 }

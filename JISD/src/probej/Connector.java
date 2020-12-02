@@ -3,7 +3,7 @@ package probej;
 
 import debug.Location;
 import debug.value.ValueInfo;
-import util.Print;
+import util.Name;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -14,13 +14,14 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /** @author sugiyama */
 class Connector {
   String host;
   int port;
   AsynchronousSocketChannel client;
-  Future<AsynchronousSocketChannel> acceptFuture;
   Parser parser = new Parser();
 
   public Connector(String host, int port) {
@@ -28,12 +29,13 @@ class Connector {
     this.port = port;
   }
 
-  public void openConnection() {
+  public void openConnection() throws TimeoutException {
     try {
       client = AsynchronousSocketChannel.open();
+      System.out.println("Try to connect to " + host + ":" + port);
       Future<Void> future = client.connect(new InetSocketAddress(host, port));
-      future.get();
-      Print.out("Successfully connected to " + host + ":" + port);
+      future.get(5, TimeUnit.SECONDS);
+      System.out.println("Succeccfully connected to " + host + ":" + port);
     } catch (IOException e) {
       e.printStackTrace();
     } catch (InterruptedException e) {
@@ -48,27 +50,30 @@ class Connector {
       Thread sender =
           new Thread(
               () -> {
-                ByteBuffer inBuf = ByteBuffer.allocate(1024);
-                String inputLine = cmd;
-                inBuf = ByteBuffer.wrap(inputLine.getBytes());
-                Future<Integer> writeResult = client.write(inBuf);
-                try {
-                  writeResult.get();
-                  // System.out.println("sended");
-                } catch (InterruptedException e) {
-                  e.printStackTrace();
-                } catch (ExecutionException e) {
-                  e.printStackTrace();
-                }
-                inBuf.clear();
+                sendCommandSync(cmd);
               });
-
       sender.start();
     }
   }
 
-  HashMap<Location, ArrayList<ValueInfo>> getResults(
-      String className, String varName, int lineNumber) {
+  void sendCommandSync(String cmd) {
+    ByteBuffer inBuf = ByteBuffer.allocate(1024);
+    String inputLine = cmd;
+    inBuf = ByteBuffer.wrap(inputLine.getBytes());
+    Future<Integer> writeResult = client.write(inBuf);
+    try {
+      writeResult.get(5, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    } catch (ExecutionException e) {
+      e.printStackTrace();
+    } catch (TimeoutException e) {
+      e.printStackTrace();
+    }
+    inBuf.clear();
+  }
+
+  HashMap<Location, ArrayList<ValueInfo>> getResults(Location loc) {
     HashMap<Location, ArrayList<ValueInfo>> results = new HashMap<>();
     Thread receiver =
         new Thread(
@@ -77,12 +82,12 @@ class Connector {
               outBuf.clear();
               outBuf.flip();
               int noOfBP = 0;
-              if (lineNumber == 0) {
+              if (loc.getLineNumber() == 0) {
                 try {
                   String noOfBPStr = readLine(client, outBuf);
                   noOfBP = Integer.parseInt(noOfBPStr);
-                } catch (NumberFormatException e) {
-                  // System.out.println("NAN");
+                } catch (NumberFormatException | TimeoutException e) {
+                  e.printStackTrace();
                   return;
                 }
                 if (noOfBP < 1) {
@@ -92,10 +97,15 @@ class Connector {
                 noOfBP = 1;
               }
               for (int i = 0; i < noOfBP; i++) {
-                String locStr = readLine(client, outBuf);
+                String locStr = null;
+                try {
+                  locStr = readLine(client, outBuf);
+                } catch (TimeoutException e) {
+                  e.printStackTrace();
+                }
                 // System.out.println(locStr);
-                Optional<Location> loc = parser.parseLocation(locStr);
-                if (loc.isEmpty()) {
+                Optional<Location> parsedLoc = parser.parseLocation(locStr);
+                if (parsedLoc.isEmpty()) {
                   // System.out.println("e");
                   continue;
                 }
@@ -109,16 +119,15 @@ class Connector {
                   }
                   for (int j = 0; j < noOfValue; j++) {
                     String valueStr = readLine(client, outBuf);
-                    // System.out.println(valueStr);
                     Optional<ValueInfo> value = parser.parseValue(valueStr);
                     if (value.isPresent()) {
                       values.add(value.get());
                     }
                   }
-                  results.put(loc.get(), values);
+                  results.put(parsedLoc.get(), values);
 
-                } catch (NumberFormatException e) {
-                  // System.out.println("noOfValueNAN");
+                } catch (NumberFormatException | TimeoutException e) {
+                  e.printStackTrace();
                   continue;
                 }
               }
@@ -127,8 +136,14 @@ class Connector {
 
     // Generate Print command.
     String cmd = "Print";
-    if (lineNumber > 0) {
-      cmd = "Print " + className + ".java " + varName + " " + lineNumber;
+    if (loc.getLineNumber() > 0) {
+      cmd =
+          "Print "
+              + Name.splitClassName(loc.getClassName()).get("class")
+              + ".java "
+              + loc.getVarName()
+              + " "
+              + loc.getLineNumber();
     }
     sendCommand(cmd);
 
@@ -141,14 +156,17 @@ class Connector {
     return results;
   }
 
-  String readLine(AsynchronousSocketChannel client, ByteBuffer b) {
+  String readLine(AsynchronousSocketChannel client, ByteBuffer b) throws TimeoutException {
     StringBuilder buf = new StringBuilder(1024);
     while (true) {
       if (!b.hasRemaining()) {
         try {
           b.clear();
-          client.read(b).get();
+          int len = client.read(b).get(5, TimeUnit.SECONDS);
           b.flip();
+          if (len == -1) {
+            return "0";
+          }
         } catch (InterruptedException e) {
           e.printStackTrace();
           return "";

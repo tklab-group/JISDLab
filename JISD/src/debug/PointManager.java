@@ -19,6 +19,11 @@ import java.util.*;
 class PointManager {
   /** points */
   private final Set<Point> ps = new HashSet<>();
+
+  private final Comparator compDR =
+      Comparator.comparing(dr -> ((DebugResult) dr).getLoc().className)
+          .thenComparing(dr -> ((DebugResult) dr).getLoc().lineNumber)
+          .thenComparing(dr -> ((DebugResult) dr).getLoc().varName);
   /** Current Thread Reference */
   ThreadReference currentTRef;
   /** is processing now? */
@@ -287,7 +292,7 @@ class PointManager {
   }
 
   /**
-   * Print current location infomation
+   * Print current location information
    *
    * @param prefix print reason
    * @param lineNumber line number
@@ -378,10 +383,7 @@ class PointManager {
                     drs.add(value);
                   });
         });
-    drs.sort(
-        Comparator.comparing(DebugResult::getClassName)
-            .thenComparing(DebugResult::getLineNumber)
-            .thenComparing(DebugResult::getName));
+    drs.sort(compDR);
     return drs;
   }
 
@@ -392,10 +394,7 @@ class PointManager {
                 .map(bp -> bp.getResult(varName))
                 .filter(res -> res.isPresent())
                 .map(res -> res.get())
-                .sorted(
-                    Comparator.comparing(DebugResult::getClassName)
-                        .thenComparing(DebugResult::getLineNumber)
-                        .thenComparing(DebugResult::getName))
+                .sorted(compDR)
                 .collect(Stream.toArrayList());
     return drs;
   }

@@ -67,6 +67,19 @@ public class Debugger {
     init("", "", host, port, true, usesProbeJ);
   }
 
+  /**
+   * Sleep main thread
+   *
+   * @param sleepTime wait time
+   */
+  public static void sleep(int sleepTime) {
+    try {
+      Thread.sleep(sleepTime);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
   void init(
       String main,
       String options,
@@ -86,6 +99,10 @@ public class Debugger {
   }
 
   // ********** debugger settings ************************************************************//
+
+  // ********** stop ************************************************************//
+
+  // ********** debugger settings ************************************************************//
   public void setPort(int port) {
     if (port < 1024 || port > 65535) {
       this.port = 8000;
@@ -95,10 +112,6 @@ public class Debugger {
       this.port = port;
     }
   }
-
-  // ********** debugger settings ************************************************************//
-
-  // ********** stop ************************************************************//
 
   /**
    * Set breakpoint with a line number.
@@ -178,6 +191,9 @@ public class Debugger {
   public Optional<Point> stopAt(String className, String methodName) {
     return stopAt(className, methodName, new ArrayList<String>());
   }
+  // ********** stopAt ************************************************************//
+
+  // ********** watch ************************************************************//
 
   /**
    * Set breakpoint with a method name and variable names.
@@ -193,9 +209,6 @@ public class Debugger {
     }
     return pm.setPoint(vmManager, className, methodName, varNames, true, false);
   }
-  // ********** stopAt ************************************************************//
-
-  // ********** watch ************************************************************//
 
   /**
    * Set watchpoint with a line number.
@@ -273,6 +286,10 @@ public class Debugger {
     return watch(className, methodName, new ArrayList<String>());
   }
 
+  // ********** watch ************************************************************//
+
+  // ********** watch or probe ************************************************************//
+
   /**
    * Set watchpoint with a method name and variable names.
    *
@@ -284,10 +301,6 @@ public class Debugger {
   public Optional<Point> watch(String className, String methodName, ArrayList<String> varNames) {
     return watch(className, methodName, varNames, usesProbeJ);
   }
-
-  // ********** watch ************************************************************//
-
-  // ********** watch or probe ************************************************************//
 
   /**
    * Set watchpoint with a line number.
@@ -358,14 +371,14 @@ public class Debugger {
     return watch(className, methodName, new ArrayList<String>(), isProbe);
   }
 
+  // ********** watch or probe ************************************************************//
+
+  // ********** on breakpoint ************************************************************//
+
   public Optional<Point> watch(
       String className, String methodName, ArrayList<String> varNames, boolean isProbe) {
     return pm.setPoint(vmManager, className, methodName, varNames, false, isProbe);
   }
-
-  // ********** watch or probe ************************************************************//
-
-  // ********** on breakpoint ************************************************************//
 
   /** Execute "step in"/"step into" */
   public void step() {
@@ -394,14 +407,14 @@ public class Debugger {
   public void list(String srcDir) {
     pm.printSrcAtCurrentLocation("Current location,", srcDir);
   }
+  // ********** on breakpoint ************************************************************//
+
+  // ********** remove breakpoint ************************************************************//
 
   /** Print all local variables in current stack frame */
   public void locals() {
     pm.printLocals();
   }
-  // ********** on breakpoint ************************************************************//
-
-  // ********** remove breakpoint ************************************************************//
 
   /** Print stacktrace in current stack frame. */
   public void where() {
@@ -436,6 +449,10 @@ public class Debugger {
     clear(main, methodName);
   }
 
+  // ********** remove breakpoint ************************************************************//
+
+  // ********** debugger control ************************************************************//
+
   /**
    * Remove breakpoint with a method name.
    *
@@ -446,10 +463,6 @@ public class Debugger {
     pm.removePoint(className, methodName);
   }
 
-  // ********** remove breakpoint ************************************************************//
-
-  // ********** debugger control ************************************************************//
-
   /**
    * Start up the debugger.
    *
@@ -459,19 +472,6 @@ public class Debugger {
     vmThread = new Thread(vmManager);
     vmThread.start();
     sleep(sleepTime);
-  }
-
-  /**
-   * Sleep main thread
-   *
-   * @param sleepTime wait time
-   */
-  public void sleep(int sleepTime) {
-    try {
-      Thread.sleep(sleepTime);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
   }
 
   /** Sleep main thread until current bpm process is done */

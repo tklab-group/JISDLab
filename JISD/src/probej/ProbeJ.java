@@ -1,6 +1,7 @@
 /** */
 package probej;
 
+import debug.Debugger;
 import debug.Location;
 import debug.value.ValueInfo;
 import util.Name;
@@ -8,6 +9,7 @@ import util.Name;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 /** @author sugiyama */
 public class ProbeJ {
@@ -24,38 +26,43 @@ public class ProbeJ {
     this.vm = Optional.ofNullable(vm);
   }
 
+  public void runVM() {
+    if (vm.isPresent()) {
+      Thread tmp = new Thread(vm.get());
+      tmp.start();
+      vmThread = Optional.of(tmp);
+      Debugger.sleep(1000);
+      System.out.println("VM with ProbeJ started.");
+    }
+  }
+
   public void run() {
     try {
-      if (vm.isPresent()) {
-        Thread tmp = new Thread(vm.get());
-        tmp.start();
-        vmThread = Optional.of(tmp);
-      }
       connector.openConnection();
       connector.sendCommand("PrintSocketOn");
-    } catch (Exception e) {
+    } catch (TimeoutException e) {
       e.printStackTrace();
     }
   }
 
-  public void requestSetProbePoint(String className, String varName, int lineNumber) {
+  public void requestSetProbePoint(Location loc) {
     String cmd =
         "Set "
-            + Name.splitClassName(className).get("class")
+            + Name.splitClassName(loc.getClassName()).get("class")
             + ".java "
-            + varName
+            + loc.getVarName()
             + " "
-            + lineNumber;
+            + loc.getLineNumber();
     connector.sendCommand(cmd);
   }
 
   public HashMap<Location, ArrayList<ValueInfo>> getResults() {
-    return getResults("", "", 0);
+    Location loc = new Location("", "", 0, "");
+    return getResults(loc);
   }
 
-  public HashMap<Location, ArrayList<ValueInfo>> getResults(
-      String className, String varName, int lineNumber) {
-    return connector.getResults(Name.splitClassName(className).get("class"), varName, lineNumber);
+  public HashMap<Location, ArrayList<ValueInfo>> getResults(Location loc) {
+    return connector.getResults(loc);
   }
 
   Connector getConnector() {
@@ -69,5 +76,16 @@ public class ProbeJ {
     }
     vm = Optional.empty();
     vmThread = Optional.empty();
+  }
+
+  public void requestRemoveProbePoint(Location loc) {
+    String cmd =
+        "Clear "
+            + Name.splitClassName(loc.getClassName()).get("class")
+            + ".java "
+            + loc.getVarName()
+            + " "
+            + loc.getLineNumber();
+    connector.sendCommand(cmd);
   }
 }

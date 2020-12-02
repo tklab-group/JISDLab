@@ -4,6 +4,7 @@ package debug;
 import com.sun.jdi.*;
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnBreakpoint;
+import org.jdiscript.requests.ChainingBreakpointRequest;
 import util.Name;
 import util.Stream;
 
@@ -18,6 +19,7 @@ import java.util.Optional;
  * @author sugiyama
  */
 public class BreakPoint extends Point {
+  Optional<ChainingBreakpointRequest> bpr = Optional.empty();
   /**
    * Constructor
    *
@@ -87,15 +89,15 @@ public class BreakPoint extends Point {
     setRequested(false);
   }
 
-  void addValue(
-      String className, int lineNumber, String varName, Map.Entry<LocalVariable, Value> entry) {
+  void addValue(Location loc, Map.Entry<LocalVariable, Value> entry) {
+    String varName = loc.getVarName();
     synchronized (this) {
       Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
       if (res.isPresent()) {
         res.get().addValue(entry);
         return;
       }
-      DebugResult dr = new DebugResult(className, lineNumber, varName);
+      DebugResult dr = new DebugResult(loc);
       if (maxRecords.containsKey(varName)) {
         dr.setMaxRecordNoOfValue(maxRecords.get(varName));
       }
@@ -136,7 +138,6 @@ public class BreakPoint extends Point {
             String bpClassName = Name.toClassNameFromSourcePath(be.location().sourcePath());
             String bpMethodName = be.location().method().name();
             // get variable data from target VM
-            var varNames = getVarNames();
             List<LocalVariable> vars;
             StackFrame stackFrame = be.thread().frame(0);
             if (varNames.size() == 0) {
@@ -160,7 +161,8 @@ public class BreakPoint extends Point {
             // add debug result
             for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
               String varName = entry.getKey().name();
-              addValue(bpClassName, bpLineNumber, varName, entry);
+              Location loc = new Location(bpClassName, bpMethodName, lineNumber, varName);
+              addValue(loc, entry);
             }
             // if isBreak is true
             if (isBreak()) {
@@ -256,6 +258,27 @@ public class BreakPoint extends Point {
     Optional<DebugResult> dr = getResult(varName);
     if (dr.isPresent()) {
       dr.get().setMaxNoOfExpand(number);
+    }
+  }
+
+  @Override
+  public void remove(String varName) {
+    removeVarName(varName);
+  }
+
+  @Override
+  public void enable() {
+    isEnable = true;
+    if (bpr.isPresent()) {
+      bpr.get().enable();
+    }
+  }
+
+  @Override
+  public void disable() {
+    isEnable = false;
+    if (bpr.isPresent()) {
+      bpr.get().disable();
     }
   }
 }

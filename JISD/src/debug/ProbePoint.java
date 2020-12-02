@@ -38,7 +38,9 @@ public class ProbePoint extends Point {
 
   @Override
   void reset() {
-    /* Todo: Implementation */
+    clearDebugResults();
+    p = Optional.empty();
+    setRequested(false);
   }
 
   @Override
@@ -48,14 +50,49 @@ public class ProbePoint extends Point {
       return;
     }
     p = Optional.of(((ProbeJManager) vmMgr).getProbeJ());
+    requestSetPoint(p);
+  }
+
+  void requestSetPoint(Optional<ProbeJ> p) {
+    if (p.isEmpty()) {
+      return;
+    }
     if (varNames.isEmpty()) {
+      // Todo: *
       return;
     }
     varNames.forEach(
         (varName) -> {
-          p.get().requestSetProbePoint(className, varName, lineNumber);
+          p.get().requestSetProbePoint(new Location(className, methodName, lineNumber, varName));
         });
     setRequested(true);
+  }
+
+  @Override
+  public void remove(String varName) {
+    if (p.isEmpty()) {
+      return;
+    }
+    p.get().requestRemoveProbePoint(new Location(className, methodName, lineNumber, varName));
+    removeVarName(varName);
+  }
+
+  @Override
+  public void enable() {
+    isEnable = true;
+    varNames.forEach(
+        varName -> {
+          requestSetPoint(p);
+        });
+  }
+
+  @Override
+  public void disable() {
+    isEnable = false;
+    varNames.forEach(
+        varName -> {
+          remove(varName);
+        });
   }
 
   @Override
@@ -72,8 +109,8 @@ public class ProbePoint extends Point {
 
     varNames.forEach(
         (varName) -> {
-          HashMap<Location, ArrayList<ValueInfo>> results =
-              p.get().getResults(className, varName, lineNumber);
+          var results =
+              p.get().getResults(new Location(className, methodName, lineNumber, varName));
           results.forEach(
               (key, values) -> {
                 values.forEach(
@@ -91,7 +128,8 @@ public class ProbePoint extends Point {
         res.get().addValue(value);
         return;
       }
-      DebugResult dr = new DebugResult(className, lineNumber, varName);
+      Location loc = new Location(className, methodName, lineNumber, varName);
+      DebugResult dr = new DebugResult(loc);
       if (maxRecords.containsKey(varName)) {
         dr.setMaxRecordNoOfValue(maxRecords.get(varName));
       }

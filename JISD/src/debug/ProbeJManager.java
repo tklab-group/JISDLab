@@ -9,6 +9,7 @@ class ProbeJManager extends VMManager {
   /** */
   public ProbeJManager(ProbeJ probeJ) {
     this.probeJ = probeJ;
+    probeJ.runVM();
   }
 
   @Override
