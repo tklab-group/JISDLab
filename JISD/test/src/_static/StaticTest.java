@@ -9,7 +9,7 @@ import static util.Print.out;
 public class StaticTest {
   @Test
   public void basicTest() {
-    init("src", "bin");
+    load("src", "bin");
     ClassInfo s = new ClassInfo("demo.HelloWorld");
     Assertions.assertEquals(s.path(), "src\\demo\\HelloWorld.java");
     out(s.path());
@@ -19,7 +19,7 @@ public class StaticTest {
 
   @Test
   public void jsonFileReadTest() {
-    init("src", "bin");
+    load("src", "bin");
     Assertions.assertNotNull(getCd());
     Assertions.assertNotNull(getPs());
     out(getPs().toString());
@@ -27,7 +27,7 @@ public class StaticTest {
 
   @Test
   public void getStaticTest() {
-    init("src", "bin");
+    load("src", "bin");
     ClassInfo c = new ClassInfo("demo.HelloWorld");
     out(c.fields());
     out(c.methods());

@@ -22,7 +22,7 @@ public class StaticFile {
 
   private StaticFile() {}
 
-  public static void init(String srcDir, String binDir) {
+  public static void load(String srcDir, String binDir) {
     if (!srcDir.isBlank()) {
       setSrcDir(srcDir);
     }
