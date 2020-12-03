@@ -43,7 +43,7 @@ ARG cp3=${ws_dir}/sample
 # IJava install
 RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3} --param startup-scripts-path:$project_dir/JISD/startup.jshell
 # For Windows
-#cd IJava ; ./gradlew.bat installKernel --param classpath:"jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;JISD/build/libs/jisd-all.jar;sample" --param startup-scripts-path:JISD/startup.jshell
+#cd IJava ; ./gradlew.bat installKernel --param classpath:"jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;JISD/build/libs/jisd-all.jar;sample" --param startup-scripts-path:"JISD/startup.jshell"
 
 #Modify kernel.json
 RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=/root/.local/share/jupyter/kernels/java/kernel.json -Pcp=${cp3}
