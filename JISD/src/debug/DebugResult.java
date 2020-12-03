@@ -23,7 +23,7 @@ public class DebugResult {
   /** the default max number of the variable expantion strata */
   static volatile int defaultMaxNoOfExpand = 1;
   /** class name */
-  @Getter Location loc;
+  @Getter Location location;
   /** saved values */
   ArrayDeque<ValueInfo> values = new ArrayDeque<>();
   /** the max record number of values */
@@ -35,7 +35,7 @@ public class DebugResult {
   DebugResult(Location loc) {
     maxRecordNoOfValue = defaultMaxRecordNoOfValue;
     maxNoOfExpand = defaultMaxNoOfExpand;
-    this.loc = loc;
+    this.location = loc;
   }
 
   public static void setDefaultMaxNoOfExpand(int number) {
@@ -129,7 +129,7 @@ public class DebugResult {
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result + ((loc == null) ? 0 : loc.hashCode());
+    result = prime * result + ((location == null) ? 0 : location.hashCode());
     return result;
   }
 
@@ -145,11 +145,11 @@ public class DebugResult {
       return false;
     }
     DebugResult other = (DebugResult) obj;
-    if (loc == null) {
-      if (other.loc != null) {
+    if (location == null) {
+      if (other.location != null) {
         return false;
       }
-    } else if (!loc.equals(other.loc)) {
+    } else if (!location.equals(other.location)) {
       return false;
     }
     return true;
