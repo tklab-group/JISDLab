@@ -21,9 +21,9 @@ class PointManager {
   private final Set<Point> ps = new HashSet<>();
 
   private final Comparator compDR =
-      Comparator.comparing(dr -> ((DebugResult) dr).getLoc().className)
-          .thenComparing(dr -> ((DebugResult) dr).getLoc().lineNumber)
-          .thenComparing(dr -> ((DebugResult) dr).getLoc().varName);
+      Comparator.comparing(dr -> ((DebugResult) dr).getLocation().className)
+          .thenComparing(dr -> ((DebugResult) dr).getLocation().lineNumber)
+          .thenComparing(dr -> ((DebugResult) dr).getLocation().varName);
   /** Current Thread Reference */
   ThreadReference currentTRef;
   /** is processing now? */
