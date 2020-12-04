@@ -19,17 +19,17 @@ import java.util.Map;
  */
 public class DebugResult {
   /** the default max record number of values */
-  static volatile int defaultMaxRecordNoOfValue = 100;
+  @Getter static volatile int defaultMaxRecordNoOfValue = 100;
   /** the default max number of the variable expantion strata */
-  static volatile int defaultMaxNoOfExpand = 1;
+  @Getter static volatile int defaultMaxNoOfExpand = 1;
   /** class name */
   @Getter Location location;
   /** saved values */
   ArrayDeque<ValueInfo> values = new ArrayDeque<>();
   /** the max record number of values */
-  int maxRecordNoOfValue;
+  @Getter int maxRecordNoOfValue;
   /** the max number of the variable expantion strata */
-  int maxNoOfExpand;
+  @Getter int maxNoOfExpand;
 
   /** Constructor */
   DebugResult(Location loc) {
