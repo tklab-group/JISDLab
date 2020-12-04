@@ -81,7 +81,7 @@ public abstract class Point {
    * @param varName variable name
    * @return debug result
    */
-  public Optional<DebugResult> getResult(String varName) {
+  public Optional<DebugResult> getResults(String varName) {
     Optional<DebugResult> result = Optional.ofNullable(drs.get(varName));
     return result;
   }
@@ -122,7 +122,7 @@ public abstract class Point {
       return;
     }
     maxRecords.put(varName, number);
-    Optional<DebugResult> dr = getResult(varName);
+    Optional<DebugResult> dr = getResults(varName);
     if (dr.isPresent()) {
       dr.get().setMaxRecordNoOfValue(number);
     }
@@ -134,7 +134,7 @@ public abstract class Point {
           "A max number of the variable expansion must be a positive integer(>= 0).");
     }
     maxExpands.put(varName, number);
-    Optional<DebugResult> dr = getResult(varName);
+    Optional<DebugResult> dr = getResults(varName);
     if (dr.isPresent()) {
       dr.get().setMaxNoOfExpand(number);
     }

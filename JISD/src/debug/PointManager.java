@@ -3,8 +3,11 @@ package debug;
 import com.sun.jdi.*;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.sun.jdi.request.StepRequest;
+import lombok.Getter;
+import lombok.Setter;
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnStep;
+import org.jdiscript.requests.ChainingStepRequest;
 import util.Name;
 import util.Stream;
 
@@ -27,7 +30,11 @@ class PointManager {
   /** Current Thread Reference */
   ThreadReference currentTRef;
   /** is processing now? */
-  volatile boolean isProcessing;
+  @Getter volatile boolean isProcessing;
+  /** is breaked now? */
+  @Setter volatile boolean isBreaked;
+
+  Optional<ChainingStepRequest> stepReq = Optional.empty();
 
   /** */
   PointManager() {
@@ -49,6 +56,7 @@ class PointManager {
   void init() {
     setIsProcessing(false);
     setCurrentTRef(null);
+    isBreaked = false;
   }
 
   /**
@@ -105,6 +113,15 @@ class PointManager {
     }
     currentTRef.resume();
     currentTRef = null;
+    isBreaked = false;
+  }
+
+  void completeStep() {
+    if (stepReq.isPresent()) {
+      stepReq.get().disable();
+    }
+    stepReq = Optional.empty();
+    setIsProcessing(false);
   }
 
   /**
@@ -116,17 +133,20 @@ class PointManager {
     if (!checkCurrentTRef()) {
       return;
     }
-    isProcessing = true;
     /** A procedure on step. */
     if (!(vmMgr instanceof JDIManager)) {
       /* do nothing */
       return;
     }
+    if (isProcessing) {
+      completeStep();
+    }
     JDIScript j = ((JDIManager) vmMgr).getJDI();
     OnStep onStep =
         j.once(
             (s) -> {
-              if (!isProcessing) {
+              completeStep();
+              if (isBreaked) {
                 DebuggerInfo.print("Step completed");
                 return;
               }
@@ -140,14 +160,15 @@ class PointManager {
               }
               currentTRef = s.thread();
               currentTRef.suspend();
-              isProcessing = false;
             });
     try {
-      j.onStep(currentTRef, StepRequest.STEP_LINE, depth, onStep);
+      stepReq =
+          Optional.of(j.stepRequest(currentTRef, StepRequest.STEP_LINE, depth, onStep).enable());
     } catch (DuplicateRequestException e) {
       e.printStackTrace();
     }
     resumeThread();
+    isProcessing = true;
   }
 
   /** request step into execution */
@@ -391,7 +412,7 @@ class PointManager {
     ArrayList<DebugResult> drs =
         (ArrayList<DebugResult>)
             ps.stream()
-                .map(bp -> bp.getResult(varName))
+                .map(bp -> bp.getResults(varName))
                 .filter(res -> res.isPresent())
                 .map(res -> res.get())
                 .sorted(compDR)

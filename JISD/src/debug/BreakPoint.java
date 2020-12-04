@@ -166,12 +166,16 @@ public class BreakPoint extends Point {
             }
             // if isBreak is true
             if (isBreak()) {
+              if (bpm.isProcessing()) {
+                bpm.completeStep();
+                DebuggerInfo.print("Step completed");
+              }
               bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
+              bpm.setBreaked(true);
               if (isNotSuspended) {
                 ThreadReference currentTRef = bpm.getCurrentTRef();
                 currentTRef.suspend();
               }
-              bpm.setIsProcessing(false);
             }
           } catch (IncompatibleThreadStateException | AbsentInformationException e) {
             e.printStackTrace();
@@ -190,7 +194,6 @@ public class BreakPoint extends Point {
                     }
                     setRequested(true);
                   }
-                  ;
                 } catch (AbsentInformationException e) {
                   e.printStackTrace();
                 }
@@ -242,7 +245,7 @@ public class BreakPoint extends Point {
       return;
     }
     maxRecords.put(varName, number);
-    Optional<DebugResult> dr = getResult(varName);
+    Optional<DebugResult> dr = getResults(varName);
     if (dr.isPresent()) {
       dr.get().setMaxRecordNoOfValue(number);
     }
@@ -255,7 +258,7 @@ public class BreakPoint extends Point {
           "A max number of the variable expansion must be a positive integer(>= 0).");
     }
     maxExpands.put(varName, number);
-    Optional<DebugResult> dr = getResult(varName);
+    Optional<DebugResult> dr = getResults(varName);
     if (dr.isPresent()) {
       dr.get().setMaxNoOfExpand(number);
     }
