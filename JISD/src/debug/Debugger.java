@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 /**
@@ -40,15 +41,11 @@ public class Debugger {
   }
 
   public Debugger(String main, String options, boolean usesProbeJ) {
-    init(main, options, "localhost", 39876, false, usesProbeJ);
+    this(main, options, 39876, usesProbeJ);
   }
 
-  public Debugger(String main, String options, String host, boolean usesProbeJ) {
-    init(main, options, host, 39876, false, usesProbeJ);
-  }
-
-  public Debugger(String main, String options, String host, int port, boolean usesProbeJ) {
-    init(main, options, host, port, false, usesProbeJ);
+  public Debugger(String main, String options, int port, boolean usesProbeJ) {
+    init(main, options, "localhost", port, false, usesProbeJ);
   }
 
   public Debugger(int port) {
@@ -76,7 +73,7 @@ public class Debugger {
     try {
       Thread.sleep(sleepTime);
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      DebuggerInfo.print("Interrupted.");
     }
   }
 
@@ -130,7 +127,7 @@ public class Debugger {
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> stopAt(int lineNumber, ArrayList<String> varNames) {
+  public Optional<Point> stopAt(int lineNumber, String[] varNames) {
     return stopAt(main, lineNumber, varNames);
   }
 
@@ -142,7 +139,7 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<Point> stopAt(String className, int lineNumber) {
-    return stopAt(className, lineNumber, new ArrayList<String>());
+    return stopAt(className, lineNumber, new String[0]);
   }
 
   /**
@@ -153,11 +150,13 @@ public class Debugger {
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> stopAt(String className, int lineNumber, ArrayList<String> varNames) {
-    if (vmManager instanceof ProbeJManager) {
+  public Optional<Point> stopAt(String className, int lineNumber, String[] varNames) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("If you use ProbeJ, you can use watch() only.");
       return Optional.empty();
     }
-    return pm.setPoint(vmManager, className, lineNumber, varNames, true, false);
+    return pm.setPoint(
+        vmManager, className, lineNumber, new ArrayList<>(Arrays.asList(varNames)), true, false);
   }
 
   /**
@@ -177,7 +176,7 @@ public class Debugger {
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> stopAt(String methodName, ArrayList<String> varNames) {
+  public Optional<Point> stopAt(String methodName, String[] varNames) {
     return stopAt(main, methodName, varNames);
   }
 
@@ -189,11 +188,8 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<Point> stopAt(String className, String methodName) {
-    return stopAt(className, methodName, new ArrayList<String>());
+    return stopAt(className, methodName, new String[0]);
   }
-  // ********** stopAt ************************************************************//
-
-  // ********** watch ************************************************************//
 
   /**
    * Set breakpoint with a method name and variable names.
@@ -203,11 +199,13 @@ public class Debugger {
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> stopAt(String className, String methodName, ArrayList<String> varNames) {
-    if (vmManager instanceof ProbeJManager) {
+  public Optional<Point> stopAt(String className, String methodName, String[] varNames) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("If you use ProbeJ, you can use watch() only.");
       return Optional.empty();
     }
-    return pm.setPoint(vmManager, className, methodName, varNames, true, false);
+    return pm.setPoint(
+        vmManager, className, methodName, new ArrayList<>(Arrays.asList(varNames)), true, false);
   }
 
   /**
@@ -217,6 +215,10 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<Point> watch(int lineNumber) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("variable names are not set.");
+      return Optional.empty();
+    }
     return watch(main, lineNumber);
   }
 
@@ -227,7 +229,7 @@ public class Debugger {
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> watch(int lineNumber, ArrayList<String> varNames) {
+  public Optional<Point> watch(int lineNumber, String[] varNames) {
     return watch(main, lineNumber, varNames);
   }
 
@@ -239,7 +241,11 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<Point> watch(String className, int lineNumber) {
-    return watch(className, lineNumber, new ArrayList<String>());
+    if (usesProbeJ) {
+      DebuggerInfo.printError("variable names are not set.");
+      return Optional.empty();
+    }
+    return watch(className, lineNumber, new String[0]);
   }
 
   /**
@@ -250,8 +256,14 @@ public class Debugger {
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> watch(String className, int lineNumber, ArrayList<String> varNames) {
-    return watch(className, lineNumber, varNames, usesProbeJ);
+  public Optional<Point> watch(String className, int lineNumber, String[] varNames) {
+    return pm.setPoint(
+        vmManager,
+        className,
+        lineNumber,
+        new ArrayList<>(Arrays.asList(varNames)),
+        false,
+        usesProbeJ);
   }
 
   /**
@@ -271,7 +283,7 @@ public class Debugger {
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> watch(String methodName, ArrayList<String> varNames) {
+  public Optional<Point> watch(String methodName, String[] varNames) {
     return watch(main, methodName, varNames);
   }
 
@@ -283,101 +295,29 @@ public class Debugger {
    * @return breakpoint(optional)
    */
   public Optional<Point> watch(String className, String methodName) {
-    return watch(className, methodName, new ArrayList<String>());
-  }
-
-  // ********** watch ************************************************************//
-
-  // ********** watch or probe ************************************************************//
-
-  /**
-   * Set watchpoint with a method name and variable names.
-   *
-   * @param className class name
-   * @param methodName method name
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
-  public Optional<Point> watch(String className, String methodName, ArrayList<String> varNames) {
-    return watch(className, methodName, varNames, usesProbeJ);
-  }
-
-  /**
-   * Set watchpoint with a line number.
-   *
-   * @param lineNumber A line number in a target java file
-   * @return breakpoint(optional)
-   */
-  public Optional<Point> watch(int lineNumber, boolean isProbe) {
-    return watch(main, lineNumber, isProbe);
-  }
-
-  /**
-   * Set watchpoint with a line number and variable names.
-   *
-   * @param lineNumber line number
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
-  public Optional<Point> watch(int lineNumber, ArrayList<String> varNames, boolean isProbe) {
-    return watch(main, lineNumber, varNames, isProbe);
-  }
-
-  /**
-   * Set watchpoint with a line number.
-   *
-   * @param className class name
-   * @param lineNumber line number
-   * @return breakpoint(optional)
-   */
-  public Optional<Point> watch(String className, int lineNumber, boolean isProbe) {
-    return watch(className, lineNumber, new ArrayList<String>(), isProbe);
-  }
-
-  public Optional<Point> watch(
-      String className, int lineNumber, ArrayList<String> varNames, boolean isProbe) {
-    return pm.setPoint(vmManager, className, lineNumber, varNames, false, isProbe);
-  }
-
-  /**
-   * Set watchpoint with a method name.
-   *
-   * @param methodName A method name in a target java file
-   * @return breakpoint(optional)
-   */
-  public Optional<Point> watch(String methodName, boolean isProbe) {
-    return watch(main, methodName, isProbe);
+    return watch(className, methodName, new String[0]);
   }
 
   /**
    * Set watchpoint with a method name and variable names.
    *
+   * @param className class name
    * @param methodName method name
    * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<Point> watch(String methodName, ArrayList<String> varNames, boolean isProbe) {
-    return watch(main, methodName, varNames, isProbe);
-  }
-
-  /**
-   * Set watchpoint with a method name.
-   *
-   * @param className class name
-   * @param methodName method name
-   * @return breakpoint(optional)
-   */
-  public Optional<Point> watch(String className, String methodName, boolean isProbe) {
-    return watch(className, methodName, new ArrayList<String>(), isProbe);
-  }
-
-  // ********** watch or probe ************************************************************//
-
-  // ********** on breakpoint ************************************************************//
-
-  public Optional<Point> watch(
-      String className, String methodName, ArrayList<String> varNames, boolean isProbe) {
-    return pm.setPoint(vmManager, className, methodName, varNames, false, isProbe);
+  public Optional<Point> watch(String className, String methodName, String[] varNames) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("Cannot allow to set a probepoint by a method name.");
+      return Optional.empty();
+    }
+    return pm.setPoint(
+        vmManager,
+        className,
+        methodName,
+        new ArrayList<>(Arrays.asList(varNames)),
+        false,
+        usesProbeJ);
   }
 
   /** Execute "step in"/"step into" */
@@ -401,6 +341,7 @@ public class Debugger {
   /** Continue execution from breakpoint */
   public void cont() {
     pm.resumeThread();
+    pm.setBreaked(false);
   }
 
   /** Print source code */
@@ -481,12 +422,13 @@ public class Debugger {
         Thread.sleep(100);
       }
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      DebuggerInfo.print("Interrupted.");
     }
   }
 
   /** Shutdown the debugger. */
   public void exit() {
+    pm.completeStep();
     vmManager.shutdown();
   }
 
