@@ -2,7 +2,6 @@
 package debug.value;
 
 import com.sun.jdi.ArrayReference;
-import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 
 import java.time.LocalDateTime;
@@ -29,28 +28,25 @@ public class ArrayInfo extends ObjectInfo {
    */
   @Override
   public ArrayList<ValueInfo> expand() {
+    if (jValue == null) {
+      return children;
+    }
     if (isExpanded) {
       return children;
     }
-    var arrayRef = (ArrayReference) jValue;
-    arrayRef
-        .getValues()
-        .forEach(
-            val -> {
-              ValueInfo vi = ValueInfoFactory.create(stratum + 1, val, "", createdAt);
-              children.add(vi);
-            });
+    try {
+      var arrayRef = (ArrayReference) jValue;
+      arrayRef
+          .getValues()
+          .forEach(
+              val -> {
+                ValueInfo vi = ValueInfoFactory.create(stratum + 1, val, "", createdAt);
+                children.add(vi);
+              });
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     isExpanded = true;
     return children;
-  }
-
-  /**
-   * Get ReferenceType
-   *
-   * @return reference type
-   */
-  @Override
-  public ReferenceType getRT() {
-    return rt;
   }
 }

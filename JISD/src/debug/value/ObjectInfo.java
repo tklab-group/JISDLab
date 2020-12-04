@@ -7,6 +7,7 @@ import com.sun.jdi.Value;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Optional;
 
 /**
  * Information of an object value
@@ -23,7 +24,9 @@ public class ObjectInfo extends ValueInfo {
    */
   public ObjectInfo(int stratum, LocalDateTime createdAt, Value jValue) {
     super(stratum, createdAt, jValue);
-    rt = ((ObjectReference) jValue).referenceType();
+    if (jValue != null) {
+      rt = ((ObjectReference) jValue).referenceType();
+    }
   }
 
   /**
@@ -33,17 +36,24 @@ public class ObjectInfo extends ValueInfo {
    */
   @Override
   public ArrayList<ValueInfo> expand() {
+    if (jValue == null) {
+      return children;
+    }
     if (isExpanded) {
       return children;
     }
-    var objectRef = (ObjectReference) jValue;
-    objectRef
-        .getValues(rt.fields())
-        .forEach(
-            (field, value) -> {
-              ValueInfo vi = ValueInfoFactory.create(stratum + 1, value, "", createdAt);
-              children.add(vi);
-            });
+    try {
+      var objectRef = (ObjectReference) jValue;
+      objectRef
+          .getValues(rt.fields())
+          .forEach(
+              (field, value) -> {
+                ValueInfo vi = ValueInfoFactory.create(stratum + 1, value, "", createdAt);
+                children.add(vi);
+              });
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     isExpanded = true;
     return children;
   }
@@ -53,7 +63,7 @@ public class ObjectInfo extends ValueInfo {
    *
    * @return reference type
    */
-  public ReferenceType getRT() {
-    return rt;
+  public Optional<ReferenceType> getRT() {
+    return Optional.ofNullable(rt);
   }
 }

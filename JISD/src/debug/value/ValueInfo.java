@@ -32,22 +32,23 @@ public abstract class ValueInfo {
   /**
    * Constructor
    *
-   * @param strutum the current number of variable expansion strata
+   * @param stratum the current number of variable expansion strata
    * @param jValue jdi value
    */
-  public ValueInfo(int strutum, LocalDateTime createdAt, Value jValue) {
+  public ValueInfo(int stratum, LocalDateTime createdAt, Value jValue) {
     this.number = count++;
-    this.stratum = strutum;
-    this.value = jValue.toString();
-    this.jValue = jValue;
+    this.stratum = stratum;
+    if (jValue != null) {
+      this.value = jValue.toString();
+      this.jValue = jValue;
+    }
     this.createdAt = createdAt;
   }
 
-  public ValueInfo(int strutum, LocalDateTime createdAt, String value) {
+  public ValueInfo(int stratum, LocalDateTime createdAt, String value) {
     this.number = count++;
-    this.stratum = strutum;
+    this.stratum = stratum;
     this.value = value;
-    // this.jValue = jValue;
     this.createdAt = createdAt;
   }
 
