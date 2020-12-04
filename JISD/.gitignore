@@ -5,3 +5,7 @@ build.xml
 /data/
 /build/*/*
 !/build/libs/*
+
+.classpath
+.project
+.settings

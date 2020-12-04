@@ -38,7 +38,7 @@ class DebuggerTest {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     bps.forEach(
         item -> {
-          dbg.watch(item, false);
+          dbg.watch(item);
         });
     return dbg;
   }
@@ -79,7 +79,7 @@ class DebuggerTest {
   void methodNameWatchPointTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<Integer> bps = new ArrayList<>();
-    dbg.watch("java.io.PrintStream", "println", false);
+    dbg.watch("java.io.PrintStream", "println");
     bps.forEach(
         item -> {
           dbg.watch(item);
@@ -129,13 +129,12 @@ class DebuggerTest {
   void watchPointSetByVarNamesTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<Integer> bps = new ArrayList<>();
-    ArrayList<String> varNames = new ArrayList<>();
+    String[] varNames = {"a"};
     bps.add(bpln1);
     bps.add(bpln2);
-    varNames.add("a");
     bps.forEach(
         item -> {
-          dbg.watch(item, varNames, false);
+          dbg.watch(item, varNames);
         });
     dbg.run(1000);
     dbg.exit();
@@ -151,14 +150,13 @@ class DebuggerTest {
   void illegalWatchPointSetTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<Integer> bps = new ArrayList<>();
-    ArrayList<String> varNames = new ArrayList<>();
+    String[] varNames = {"a"};
     bps.add(bpln1);
     bps.add(bpln2);
     bps.add(0);
-    varNames.add("a");
     bps.forEach(
         item -> {
-          dbg.watch(item, varNames, false);
+          dbg.watch(item, varNames);
         });
     dbg.run(1000);
     dbg.exit();
@@ -173,10 +171,9 @@ class DebuggerTest {
   @Test
   void breakPointTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
-    ArrayList<String> varNames = new ArrayList<>();
-    varNames.add("a");
+    String[] varNames = {"a"};
     dbg.stopAt(bpln1, varNames);
-    dbg.watch(bpln2, varNames, false);
+    dbg.watch(bpln2, varNames);
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
@@ -191,9 +188,8 @@ class DebuggerTest {
   @Test
   void valueInfoTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
-    ArrayList<String> varNames = new ArrayList<>();
-    varNames.add("a");
-    dbg.watch(34, varNames, false);
+    String[] varNames = {"a"};
+    dbg.watch(34, varNames);
     int maxRecords = 200;
     DebugResult.setDefaultMaxRecordNoOfValue(maxRecords);
     dbg.run(2000);
@@ -218,8 +214,7 @@ class DebuggerTest {
   @Test
   void stepTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
-    ArrayList<String> varNames = new ArrayList<>();
-    varNames.add("a");
+    String[] varNames = {"a"};
     dbg.stopAt(bpln1, varNames).get();
     dbg.stopAt(bpln2, varNames).get();
     dbg.run(1000);
@@ -240,8 +235,8 @@ class DebuggerTest {
   @Test
   void breakPointClearTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
-    Point bp1 = dbg.watch(bpln1, false).get();
-    Point bp2 = dbg.watch(bpln2, false).get();
+    Point bp1 = dbg.watch(bpln1).get();
+    Point bp2 = dbg.watch(bpln2).get();
     bp1.disable();
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
