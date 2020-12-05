@@ -412,6 +412,9 @@ public class Debugger {
   public void run(int sleepTime) {
     vmThread = new Thread(vmManager);
     vmThread.start();
+    if (!isRemoteDebug && usesProbeJ) {
+      sleep(1000);
+    }
     sleep(sleepTime);
   }
 

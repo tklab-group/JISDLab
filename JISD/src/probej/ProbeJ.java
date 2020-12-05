@@ -31,7 +31,7 @@ public class ProbeJ {
       Thread tmp = new Thread(vm.get());
       tmp.start();
       vmThread = Optional.of(tmp);
-      Debugger.sleep(1000);
+      Debugger.sleep(800); // wait for vm start.
       System.out.println("VM with ProbeJ started.");
     }
   }
