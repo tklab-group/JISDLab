@@ -1,48 +1,46 @@
-package debug.test;
+package debug;
 
-import static org.junit.jupiter.api.Assertions.*;
+import debug.value.ValueInfo;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import debug.BreakPoint;
-import debug.DebugResult;
-import debug.Debugger;
-import debug.value.ValueInfo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Debugger Test
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 class DebuggerTest {
   /* line numbers a breakpoint is set */
   static final int bpln1 = 29;
   static final int bpln2 = 31;
   ArrayList<Integer> bps = new ArrayList<>();
-  
+
   DebuggerTest() {
     bps.add(bpln1);
     bps.add(bpln2);
   }
-  Debugger makeDebugger() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
-    bps.forEach(item -> {
-      dbg.watch(item, false);
-    });
-    return dbg;
-  }
 
-  void showResult(DebugResult res) {
+  static void showResult(DebugResult res) {
     System.out.println("-----------------------------");
-    System.out.println(res.getLineNumber());
-    System.out.println(res.getName());
+    var loc = res.getLocation();
+    System.out.println(loc.getLineNumber());
+    System.out.println(loc.getVarName());
     System.out.println(res.getLatestValue());
     System.out.println("");
+  }
+
+  Debugger makeDebugger() {
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    bps.forEach(
+        item -> {
+          dbg.watch(item);
+        });
+    return dbg;
   }
 
   @Test
@@ -53,7 +51,7 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bps.get(i / 4));
+      Assertions.assertEquals(res.getLocation().getLineNumber(), bps.get(i / 4));
     }
     dbg.exit();
   }
@@ -65,26 +63,27 @@ class DebuggerTest {
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      assertEquals(res.getLineNumber(), bps.get(i / 4));
+      assertEquals(res.getLocation().getLineNumber(), bps.get(i / 4));
     }
     dbg.clear(bpln2);
-    assertEquals(dbg.getBreakPoints().size(), 1);
-    assertEquals(dbg.getBreakPoints().get(0).getLineNumber(), bps.get(0));
+    assertEquals(dbg.getPoints().size(), 1);
+    assertEquals(dbg.getPoints().get(0).getLineNumber(), bps.get(0));
     dbg.stopAt("sayHello");
-    assertEquals(dbg.getBreakPoints().size(), 2);
+    assertEquals(dbg.getPoints().size(), 2);
     dbg.clear("sayHello");
-    assertEquals(dbg.getBreakPoints().size(), 1);
+    assertEquals(dbg.getPoints().size(), 1);
     dbg.exit();
   }
 
   @Test
   void methodNameWatchPointTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<Integer> bps = new ArrayList<>();
-    dbg.watch("java.io.PrintStream", "println", false);
-    bps.forEach(item -> {
-      dbg.watch(item);
-    });
+    dbg.watch("java.io.PrintStream", "println");
+    bps.forEach(
+        item -> {
+          dbg.watch(item);
+        });
     dbg.run(1000);
     dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
@@ -103,10 +102,10 @@ class DebuggerTest {
     assertEquals(results.size(), 8);
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
-      assertEquals(res.getLineNumber(), bps.get(i / 4));
+      assertEquals(res.getLocation().getLineNumber(), bps.get(i / 4));
     }
     dbg.clear(bpln2);
-    assertEquals(dbg.getBreakPoints().size(), 1);
+    assertEquals(dbg.getPoints().size(), 1);
     dbg.restart(sleepTime);
     results = dbg.getResults();
     assertEquals(results.size(), 4);
@@ -122,66 +121,65 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bps.get(i / 4));
+      Assertions.assertEquals(res.getLocation().getLineNumber(), bps.get(i / 4));
     }
   }
 
   @Test
   void watchPointSetByVarNamesTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<Integer> bps = new ArrayList<>();
-    ArrayList<String> varNames = new ArrayList<>();
+    String[] varNames = {"a"};
     bps.add(bpln1);
     bps.add(bpln2);
-    varNames.add("a");
-    bps.forEach(item -> {
-      dbg.watch(item, varNames, false);
-    });
+    bps.forEach(
+        item -> {
+          dbg.watch(item, varNames);
+        });
     dbg.run(1000);
     dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getName(), "a");
+      Assertions.assertEquals(res.getLocation().getVarName(), "a");
     }
   }
 
   @Test
   void illegalWatchPointSetTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     ArrayList<Integer> bps = new ArrayList<>();
-    ArrayList<String> varNames = new ArrayList<>();
+    String[] varNames = {"a"};
     bps.add(bpln1);
     bps.add(bpln2);
     bps.add(0);
-    varNames.add("a");
-    bps.forEach(item -> {
-      dbg.watch(item, varNames, false);
-    });
+    bps.forEach(
+        item -> {
+          dbg.watch(item, varNames);
+        });
     dbg.run(1000);
     dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getName(), "a");
+      Assertions.assertEquals(res.getLocation().getVarName(), "a");
     }
   }
 
   @Test
   void breakPointTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
-    ArrayList<String> varNames = new ArrayList<>();
-    varNames.add("a");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    String[] varNames = {"a"};
     dbg.stopAt(bpln1, varNames);
-    dbg.watch(bpln2, varNames, false);
+    dbg.watch(bpln2, varNames);
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bpln1);
+      Assertions.assertEquals(res.getLocation().getLineNumber(), bpln1);
     }
     dbg.cont();
     dbg.exit();
@@ -189,10 +187,9 @@ class DebuggerTest {
 
   @Test
   void valueInfoTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
-    ArrayList<String> varNames = new ArrayList<>();
-    varNames.add("a");
-    dbg.watch(34, varNames, false);
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    String[] varNames = {"a"};
+    dbg.watch(34, varNames);
     int maxRecords = 200;
     DebugResult.setDefaultMaxRecordNoOfValue(maxRecords);
     dbg.run(2000);
@@ -200,23 +197,24 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getValues().length, maxRecords);
+      Assertions.assertEquals(res.getValues().size(), maxRecords);
     }
-    ValueInfo[] values = results.get(0).getValues();
-    IntStream.range(0, maxRecords).forEach(i -> {
-      System.out.print(values[i].getValue() + " ");
-      if (i % 10 == 9) {
-        System.out.println("");
-      }
-    });
+    ArrayList<ValueInfo> values = results.get(0).getValues();
+    IntStream.range(0, maxRecords)
+        .forEach(
+            i -> {
+              System.out.print(values.get(i).getValue() + " ");
+              if (i % 10 == 9) {
+                System.out.println("");
+              }
+            });
     dbg.exit();
   }
-  
-  @Test 
+
+  @Test
   void stepTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
-    ArrayList<String> varNames = new ArrayList<>();
-    varNames.add("a");
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    String[] varNames = {"a"};
     dbg.stopAt(bpln1, varNames).get();
     dbg.stopAt(bpln2, varNames).get();
     dbg.run(1000);
@@ -225,15 +223,20 @@ class DebuggerTest {
     dbg.next();
     dbg.next();
     dbg.locals();
-    dbg.getResults().forEach((r)->{System.out.println(r.getLineNumber()+": "+r.getName());});
+    dbg.getResults()
+        .forEach(
+            (r) -> {
+              var loc = r.getLocation();
+              System.out.println(loc.getLineNumber() + ": " + loc.getVarName());
+            });
     dbg.exit();
   }
-  
+
   @Test
   void breakPointClearTest() {
-    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin/");
-    BreakPoint bp1 = dbg.watch(bpln1, false).get();
-    BreakPoint bp2 = dbg.watch(bpln2, false).get();
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    Point bp1 = dbg.watch(bpln1).get();
+    Point bp2 = dbg.watch(bpln2).get();
     bp1.disable();
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
@@ -241,9 +244,9 @@ class DebuggerTest {
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
       showResult(res);
-      Assertions.assertEquals(res.getLineNumber(), bpln2);
+      var loc = res.getLocation();
+      Assertions.assertEquals(loc.getLineNumber(), bpln2);
     }
     dbg.exit();
   }
-
 }

@@ -1,0 +1,15 @@
+{
+  "interrupt_mode": "message",
+  "language": "java",
+  "display_name": "Java",
+  "env": {
+    "IJAVA_CLASSPATH": "/JISDLab/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:/JISDLab/JISD/build/libs/jisd-all.jar:/workspaces/sample"
+  },
+  "argv": [
+    "java",
+    "-cp",
+    "/root/.local/share/jupyter/kernels/java/ijava-1.3.0.jar:/workspaces/sample",
+    "io.github.spencerpark.ijava.IJava",
+    "{connection_file}"
+  ]
+}

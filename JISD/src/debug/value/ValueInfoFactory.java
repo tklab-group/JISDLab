@@ -1,43 +1,35 @@
-/**
- * 
- */
+/** */
 package debug.value;
 
 import com.sun.jdi.Value;
 
+import java.time.LocalDateTime;
+
 /**
  * ValueInfo simple factory
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 public class ValueInfoFactory {
   /**
    * create ValueInfo
-   * 
-   * @param number  timestamp
+   *
    * @param stratum No. of the variable expansion
-   * @param jValue  jdi value
+   * @param jValue jdi value
    * @return value info
    */
-  public static ValueInfo create(long number, int stratum, Value jValue) {
+  public static ValueInfo create(int stratum, Value jValue, String value, LocalDateTime createdAt) {
+    if (jValue == null) { // no jValue
+      return new PrimitiveInfo(stratum, createdAt, value);
+    }
     char sign = jValue.type().signature().charAt(0);
     switch (sign) {
-    case '[':
-      return new ArrayInfo(number, stratum, jValue);
-    case 'Z':
-    case 'B':
-    case 'C':
-    case 'S':
-    case 'I':
-    case 'J':
-    case 'F':
-    case 'D':
-      return new PrimitiveInfo(number, stratum, jValue);
-    case 'L':
-      return new ObjectInfo(number, stratum, jValue);
-    default:
-      return new ValueInfo(number, stratum, jValue);
+      case '[':
+        return new ArrayInfo(stratum, createdAt, jValue);
+      case 'L':
+        return new ObjectInfo(stratum, createdAt, jValue);
+      default:
+        return new PrimitiveInfo(stratum, createdAt, jValue);
     }
   }
 }

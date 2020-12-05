@@ -1,162 +1,105 @@
 package debug;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.jdiscript.JDIScript;
-import org.jdiscript.handlers.OnVMStart;
-import org.jdiscript.util.VMLauncher;
-import org.jdiscript.util.VMSocketAttacher;
-
-import com.sun.jdi.VirtualMachine;
-
 /**
  * JISDLab's main debugger
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 public class Debugger {
   /** Manage breakpoints */
-  BreakPointManager bpm;
+  PointManager pm;
   /** Target class setting items */
-  String main, options, srcDir;
+  @Getter @Setter String main, options;
   /** JDI thread */
   Thread vmThread;
   /** VM manager */
   VMManager vmManager;
   /** use attaching connector or not */
-  boolean isRemoteDebug = false;
+  boolean isRemoteDebug;
   /** uses ProbeJ ? */
-  boolean usesProbeJ = false;
+  boolean usesProbeJ;
   /** attaching port */
-  int port = 0;
+  @Getter int port;
   /** */
-  String host;
+  @Getter @Setter String host;
 
   /**
    * Constructor
-   * 
-   * @param main    A target class file name
-   * @param options A target class path setting
-   * @param srcDir  source directory
-   */
-  public Debugger(String main, String options, String srcDir) {
-    this(main, options, srcDir, false);
-  }
-
-  /**
-   * Constructor
-   * 
-   * @param main    A target class file name
+   *
+   * @param main A target class file name
    * @param options A target class path setting
    */
   public Debugger(String main, String options) {
     this(main, options, false);
   }
 
-  /**
-   * Constructor
-   * 
-   * @param main   A target class file name
-   * @param srcDir source directory
-   * @param port   attaching port
-   */
-  public Debugger(String host, int port, String srcDir) {
-    this(host, port, srcDir, false);
+  public Debugger(String main, String options, boolean usesProbeJ) {
+    this(main, options, 39876, usesProbeJ);
   }
 
-  /**
-   * Constructor
-   * 
-   * @param main A target class file name
-   * @param port attaching port
-   */
+  public Debugger(String main, String options, int port, boolean usesProbeJ) {
+    init(main, options, "localhost", port, false, usesProbeJ);
+  }
+
   public Debugger(int port) {
     this(port, false);
   }
-  
-  /**
-   * Constructor
-   * 
-   * @param main A target class file name
-   * @param port attaching port
-   */
+
   public Debugger(String host, int port) {
     this(host, port, false);
   }
-  
-  /**
-   * Constructor
-   * 
-   * @param main    A target class file name
-   * @param options A target class path setting
-   * @param srcDir  source directory
-   */
-  public Debugger(String main, String options, String srcDir, boolean usesProbeJ) {
-    setMain(main);
-    this.options = options;
-    this.usesProbeJ = usesProbeJ;
-    setSrcDir(srcDir);
-    bpm = new BreakPointManager();
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
-    vmManager.prepareStart(bpm);
-  }
 
-  /**
-   * Constructor
-   * 
-   * @param main    A target class file name
-   * @param options A target class path setting
-   */
-  public Debugger(String main, String options, boolean usesProbeJ) {
-    this(main, options, ".", usesProbeJ);
-  }
-
-  /**
-   * Constructor
-   * 
-   * @param main   A target class file name
-   * @param srcDir source directory
-   * @param port   attaching port
-   */
-  public Debugger(String host, int port, String srcDir, boolean usesProbeJ) {
-    setSrcDir(srcDir);
-    this.host = host;
-    this.usesProbeJ = usesProbeJ;
-    bpm = new BreakPointManager();
-    this.isRemoteDebug = true;
-    setPort(port);
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
-    vmManager.prepareStart(bpm);
-  }
-
-  /**
-   * Constructor
-   * 
-   * @param main A target class file name
-   * @param port attaching port
-   */
   public Debugger(int port, boolean usesProbeJ) {
     this("localhost", port, usesProbeJ);
   }
-  
-  /**
-   * Constructor
-   * 
-   * @param main A target class file name
-   * @param port attaching port
-   */
+
   public Debugger(String host, int port, boolean usesProbeJ) {
-    this(host, port, "", usesProbeJ);
+    init("", "", host, port, true, usesProbeJ);
   }
 
-  //********** debugger settings ************************************************************//
+  /**
+   * Sleep main thread
+   *
+   * @param sleepTime wait time
+   */
+  public static void sleep(int sleepTime) {
+    try {
+      Thread.sleep(sleepTime);
+    } catch (InterruptedException e) {
+      DebuggerInfo.print("Interrupted.");
+    }
+  }
+
+  void init(
+      String main,
+      String options,
+      String host,
+      int port,
+      boolean isRemoteDebug,
+      boolean usesProbeJ) {
+    setMain(main);
+    setOptions(options);
+    setHost(host);
+    setPort(port);
+    this.usesProbeJ = usesProbeJ;
+    this.isRemoteDebug = isRemoteDebug;
+    pm = new PointManager();
+    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager.prepareStart(pm);
+  }
+
+  // ********** debugger settings ************************************************************//
+
+  // ********** stop ************************************************************//
+
+  // ********** debugger settings ************************************************************//
   public void setPort(int port) {
     if (port < 1024 || port > 65535) {
       this.port = 8000;
@@ -166,326 +109,262 @@ public class Debugger {
       this.port = port;
     }
   }
-  
-  public void setMain(String main) {
-    this.main = main;
-  }
-  
-  public void setSrcDir(String srcDir) {
-    this.srcDir = srcDir;
-  }
-  //********** debugger settings ************************************************************//
 
-  //********** stop ************************************************************//
   /**
    * Set breakpoint with a line number.
-   * 
+   *
    * @param lineNumber A line number in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(int lineNumber) {
+  public Optional<Point> stopAt(int lineNumber) {
     return stopAt(main, lineNumber);
   }
 
   /**
    * Set breakpoint with a line number and variable names.
-   * 
+   *
    * @param lineNumber line number
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(int lineNumber, ArrayList<String> varNames) {
+  public Optional<Point> stopAt(int lineNumber, String[] varNames) {
     return stopAt(main, lineNumber, varNames);
   }
 
   /**
    * Set breakpoint with a line number and variable names.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param lineNumber line number
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(String className, int lineNumber) {
-    return stopAt(className, lineNumber, new ArrayList<String>());
+  public Optional<Point> stopAt(String className, int lineNumber) {
+    return stopAt(className, lineNumber, new String[0]);
   }
 
   /**
    * Set breakpoint with a line number and variable names.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param lineNumber line number
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(String className, int lineNumber, ArrayList<String> varNames) {
-    return bpm.setBreakPoint(vmManager, className, lineNumber, varNames, true, false);
+  public Optional<Point> stopAt(String className, int lineNumber, String[] varNames) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("If you use ProbeJ, you can use watch() only.");
+      return Optional.empty();
+    }
+    return pm.setPoint(
+        vmManager, className, lineNumber, new ArrayList<>(Arrays.asList(varNames)), true, false);
   }
 
   /**
    * Set breakpoint with a method name.
-   * 
+   *
    * @param methodName A method name in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(String methodName) {
+  public Optional<Point> stopAt(String methodName) {
     return stopAt(main, methodName);
   }
 
   /**
    * Set breakpoint with a method name and variable names.
-   * 
+   *
    * @param methodName method name
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(String methodName, ArrayList<String> varNames) {
+  public Optional<Point> stopAt(String methodName, String[] varNames) {
     return stopAt(main, methodName, varNames);
   }
 
   /**
    * Set breakpoint with a method name.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param methodName method name
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(String className, String methodName) {
-    return stopAt(className, methodName, new ArrayList<String>());
+  public Optional<Point> stopAt(String className, String methodName) {
+    return stopAt(className, methodName, new String[0]);
   }
 
   /**
    * Set breakpoint with a method name and variable names.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param methodName method name
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> stopAt(String className, String methodName, ArrayList<String> varNames) {
-    return bpm.setBreakPoint(vmManager, className, methodName, varNames, true, false);
+  public Optional<Point> stopAt(String className, String methodName, String[] varNames) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("If you use ProbeJ, you can use watch() only.");
+      return Optional.empty();
+    }
+    return pm.setPoint(
+        vmManager, className, methodName, new ArrayList<>(Arrays.asList(varNames)), true, false);
   }
-  //********** stopAta ************************************************************//
-  
-  //********** watch ************************************************************//
+
   /**
    * Set watchpoint with a line number.
-   * 
+   *
    * @param lineNumber A line number in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(int lineNumber) {
+  public Optional<Point> watch(int lineNumber) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("variable names are not set.");
+      return Optional.empty();
+    }
     return watch(main, lineNumber);
   }
 
   /**
    * Set watchpoint with a line number and variable names.
-   * 
+   *
    * @param lineNumber line number
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(int lineNumber, ArrayList<String> varNames) {
+  public Optional<Point> watch(int lineNumber, String[] varNames) {
     return watch(main, lineNumber, varNames);
   }
 
   /**
    * Set watchpoint with a line number.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param lineNumber line number
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(String className, int lineNumber) {
-    return watch(className, lineNumber, new ArrayList<String>());
+  public Optional<Point> watch(String className, int lineNumber) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("variable names are not set.");
+      return Optional.empty();
+    }
+    return watch(className, lineNumber, new String[0]);
   }
 
   /**
    * Set watchpoint with a line number and variable names.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param lineNumber line number
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(String className, int lineNumber, ArrayList<String> varNames) {
-    return watch(className, lineNumber, varNames, usesProbeJ);
+  public Optional<Point> watch(String className, int lineNumber, String[] varNames) {
+    return pm.setPoint(
+        vmManager,
+        className,
+        lineNumber,
+        new ArrayList<>(Arrays.asList(varNames)),
+        false,
+        usesProbeJ);
   }
 
   /**
    * Set watchpoint with a method name.
-   * 
+   *
    * @param methodName A method name in a target java file
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(String methodName) {
+  public Optional<Point> watch(String methodName) {
     return watch(main, methodName);
   }
 
   /**
    * Set watchpoint with a method name and variable names.
-   * 
+   *
    * @param methodName method name
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(String methodName, ArrayList<String> varNames) {
+  public Optional<Point> watch(String methodName, String[] varNames) {
     return watch(main, methodName, varNames);
   }
 
   /**
    * Set watchpoint with a method name.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param methodName method name
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(String className, String methodName) {
-    return watch(className, methodName, new ArrayList<String>());
+  public Optional<Point> watch(String className, String methodName) {
+    return watch(className, methodName, new String[0]);
   }
 
   /**
    * Set watchpoint with a method name and variable names.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param methodName method name
-   * @param varNames   variable names
+   * @param varNames variable names
    * @return breakpoint(optional)
    */
-  public Optional<BreakPoint> watch(String className, String methodName, ArrayList<String> varNames) {
-    return watch(className, methodName, varNames, usesProbeJ);
-  }
-  //********** watch ************************************************************//
-  
-  //********** watch or probe ************************************************************//
-  /**
-   * Set watchpoint with a line number.
-   * 
-   * @param lineNumber A line number in a target java file
-   * @return breakpoint(optional)
-   */
-  public Optional<BreakPoint> watch(int lineNumber, boolean isProbe) {
-    return watch(main, lineNumber, isProbe);
+  public Optional<Point> watch(String className, String methodName, String[] varNames) {
+    if (usesProbeJ) {
+      DebuggerInfo.printError("Cannot allow to set a probepoint by a method name.");
+      return Optional.empty();
+    }
+    return pm.setPoint(
+        vmManager,
+        className,
+        methodName,
+        new ArrayList<>(Arrays.asList(varNames)),
+        false,
+        usesProbeJ);
   }
 
-  /**
-   * Set watchpoint with a line number and variable names.
-   * 
-   * @param lineNumber line number
-   * @param varNames   variable names
-   * @return breakpoint(optional)
-   */
-  public Optional<BreakPoint> watch(int lineNumber, ArrayList<String> varNames, boolean isProbe) {
-    return watch(main, lineNumber, varNames, isProbe);
-  }
-
-  /**
-   * Set watchpoint with a line number.
-   * 
-   * @param className  class name
-   * @param lineNumber line number
-   * @return breakpoint(optional)
-   */
-  public Optional<BreakPoint> watch(String className, int lineNumber, boolean isProbe) {
-    return watch(className, lineNumber, new ArrayList<String>(), isProbe);
-  }
-  
-  public Optional<BreakPoint> watch(String className, int lineNumber, ArrayList<String> varNames, boolean isProbe) {
-    return bpm.setBreakPoint(vmManager, className, lineNumber, varNames, false, isProbe);
-  }
-  
-  /**
-   * Set watchpoint with a method name.
-   * 
-   * @param methodName A method name in a target java file
-   * @return breakpoint(optional)
-   */
-  public Optional<BreakPoint> watch(String methodName, boolean isProbe) {
-    return watch(main, methodName, isProbe);
-  }
-
-  /**
-   * Set watchpoint with a method name and variable names.
-   * 
-   * @param methodName method name
-   * @param varNames   variable names
-   * @return breakpoint(optional)
-   */
-  public Optional<BreakPoint> watch(String methodName, ArrayList<String> varNames, boolean isProbe) {
-    return watch(main, methodName, varNames, isProbe);
-  }
-
-  /**
-   * Set watchpoint with a method name.
-   * 
-   * @param className  class name
-   * @param methodName method name
-   * @return breakpoint(optional)
-   */
-  public Optional<BreakPoint> watch(String className, String methodName, boolean isProbe) {
-    return watch(className, methodName, new ArrayList<String>(), isProbe);
-  }
-  
-  public Optional<BreakPoint> watch(String className, String methodName, ArrayList<String> varNames, boolean isProbe) {
-    return bpm.setBreakPoint(vmManager, className, methodName, varNames, false, isProbe);
-  }
-  //********** watch or probe ************************************************************//
-  
-  //********** on breakpoint ************************************************************//
-  /**
-   * Execute "step in"/"step into"
-   */
+  /** Execute "step in"/"step into" */
   public void step() {
-    bpm.requestStepInto(vmManager);
+    pm.requestStepInto(vmManager);
     sleep();
   }
-  
-  /**
-   * Execute "step over"
-   */
+
+  /** Execute "step over" */
   public void next() {
-    bpm.requestStepOver(vmManager);
+    pm.requestStepOver(vmManager);
     sleep();
   }
-  
-  /**
-   * Execute "step out"/"step return"
-   */
+
+  /** Execute "step out"/"step return" */
   public void finish() {
-    bpm.requestStepOut(vmManager);
+    pm.requestStepOut(vmManager);
     sleep();
   }
-  
+
   /** Continue execution from breakpoint */
   public void cont() {
-    bpm.resumeThread();
+    pm.resumeThread();
+    pm.setBreaked(false);
   }
 
-  /**
-   * Print source code
-   */
-  public void list() {
-    bpm.printSrcAtCurrentLocation("Current location,", srcDir);
+  /** Print source code */
+  public void list(String srcDir) {
+    pm.printSrcAtCurrentLocation("Current location,", srcDir);
   }
+  // ********** on breakpoint ************************************************************//
 
-  /**
-   * Print all local variables in current stack frame
-   */
+  // ********** remove breakpoint ************************************************************//
+
+  /** Print all local variables in current stack frame */
   public void locals() {
-    bpm.printLocals();
+    pm.printLocals();
   }
-  
-  /**
-   * Print stacktrace in current stack frame.
-   */
-  public void where() {
-    bpm.printStackTrace();
-  }
-  //********** on breakpoint ************************************************************//
 
-  //********** remove breakpoint ************************************************************//
+  /** Print stacktrace in current stack frame. */
+  public void where() {
+    pm.printStackTrace();
+  }
+
   /**
    * Remove breakpoint with a line number.
-   * 
+   *
    * @param lineNumber A line number in a target java file
    */
   public void clear(int lineNumber) {
@@ -494,38 +373,40 @@ public class Debugger {
 
   /**
    * Remove breakpoint with a line number.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param lineNumber line number
    */
   public void clear(String className, int lineNumber) {
-    bpm.removeBreakPoint(className, lineNumber);
+    pm.removePoint(className, lineNumber);
   }
 
   /**
    * Remove breakpoint with a method name.
-   * 
+   *
    * @param methodName A method name in a target java file
    */
   public void clear(String methodName) {
     clear(main, methodName);
   }
 
+  // ********** remove breakpoint ************************************************************//
+
+  // ********** debugger control ************************************************************//
+
   /**
    * Remove breakpoint with a method name.
-   * 
-   * @param className  class name
+   *
+   * @param className class name
    * @param methodName method name
    */
   public void clear(String className, String methodName) {
-    bpm.removeBreakPoint(className, methodName);
+    pm.removePoint(className, methodName);
   }
-  //********** remove breakpoint ************************************************************//
 
-  //********** debugger control ************************************************************//
   /**
    * Start up the debugger.
-   * 
+   *
    * @param sleepTime Wait time after the debugger starts running
    */
   public void run(int sleepTime) {
@@ -534,156 +415,82 @@ public class Debugger {
     sleep(sleepTime);
   }
 
-  /**
-   * Sleep main thread
-   * 
-   * @param sleepTime wait time
-   */
-  public void sleep(int sleepTime) {
+  /** Sleep main thread until current bpm process is done */
+  void sleep() {
     try {
-      Thread.sleep(sleepTime);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-  }
-  
-  /**
-   * Sleep main thread until current bpm process is done
-   * 
-   */
-  public void sleep() {
-    try {
-      while (bpm.isProcessing) {
+      while (pm.isProcessing) {
         Thread.sleep(100);
       }
     } catch (InterruptedException e) {
-      e.printStackTrace();
+      DebuggerInfo.print("Interrupted.");
     }
   }
 
-  /**
-   * Shutdown the debugger.
-   */
+  /** Shutdown the debugger. */
   public void exit() {
+    pm.completeStep();
     vmManager.shutdown();
   }
-  
-  /**
-   * Shutdown the debugger.(alias of "exit")
-   */
+
+  /** Shutdown the debugger.(alias of "exit") */
   public void quit() {
     exit();
   }
 
   /**
-   * Clear debug results all.
-   */
-  public void clearResults() {
-    ArrayList<BreakPoint> bps = getBreakPoints();
-    bps.forEach(bp -> {
-      bp.clearDebugResults();
-      bp.setRequestState(false);
-    });
-  }
-
-  /**
    * Restart the debugger.
-   * 
+   *
    * @param sleepTime Wait time after the debugger starts running
    */
   public void restart(int sleepTime) {
     exit();
     clearResults();
     vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
-    vmManager.prepareStart(bpm);
+    vmManager.prepareStart(pm);
     run(sleepTime);
   }
-  //********** debugger control ************************************************************//
+  // ********** debugger control ************************************************************//
 
-  //********** debug result ************************************************************//
+  // ********** debug result ************************************************************//
+
+  /** Clear debug results all. */
+  public void clearResults() {
+    ArrayList<Point> bps = getPoints();
+    bps.forEach(
+        bp -> {
+          bp.reset();
+        });
+  }
+
   /**
    * Get debug results.
-   * 
+   *
    * @return Debug results
    */
   public ArrayList<DebugResult> getResults() {
-    return bpm.getResults();
+    return pm.getResults();
   }
 
   /**
    * Get debug results a variable name matches.
-   * 
+   *
    * @param varName variable name
    * @return Debug results
    */
   public ArrayList<DebugResult> getResults(String varName) {
-    return bpm.getResults(varName);
+    return pm.getResults(varName);
   }
-  //********** debug result ************************************************************//
+  // ********** debug result ************************************************************//
 
-  //********** breakpoint ************************************************************//
+  // ********** breakpoint ************************************************************//
+
   /**
    * Get breakpoints.
-   * 
+   *
    * @return breakpoints
    */
-  public ArrayList<BreakPoint> getBreakPoints() {
-    return new ArrayList<>(bpm.getBreakPoints());
+  public ArrayList<Point> getPoints() {
+    return new ArrayList<>(pm.getPoints());
   }
-  //********** breakpoint ************************************************************//
-  
-  //********** external process ************************************************************//
-  /**
-   * Execute external command.
-   * @param command command (wildcard * is unavailable)
-   * @return [stdout, stderr, exit code] (optional)
-   */
-  public static Optional<String[]> exec(String command) {
-    String lineSeparator = System.getProperty("line.separator");
-    String[] results = new String[3];
-    Arrays.fill(results, "");
-    try {
-      Process p = Runtime.getRuntime().exec(command);
-      InputStream in = null;
-      BufferedReader br = null;
-      try {
-        in = p.getInputStream();
-        StringBuffer out = new StringBuffer();
-        br = new BufferedReader(new InputStreamReader(in));
-        String line;
-        while ((line = br.readLine()) != null) {
-            out.append(line + lineSeparator);
-        }
-        results[0] = out.toString();
-        br.close();
-        in.close();
-        in = p.getErrorStream();
-        StringBuffer err = new StringBuffer();
-        br = new BufferedReader(new InputStreamReader(in));
-        while ((line = br.readLine()) != null) {
-            err.append(line + lineSeparator);
-        }
-        results[1] = err.toString();
-        results[2] = Integer.toString(p.waitFor());
-        System.out.print(results[0]);
-        System.err.print(results[1]);
-      } finally {
-        if (br != null) {
-            br.close();
-        }
-        if (in != null) {
-            in.close();
-        }
-      }
-      p.destroy();
-      return Optional.of(results);
-    } catch (IOException e) {
-      e.printStackTrace();
-      return Optional.empty();
-    } catch (InterruptedException e) {
-      DebuggerInfo.print("Interrupted.");
-      return Optional.empty();
-    }
-  }
-  //********** external process ************************************************************//
+  // ********** breakpoint ************************************************************//
 }

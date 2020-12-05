@@ -1,58 +1,69 @@
-/**
- * 
- */
+/** */
 package debug.value;
-
-import java.util.ArrayList;
 
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Optional;
+
 /**
  * Information of an object value
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
 public class ObjectInfo extends ValueInfo {
   /** reference type */
   ReferenceType rt;
 
   /**
-   * @param number  timestamp
    * @param stratum No. of the variable expansion
-   * @param jValue  jdi value
+   * @param jValue jdi value
    */
-  public ObjectInfo(long number, int stratum, Value jValue) {
-    super(number, stratum, jValue);
-    rt = ((ObjectReference) jValue).referenceType();
+  public ObjectInfo(int stratum, LocalDateTime createdAt, Value jValue) {
+    super(stratum, createdAt, jValue);
+    if (jValue != null) {
+      rt = ((ObjectReference) jValue).referenceType();
+    }
   }
 
   /**
    * Create value info of fields
-   * 
+   *
    * @return children
    */
   @Override
   public ArrayList<ValueInfo> expand() {
-    if (isExpanded)
+    if (jValue == null) {
       return children;
-    var objectRef = (ObjectReference) jValue;
-    objectRef.getValues(rt.fields()).forEach((field, value) -> {
-      ValueInfo vi = ValueInfoFactory.create(number, stratum + 1, value);
-      children.add(vi);
-    });
+    }
+    if (isExpanded) {
+      return children;
+    }
+    try {
+      var objectRef = (ObjectReference) jValue;
+      objectRef
+          .getValues(rt.fields())
+          .forEach(
+              (field, value) -> {
+                ValueInfo vi = ValueInfoFactory.create(stratum + 1, value, "", createdAt);
+                children.add(vi);
+              });
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     isExpanded = true;
     return children;
   }
 
   /**
    * Get ReferenceType
-   * 
+   *
    * @return reference type
    */
-  public ReferenceType getRT() {
-    return rt;
+  public Optional<ReferenceType> getRT() {
+    return Optional.ofNullable(rt);
   }
 }

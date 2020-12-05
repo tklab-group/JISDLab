@@ -1,81 +1,64 @@
 package debug.value;
 
-import java.util.ArrayList;
 import com.sun.jdi.Value;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 /**
  * Saved value information
- * 
- * @author sugiyama
  *
+ * @author sugiyama
  */
-public class ValueInfo {
-  /** saved value */
-  String value;
+public abstract class ValueInfo {
   /** time stamp */
-  long number;
+  @Getter static volatile long count = 0;
+  /** saved value */
+  @Getter String value;
+  /** value number */
+  @Getter long number;
+  /** time stamp */
+  @Getter LocalDateTime createdAt;
   /** the current number of variable expansion strata */
-  int stratum;
+  @Getter int stratum;
   /** value */
-  Value jValue;
+  @Getter Value jValue;
   /** children value info */
   ArrayList<ValueInfo> children = new ArrayList<>();
   /** already expanded? */
-  boolean isExpanded = false;
+  @Getter boolean isExpanded = false;
 
   /**
    * Constructor
-   * 
-   * @param number  time stamp
-   * @param strutum the current number of variable expansion strata
-   * @param jValue  jdi value
+   *
+   * @param stratum the current number of variable expansion strata
+   * @param jValue jdi value
    */
-  public ValueInfo(long number, int strutum, Value jValue) {
-    this.number = number;
-    this.stratum = strutum;
-    this.value = jValue.toString();
-    this.jValue = jValue;
+  public ValueInfo(int stratum, LocalDateTime createdAt, Value jValue) {
+    this.number = count++;
+    this.stratum = stratum;
+    if (jValue != null) {
+      this.value = jValue.toString();
+      this.jValue = jValue;
+    }
+    this.createdAt = createdAt;
   }
 
-  /**
-   * Get number
-   * 
-   * @return time stamp
-   */
-  public long getNumber() {
-    return number;
+  public ValueInfo(int stratum, LocalDateTime createdAt, String value) {
+    this.number = count++;
+    this.stratum = stratum;
+    this.value = value;
+    this.createdAt = createdAt;
   }
 
-  /**
-   * Get value
-   * 
-   * @return saved value
-   */
-  public String getValue() {
-    return value;
-  }
-
-  /**
-   * Get jdi raw value
-   * 
-   * @return jdi value
-   */
-  public Value getJValue() {
-    return jValue;
-  }
-
-  /**
-   * Get the current number of variable expansion strata.
-   * 
-   * @return stratum
-   */
-  public int getStratum() {
-    return stratum;
+  public static void resetNumber() {
+    count = 0;
   }
 
   /**
    * Create children value info
-   * 
+   *
    * @return children value info
    */
   public ArrayList<ValueInfo> expand() {
@@ -90,11 +73,10 @@ public class ValueInfo {
 
   /**
    * Get children value info
-   * 
+   *
    * @return children
    */
   public ArrayList<ValueInfo> ch() {
     return children;
   }
-
 }
