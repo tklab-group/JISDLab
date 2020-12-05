@@ -485,9 +485,9 @@ public class Debugger {
   // ********** breakpoint ************************************************************//
 
   /**
-   * Get breakpoints.
+   * Get observation points.
    *
-   * @return breakpoints
+   * @return observation points
    */
   public ArrayList<Point> getPoints() {
     return new ArrayList<>(pm.getPoints());
