@@ -24,9 +24,8 @@ class VMManagerFactory {
           probej.VirtualMachine vm = new probej.VirtualMachine(main, options, port);
           probeJ = new ProbeJ(host, port, vm);
         } else {
-          DebuggerInfo.printError(
+          throw new IllegalArgumentException(
               "ProbeJ Not Supported for " + System.getProperty("os.name") + ".");
-          throw new IllegalArgumentException();
         }
       } else {
         probeJ = new ProbeJ(host, port);
