@@ -47,7 +47,7 @@ public class VirtualMachine implements Runnable {
   public void shutdown() {
     if (p.isPresent()) {
       p.get().destroy();
-      Print.out("VM shutdown.");
+      Print.out("VM with ProbeJ exited.");
       p = Optional.empty();
     }
   }

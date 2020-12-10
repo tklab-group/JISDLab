@@ -1,14 +1,17 @@
 /** */
 package probej;
 
+import com.sun.jdi.VMDisconnectedException;
 import debug.Location;
 import debug.value.ValueInfo;
 import util.Name;
+import util.Print;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
+import java.nio.channels.NotYetConnectedException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
@@ -42,18 +45,19 @@ class Connector {
       e.printStackTrace();
     } catch (ExecutionException e) {
       e.printStackTrace();
+    } catch (TimeoutException e) {
+      Print.err("Connection Timeout.");
     }
   }
 
   void sendCommand(String cmd) {
-    if ((client != null) && (client.isOpen())) {
-      Thread sender =
-          new Thread(
-              () -> {
-                sendCommandSync(cmd);
-              });
-      sender.start();
-    }
+    checkClientState();
+    Thread sender =
+        new Thread(
+            () -> {
+              sendCommandSync(cmd);
+            });
+    sender.start();
   }
 
   void sendCommandSync(String cmd) {
@@ -62,7 +66,10 @@ class Connector {
     inBuf = ByteBuffer.wrap(inputLine.getBytes());
     Future<Integer> writeResult = client.write(inBuf);
     try {
-      writeResult.get(5, TimeUnit.SECONDS);
+      int len = writeResult.get(5, TimeUnit.SECONDS);
+      if (len == -1) {
+        throw new ProbeJUndetectedException("Cannot detect ProbeJ.");
+      }
     } catch (InterruptedException e) {
       e.printStackTrace();
     } catch (ExecutionException e) {
@@ -158,6 +165,7 @@ class Connector {
 
   String readLine(AsynchronousSocketChannel client, ByteBuffer b) throws TimeoutException {
     StringBuilder buf = new StringBuilder(1024);
+    checkClientState();
     while (true) {
       if (!b.hasRemaining()) {
         try {
@@ -165,7 +173,7 @@ class Connector {
           int len = client.read(b).get(5, TimeUnit.SECONDS);
           b.flip();
           if (len == -1) {
-            return "0";
+            throw new ProbeJUndetectedException("Cannot detect ProbeJ.");
           }
         } catch (InterruptedException e) {
           e.printStackTrace();
@@ -189,10 +197,24 @@ class Connector {
 
   void close() {
     try {
-      client.close();
+      if (client != null && client.isOpen()) {
+        client.close();
+      } else if (client != null && !client.isOpen()) {
+        throw new VMDisconnectedException("Connection has already been closed.");
+      } else {
+        throw new NotYetConnectedException();
+      }
       // System.out.println("close");
     } catch (IOException e) {
       e.printStackTrace();
+    }
+  }
+
+  void checkClientState() {
+    if (client != null && !client.isOpen()) {
+      throw new VMDisconnectedException("Connection has already been closed.");
+    } else if (client == null) {
+      throw new NotYetConnectedException();
     }
   }
 }

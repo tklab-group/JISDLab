@@ -410,6 +410,9 @@ public class Debugger {
    * @param sleepTime Wait time after the debugger starts running
    */
   public void run(int sleepTime) {
+    if (vmThread != null) {
+      throw new VMAlreadyStartedException("VM has already started once.");
+    }
     vmThread = new Thread(vmManager);
     vmThread.start();
     if (!isRemoteDebug && usesProbeJ) {
@@ -433,6 +436,7 @@ public class Debugger {
   public void exit() {
     pm.completeStep();
     vmManager.shutdown();
+    vmThread = null;
   }
 
   /** Shutdown the debugger.(alias of "exit") */

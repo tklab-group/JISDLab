@@ -225,6 +225,9 @@ class PointManager {
     } else {
       bp = new BreakPoint(className, lineNumber, varNames, isBreak);
     }
+    if (ps.contains(bp)) {
+      throw new RuntimeException("This observation point has already been set.");
+    }
     bp.requestSetPoint(vm, this);
     ps.add(bp);
     return Optional.of(bp);
@@ -259,6 +262,9 @@ class PointManager {
       bp = new ProbePoint(className, methodName, varNames, isBreak);
     } else {
       bp = new BreakPoint(className, methodName, varNames, isBreak);
+    }
+    if (ps.contains(bp)) {
+      throw new RuntimeException("This observation point has already been set.");
     }
     bp.requestSetPoint(vm, this);
     ps.add(bp);
