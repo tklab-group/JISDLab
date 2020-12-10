@@ -113,12 +113,29 @@ public class ProbePoint extends Point {
               p.get().getResults(new Location(className, methodName, lineNumber, varName));
           results.forEach(
               (key, values) -> {
-                values.forEach(
-                    value -> {
-                      addValue(varName, value);
-                    });
+                addValues(key.varName, values);
               });
         });
+  }
+
+  void addValues(String varName, ArrayList<ValueInfo> values) {
+    synchronized (this) {
+      Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
+      if (res.isPresent()) {
+        res.get().addValues(values);
+        return;
+      }
+      Location loc = new Location(className, methodName, lineNumber, varName);
+      DebugResult dr = new DebugResult(loc);
+      if (maxRecords.containsKey(varName)) {
+        dr.setMaxRecordNoOfValue(maxRecords.get(varName));
+      }
+      if (maxExpands.containsKey(varName)) {
+        dr.setMaxRecordNoOfValue(maxExpands.get(varName));
+      }
+      dr.addValues(values);
+      addDebugResult(varName, dr);
+    }
   }
 
   void addValue(String varName, ValueInfo value) {

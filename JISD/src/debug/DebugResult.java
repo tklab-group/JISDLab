@@ -65,6 +65,32 @@ public class DebugResult {
     }
   }
 
+  void addValues(ArrayList<ValueInfo> notRegesteredValues) {
+    int regSize = values.size();
+    if (regSize == 0) {
+      notRegesteredValues.forEach(
+          v -> {
+            addValue(v);
+          });
+      return;
+    }
+    int regLastIndex = regSize - 1;
+    var regLastTime = values.getLast().getCreatedAt();
+    int notRegIndex = -1;
+    for (int i = 0; i < notRegesteredValues.size(); i++) {
+      if (notRegesteredValues.get(i).getCreatedAt().isEqual(regLastTime)) {
+        notRegIndex = i + 1;
+        break;
+      }
+    }
+    if (notRegIndex == -1) {
+      notRegIndex = 0;
+    }
+    for (int i = notRegIndex; i < notRegesteredValues.size(); i++) {
+      addValue(notRegesteredValues.get(i));
+    }
+  }
+
   /**
    * Add value to deque
    *
