@@ -1,6 +1,7 @@
 package debug;
 
 import debug.value.ValueInfo;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,7 +29,9 @@ public abstract class Point {
   /** break or not at points */
   @Getter boolean isBreak;
   /** already request to set Breakpoint? */
-  @Getter @Setter boolean isRequested = false;
+  @Getter
+  @Setter(AccessLevel.PACKAGE)
+  boolean isRequested = false;
 
   /**
    * Constructor
@@ -95,7 +98,7 @@ public abstract class Point {
    *
    * @param dr debugresult
    */
-  public void addDebugResult(String varName, DebugResult dr) {
+  void addDebugResult(String varName, DebugResult dr) {
     drs.put(varName, dr);
   }
 
@@ -170,7 +173,7 @@ public abstract class Point {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    BreakPoint other = (BreakPoint) obj;
+    Point other = (Point) obj;
     if (className == null) {
       if (other.className != null) {
         return false;
