@@ -1,6 +1,5 @@
 package debug;
 
-import com.sun.jdi.LocalVariable;
 import com.sun.jdi.Value;
 import debug.value.ValueInfo;
 import debug.value.ValueInfoFactory;
@@ -10,7 +9,6 @@ import util.Stream;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * Debug result
@@ -91,14 +89,10 @@ public class DebugResult {
     }
   }
 
-  /**
-   * Add value to deque
-   *
-   * @param entry entry An observed variable and value
-   */
-  void addValue(Map.Entry<LocalVariable, Value> entry) {
+  /** Add value to deque */
+  void addValue(Value jValue) {
     ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
-    ValueInfo value = ValueInfoFactory.create(0, entry.getValue(), "", LocalDateTime.now());
+    ValueInfo value = ValueInfoFactory.create(0, jValue, "", LocalDateTime.now());
     valueExpansionQue.add(value);
     while (true) {
       ValueInfo v = valueExpansionQue.pop();

@@ -150,24 +150,4 @@ public class ProbePoint extends Point {
       addDebugResult(varName, dr);
     }
   }
-
-  void addValue(String varName, ValueInfo value) {
-    synchronized (this) {
-      Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
-      if (res.isPresent()) {
-        res.get().addValue(value);
-        return;
-      }
-      Location loc = new Location(className, methodName, lineNumber, varName);
-      DebugResult dr = new DebugResult(loc);
-      if (maxRecords.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxRecords.get(varName));
-      }
-      if (maxExpands.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxExpands.get(varName));
-      }
-      dr.addValue(value);
-      addDebugResult(varName, dr);
-    }
-  }
 }
