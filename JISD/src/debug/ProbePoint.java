@@ -69,6 +69,19 @@ public class ProbePoint extends Point {
   }
 
   @Override
+  public void add(String varName) {
+    if (p.isEmpty()) {
+      return;
+    }
+    if (varNames.contains(varName)) {
+      DebuggerInfo.print("This name is already registered.");
+      return;
+    }
+    p.get().requestSetProbePoint(new Location(className, methodName, lineNumber, varName));
+    addVarName(varName);
+  }
+
+  @Override
   public void remove(String varName) {
     if (p.isEmpty()) {
       return;

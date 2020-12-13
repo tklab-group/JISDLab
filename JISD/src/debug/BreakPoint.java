@@ -265,6 +265,11 @@ public class BreakPoint extends Point {
   }
 
   @Override
+  public void add(String varName) {
+    addVarName(varName);
+  }
+
+  @Override
   public void remove(String varName) {
     removeVarName(varName);
   }

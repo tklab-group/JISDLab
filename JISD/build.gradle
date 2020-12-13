@@ -85,3 +85,7 @@ task createKernelJson(type: JavaExec) {
   def cp = project.hasProperty("cp") ? project.property("cp") : ""
   args(path, path, cp)
 }
+
+tasks.withType(JavaCompile) {
+  options.compilerArgs << '-Xlint:unchecked'
+}

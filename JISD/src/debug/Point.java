@@ -143,7 +143,17 @@ public abstract class Point {
     }
   }
 
+  public abstract void add(String varName);
+
   public abstract void remove(String varName);
+
+  void addVarName(String varName) {
+    if (varNames.contains(varName)) {
+      DebuggerInfo.print("This name is already registered.");
+      return;
+    }
+    varNames.add(varName);
+  }
 
   void removeVarName(String varName) {
     drs.remove(varName);
