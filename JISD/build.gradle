@@ -16,18 +16,34 @@ wrapper {
   gradleVersion = '6.6'
 }
 
+task delombok(type: Exec, dependsOn: compileJava) {
+  commandLine "powershell", "-Command", "java", "-jar", "\"lib\\lombok-1.18.16.jar\"", "delombok", "src", "--classpath", "\"build\\libs\\jisd-all.jar\"", "-d", "build/delombok/src"
+}
+
 javadoc {
+  dependsOn delombok
+  source = "build/delombok/src"
   exclude('demo/**')
-  destinationDir = file("../JISD-doc")
+  exclude('util/**')
+  destinationDir = file("../JISD-doc/docs")
+  failOnError = true
+  options.setMemberLevel(JavadocMemberLevel.PUBLIC)
+  doLast {
+    copy {
+      from "../JISD-doc/.nojekyll"
+      into "../JISD-doc/docs"
+    }
+  }
 }
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.0.1'
+  archiveVersion = '0.0.2'
   exclude('demo/**')
 }
 
 shadowJar {
+  dependsOn jar
   exclude('demo/**')
 }
 
@@ -70,4 +86,6 @@ task createKernelJson(type: JavaExec) {
   args(path, path, cp)
 }
 
-shadowJar.dependsOn jar
+tasks.withType(JavaCompile) {
+  options.compilerArgs << '-Xlint:unchecked'
+}

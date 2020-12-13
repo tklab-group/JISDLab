@@ -410,8 +410,14 @@ public class Debugger {
    * @param sleepTime Wait time after the debugger starts running
    */
   public void run(int sleepTime) {
+    if (vmThread != null) {
+      throw new VMAlreadyStartedException("VM has already started once.");
+    }
     vmThread = new Thread(vmManager);
     vmThread.start();
+    if (!isRemoteDebug && usesProbeJ) {
+      sleep(1000);
+    }
     sleep(sleepTime);
   }
 
@@ -430,6 +436,7 @@ public class Debugger {
   public void exit() {
     pm.completeStep();
     vmManager.shutdown();
+    vmThread = null;
   }
 
   /** Shutdown the debugger.(alias of "exit") */
@@ -485,9 +492,9 @@ public class Debugger {
   // ********** breakpoint ************************************************************//
 
   /**
-   * Get breakpoints.
+   * Get observation points.
    *
-   * @return breakpoints
+   * @return observation points
    */
   public ArrayList<Point> getPoints() {
     return new ArrayList<>(pm.getPoints());

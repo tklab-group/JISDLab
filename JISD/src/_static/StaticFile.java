@@ -12,18 +12,23 @@ import static util.Json.readJsonFile;
 
 public class StaticFile {
   private static final String rootDirName = ".jisd_static_data";
-  @Setter static String rootDirPath = rootDirName + File.separator;
-  @Setter static String classDataFilePath = rootDirPath + "class_data.json";
-  @Setter static String programStructureFilePath = rootDirPath + "program_structure.json";
-  @Getter @Setter static String srcDir = ".";
-  @Getter @Setter static String binDir = ".";
-  @Getter static Optional<JSONObject> cd = Optional.empty();
-  @Getter static Optional<JSONObject> ps = Optional.empty();
+  static int count = 0;
+  int number;
+  @Setter String rootDirPath = rootDirName + File.separator;
+  @Setter String classDataFilePath = rootDirPath + "class_data.json";
+  @Setter String programStructureFilePath = rootDirPath + "program_structure.json";
+  @Getter @Setter String srcDir = ".";
+  @Getter @Setter String binDir = ".";
+  @Getter Optional<JSONObject> cd = Optional.empty();
+  @Getter Optional<JSONObject> ps = Optional.empty();
   // private static StaticFile me = new StaticFile();
 
-  private StaticFile() {}
+  StaticFile(String srcDir, String binDir) {
+    number = count++;
+    load(srcDir, binDir);
+  }
 
-  public static void load(String srcDir, String binDir) {
+  void load(String srcDir, String binDir) {
     if (!srcDir.isBlank()) {
       setSrcDir((srcDir.endsWith(File.separator)) ? srcDir : srcDir + File.separator);
     }
@@ -35,29 +40,29 @@ public class StaticFile {
     readStaticData();
   }
 
-  static void setStaticFilePath() {
-    setRootDirPath(binDir + rootDirName + File.separator);
+  void setStaticFilePath() {
+    setRootDirPath(binDir + rootDirName + number + File.separator);
     setClassDataFilePath(rootDirPath + "class_data.json");
     setProgramStructureFilePath(rootDirPath + "program_structure.json");
   }
 
-  static void createStaticData() {
+  void createStaticData() {
     String[] args = new String[2];
     args[0] = rootDirPath; // out
     args[1] = binDir; // in
     LysMain.main(args);
   }
 
-  static void readStaticData() {
+  void readStaticData() {
     readCd();
     readPs();
   }
 
-  static void readCd() {
+  void readCd() {
     cd = readJsonFile(classDataFilePath);
   }
 
-  static void readPs() {
+  void readPs() {
     ps = readJsonFile(programStructureFilePath);
   }
 }

@@ -1,6 +1,7 @@
 package debug;
 
 import debug.value.ValueInfo;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,7 +29,9 @@ public abstract class Point {
   /** break or not at points */
   @Getter boolean isBreak;
   /** already request to set Breakpoint? */
-  @Getter @Setter boolean isRequested = false;
+  @Getter
+  @Setter(AccessLevel.PACKAGE)
+  boolean isRequested = false;
 
   /**
    * Constructor
@@ -95,7 +98,7 @@ public abstract class Point {
    *
    * @param dr debugresult
    */
-  public void addDebugResult(String varName, DebugResult dr) {
+  void addDebugResult(String varName, DebugResult dr) {
     drs.put(varName, dr);
   }
 
@@ -140,13 +143,49 @@ public abstract class Point {
     }
   }
 
+  public abstract void add(String varName);
+
   public abstract void remove(String varName);
 
+  void addVarName(String varName) {
+    if (varNames.contains(varName)) {
+      DebuggerInfo.print("This name is already registered.");
+      return;
+    }
+    varNames.add(varName);
+  }
+
   void removeVarName(String varName) {
+    // for local
     drs.remove(varName);
     maxExpands.remove(varName);
     maxRecords.remove(varName);
+    // for field
+    drs.remove("this." + varName);
+    maxExpands.remove("this." + varName);
+    maxRecords.remove("this." + varName);
+    // for local and field
     varNames.remove(varName);
+  }
+
+  void addValue(String varName, ValueInfo value) {
+    synchronized (this) {
+      Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
+      if (res.isPresent()) {
+        res.get().addValue(value);
+        return;
+      }
+      Location loc = new Location(className, methodName, lineNumber, varName);
+      DebugResult dr = new DebugResult(loc);
+      if (maxRecords.containsKey(varName)) {
+        dr.setMaxRecordNoOfValue(maxRecords.get(varName));
+      }
+      if (maxExpands.containsKey(varName)) {
+        dr.setMaxRecordNoOfValue(maxExpands.get(varName));
+      }
+      dr.addValue(value);
+      addDebugResult(varName, dr);
+    }
   }
 
   @Override
@@ -170,7 +209,7 @@ public abstract class Point {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    BreakPoint other = (BreakPoint) obj;
+    Point other = (Point) obj;
     if (className == null) {
       if (other.className != null) {
         return false;

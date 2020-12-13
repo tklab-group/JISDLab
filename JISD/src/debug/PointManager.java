@@ -3,6 +3,7 @@ package debug;
 import com.sun.jdi.*;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.sun.jdi.request.StepRequest;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.jdiscript.JDIScript;
@@ -23,14 +24,18 @@ class PointManager {
   /** points */
   private final Set<Point> ps = new HashSet<>();
 
-  private final Comparator compDR =
+  private final Comparator<? super DebugResult> compDR =
       Comparator.comparing(dr -> ((DebugResult) dr).getLocation().className)
           .thenComparing(dr -> ((DebugResult) dr).getLocation().lineNumber)
           .thenComparing(dr -> ((DebugResult) dr).getLocation().varName);
   /** Current Thread Reference */
+  @Getter(AccessLevel.PACKAGE)
+  @Setter(AccessLevel.PACKAGE)
   ThreadReference currentTRef;
   /** is processing now? */
-  @Getter volatile boolean isProcessing;
+  @Getter
+  @Setter(AccessLevel.PACKAGE)
+  volatile boolean isProcessing;
   /** is breaked now? */
   @Setter volatile boolean isBreaked;
 
@@ -41,22 +46,10 @@ class PointManager {
     init();
   }
 
-  void setIsProcessing(boolean isProcessing) {
-    this.isProcessing = isProcessing;
-  }
-
-  ThreadReference getCurrentTRef() {
-    return currentTRef;
-  }
-
-  void setCurrentTRef(ThreadReference tRef) {
-    this.currentTRef = tRef;
-  }
-
   void init() {
-    setIsProcessing(false);
+    setProcessing(false);
     setCurrentTRef(null);
-    isBreaked = false;
+    setBreaked(false);
   }
 
   /**
@@ -121,7 +114,7 @@ class PointManager {
       stepReq.get().disable();
     }
     stepReq = Optional.empty();
-    setIsProcessing(false);
+    setProcessing(false);
   }
 
   /**
@@ -225,6 +218,9 @@ class PointManager {
     } else {
       bp = new BreakPoint(className, lineNumber, varNames, isBreak);
     }
+    if (ps.contains(bp)) {
+      throw new RuntimeException("This observation point has already been set.");
+    }
     bp.requestSetPoint(vm, this);
     ps.add(bp);
     return Optional.of(bp);
@@ -259,6 +255,9 @@ class PointManager {
       bp = new ProbePoint(className, methodName, varNames, isBreak);
     } else {
       bp = new BreakPoint(className, methodName, varNames, isBreak);
+    }
+    if (ps.contains(bp)) {
+      throw new RuntimeException("This observation point has already been set.");
     }
     bp.requestSetPoint(vm, this);
     ps.add(bp);

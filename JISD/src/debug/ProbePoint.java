@@ -69,6 +69,19 @@ public class ProbePoint extends Point {
   }
 
   @Override
+  public void add(String varName) {
+    if (p.isEmpty()) {
+      return;
+    }
+    if (varNames.contains(varName)) {
+      DebuggerInfo.print("This name is already registered.");
+      return;
+    }
+    p.get().requestSetProbePoint(new Location(className, methodName, lineNumber, varName));
+    addVarName(varName);
+  }
+
+  @Override
   public void remove(String varName) {
     if (p.isEmpty()) {
       return;
@@ -113,19 +126,16 @@ public class ProbePoint extends Point {
               p.get().getResults(new Location(className, methodName, lineNumber, varName));
           results.forEach(
               (key, values) -> {
-                values.forEach(
-                    value -> {
-                      addValue(varName, value);
-                    });
+                addValues(key.varName, values);
               });
         });
   }
 
-  void addValue(String varName, ValueInfo value) {
+  void addValues(String varName, ArrayList<ValueInfo> values) {
     synchronized (this) {
       Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
       if (res.isPresent()) {
-        res.get().addValue(value);
+        res.get().addValues(values);
         return;
       }
       Location loc = new Location(className, methodName, lineNumber, varName);
@@ -136,7 +146,7 @@ public class ProbePoint extends Point {
       if (maxExpands.containsKey(varName)) {
         dr.setMaxRecordNoOfValue(maxExpands.get(varName));
       }
-      dr.addValue(value);
+      dr.addValues(values);
       addDebugResult(varName, dr);
     }
   }

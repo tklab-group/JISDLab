@@ -9,17 +9,19 @@ class ProbeJManager extends VMManager {
   /** */
   public ProbeJManager(ProbeJ probeJ) {
     this.probeJ = probeJ;
-    probeJ.runVM();
   }
 
   @Override
   public void run() {
+    probeJ.runVM();
     probeJ.run();
+    DebuggerInfo.print("Debugger started.");
   }
 
   @Override
   void shutdown() {
     probeJ.exit();
+    DebuggerInfo.print("Debugger exited.");
   }
 
   @Override

@@ -34,11 +34,11 @@ class JDIManager extends VMManager {
   /** Run the debugger. */
   @Override
   public void run() {
-    DebuggerInfo.print("VM started.");
     try {
+      DebuggerInfo.print("Debugger started.");
       j.run(start);
     } catch (VMDisconnectedException e) {
-      /* Do nothing */
+      throw e;
     }
   }
 
@@ -47,9 +47,9 @@ class JDIManager extends VMManager {
   void shutdown() {
     try {
       j.vm().exit(0);
-      DebuggerInfo.print("VM exited.");
+      DebuggerInfo.print("Debugger exited.");
     } catch (VMDisconnectedException e) {
-      DebuggerInfo.print("VM already exited.");
+      throw e;
     }
   }
 

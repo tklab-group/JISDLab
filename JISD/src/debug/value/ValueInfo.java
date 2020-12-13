@@ -77,6 +77,6 @@ public abstract class ValueInfo {
    * @return children
    */
   public ArrayList<ValueInfo> ch() {
-    return children;
+    return expand();
   }
 }

@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 public class ProbePointTest {
 
   void testProbeDebugger(Debugger dbg) {
-    dbg.run(1000);
+    dbg.run(0);
     Point p = dbg.watch("LoopN", 22, new String[] {"var1"}).get();
     dbg.sleep(1000);
     var results = p.getResults();
