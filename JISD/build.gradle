@@ -38,7 +38,7 @@ javadoc {
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.0.1'
+  archiveVersion = '0.0.2'
   exclude('demo/**')
 }
 

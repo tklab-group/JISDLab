@@ -33,7 +33,7 @@ COPY . $jisdlab_dir
 WORKDIR $jisdlab_dir
 
 # set env
-RUN export JISD_HOME=${jisd_dir}
+RUN export JISDLAB_HOME=${jisdlab_dir}
 
 # jdiscript classpath  
 ARG cp1=${jisdlab_dir}/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar
@@ -47,9 +47,9 @@ ARG cp3=${ws_dir}/sample
 # IJava install
 RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3} --param startup-scripts-path:${jisd_dir}/startup.jshell
 # For Windows
-#cd IJava ; ./gradlew.bat installKernel --param classpath:"../jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;../JISD/build/libs/jisd-all.jar;../sample" --param startup-scripts-path:"../JISD/startup.jshell"
+#cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISD_HOME%/build/libs/jisd-all.jar;%JISDLAB_HOME%/sample" --param startup-scripts-path:"%JISD_HOME%/startup.jshell"; cd ..
 
 #Modify kernel.json
 RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=/root/.local/share/jupyter/kernels/java/kernel.json -Pcp=${cp3}
 # For Windows
-#cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp="../sample"
+#cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp="%JISDLAB_HOME%\sample"; cd ..
