@@ -63,7 +63,7 @@ public class Utility {
     }
   }
 
-  public static void print(Object o) {
+  public static void println(Object o) {
     System.out.println(o);
   }
 }

@@ -2,11 +2,10 @@
 import debug.*;
 import debug.value.*;
 import static debug.Utility.exec;
-import static debug.Utility.print;
+import static debug.Utility.println;
 
 // static analysis classes
 import _static.*;
-import static _static.StaticFile.load;
 
 // often use classes
 import java.util.ArrayList;

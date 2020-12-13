@@ -11,19 +11,19 @@ import java.util.Optional;
 public class FieldInfo extends StaticInfo {
   Optional<HashMap<String, ArrayList<Integer>>> canSetPoint = Optional.empty();
 
-  public FieldInfo(String className, String fieldName) {
-    super(className, "this." + fieldName);
+  public FieldInfo(StaticFile sf, String className, String fieldName) {
+    super(sf, className, "this." + fieldName);
   }
 
   public LocalInfo local(String methodName) {
-    return new LocalInfo(className, methodName, name);
+    return new LocalInfo(sf, className, methodName, name);
   }
 
   public HashMap<String, ArrayList<Integer>> canSet() {
     if (canSetPoint.isPresent()) {
       return canSetPoint.get();
     }
-    var ps = StaticFile.getPs();
+    var ps = sf.getPs();
     var packageAndClassName = Name.splitClassName(className);
     if (ps.isEmpty()) {
       return new HashMap<>();

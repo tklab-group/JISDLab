@@ -12,23 +12,23 @@ public class ClassInfo extends StaticInfo {
   private Optional<ArrayList<String>> methods = Optional.empty();
   private Optional<ArrayList<String>> fields = Optional.empty();
 
-  public ClassInfo(String className) {
-    super(className, className);
+  ClassInfo(StaticFile sf, String className) {
+    super(sf, className, className);
   }
 
   public FieldInfo field(String name) {
-    return new FieldInfo(className, name);
+    return new FieldInfo(sf, className, name);
   }
 
   public MethodInfo method(String name) {
-    return new MethodInfo(className, name);
+    return new MethodInfo(sf, className, name);
   }
 
   public ArrayList<String> methods() {
     if (methods.isPresent()) {
       return methods.get();
     }
-    var cd = StaticFile.getCd();
+    var cd = sf.getCd();
     var packageAndClassName = Name.splitClassName(className);
     if (cd.isEmpty()) {
       return new ArrayList<>();
@@ -51,7 +51,7 @@ public class ClassInfo extends StaticInfo {
     if (fields.isPresent()) {
       return fields.get();
     }
-    var cd = StaticFile.getCd();
+    var cd = sf.getCd();
     var packageAndClassName = Name.splitClassName(className);
     if (cd.isEmpty()) {
       return new ArrayList<>();

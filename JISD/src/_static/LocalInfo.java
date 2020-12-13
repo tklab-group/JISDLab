@@ -11,8 +11,8 @@ public class LocalInfo extends StaticInfo {
   String methodName;
   Optional<ArrayList<Integer>> canSetPoint = Optional.empty();
 
-  public LocalInfo(String className, String methodName, String name) {
-    super(className, name);
+  LocalInfo(StaticFile sf, String className, String methodName, String name) {
+    super(sf, className, name);
     this.methodName = methodName;
   }
 
@@ -24,7 +24,7 @@ public class LocalInfo extends StaticInfo {
     if (canSetPoint.isPresent()) {
       return canSetPoint.get();
     }
-    var ps = StaticFile.getPs();
+    var ps = sf.getPs();
     var packageAndClassName = Name.splitClassName(className);
     if (ps.isEmpty()) {
       return new ArrayList<>();

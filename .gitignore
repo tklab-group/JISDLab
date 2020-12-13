@@ -12,3 +12,4 @@ docs/
 out/
 .gradle/
 JISD@tmp/
+sample/.jisd_static_data*

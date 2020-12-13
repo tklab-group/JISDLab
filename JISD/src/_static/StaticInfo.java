@@ -9,10 +9,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public abstract class StaticInfo {
+  StaticFile sf;
   String className;
   String name;
 
-  public StaticInfo(String className, String name) {
+  StaticInfo(StaticFile sf, String className, String name) {
+    this.sf = sf;
     this.className = className;
     this.name = name;
   }
@@ -30,7 +32,7 @@ public abstract class StaticInfo {
   }
 
   public String path() {
-    return StaticFile.getSrcDir() + File.separator + Name.toSourcePathFromClassName(className);
+    return sf.getSrcDir() + File.separator + Name.toSourcePathFromClassName(className);
   }
 
   public String absPath() {
