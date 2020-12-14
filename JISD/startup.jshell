@@ -4,7 +4,7 @@ import debug.value.*;
 import static debug.Utility.*;
 
 // static analysis classes
-import _static.*;
+import info.*;
 
 // often use classes
 import java.util.*;

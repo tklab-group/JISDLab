@@ -1,4 +1,4 @@
-package _static;
+package info;
 
 import org.json.JSONObject;
 

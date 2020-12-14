@@ -1,4 +1,4 @@
-package _static;
+package info;
 
 import analysis.LysMain;
 import lombok.AccessLevel;

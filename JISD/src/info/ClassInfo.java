@@ -1,4 +1,4 @@
-package _static;
+package info;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,7 +23,7 @@ public class ClassInfo extends StaticInfo {
       throw new RuntimeException("No such field");
     }
     if (!fields.get().contains(name)) {
-      throw new RuntimeException();
+      throw new RuntimeException("No such field");
     }
     return new FieldInfo(className, name, path, classObjFromCD, classObjFromPS);
   }
