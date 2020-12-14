@@ -1,9 +1,12 @@
 package _static;
 
 import analysis.LysMain;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
 import org.json.JSONObject;
+import util.Name;
 
 import java.io.File;
 import java.util.Optional;
@@ -11,14 +14,21 @@ import java.util.Optional;
 import static util.Json.readJsonFile;
 
 public class StaticFile {
-  private static final String rootDirName = ".jisd_static_data";
-  static int count = 0;
-  int number;
+  @Getter private static final String rootDirName = ".jisd_static_data";
+  @Getter static int count = 0;
+  @Getter int number;
   @Setter String rootDirPath = rootDirName + File.separator;
   @Setter String classDataFilePath = rootDirPath + "class_data.json";
   @Setter String programStructureFilePath = rootDirPath + "program_structure.json";
-  @Getter @Setter String srcDir = ".";
-  @Getter @Setter String binDir = ".";
+
+  @Getter
+  @Setter(AccessLevel.PACKAGE)
+  String srcDir = ".";
+
+  @Getter
+  @Setter(AccessLevel.PACKAGE)
+  String binDir = ".";
+
   @Getter Optional<JSONObject> cd = Optional.empty();
   @Getter Optional<JSONObject> ps = Optional.empty();
   // private static StaticFile me = new StaticFile();
@@ -64,5 +74,27 @@ public class StaticFile {
 
   void readPs() {
     ps = readJsonFile(programStructureFilePath);
+  }
+
+  JSONObject getClassObjFromCD(String className) {
+    var packageAndClassName = Name.splitClassName(className);
+    if (cd.isEmpty()) {
+      throw new JSONException("");
+    }
+    var cdObj = cd.get();
+    var packageObj = cdObj.getJSONObject(packageAndClassName.get("package"));
+    var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
+    return classObj;
+  }
+
+  JSONObject getClassObjFromPS(String className) {
+    var packageAndClassName = Name.splitClassName(className);
+    if (ps.isEmpty()) {
+      throw new JSONException("");
+    }
+    var cdObj = ps.get();
+    var packageObj = cdObj.getJSONObject(packageAndClassName.get("package"));
+    var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
+    return classObj;
   }
 }

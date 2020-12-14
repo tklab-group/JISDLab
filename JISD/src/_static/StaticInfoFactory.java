@@ -2,6 +2,10 @@ package _static;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.json.JSONObject;
+import util.Name;
+
+import java.io.File;
 
 public class StaticInfoFactory {
   @Getter(AccessLevel.PACKAGE)
@@ -11,19 +15,38 @@ public class StaticInfoFactory {
     sf = new StaticFile(srcDir, binDir);
   }
 
+  JSONObject[] getClassObj(String className) {
+    var cdObj = sf.getClassObjFromCD(className);
+    var psObj = sf.getClassObjFromPS(className);
+    JSONObject[] objs = {cdObj, psObj};
+    return objs;
+  }
+
+  String getPath(String className) {
+    return sf.getSrcDir() + File.separator + Name.toSourcePathFromClassName(className);
+  }
+
   public ClassInfo createClass(String className) {
-    return new ClassInfo(sf, className);
+    var path = getPath(className);
+    var objs = getClassObj(className);
+    return new ClassInfo(className, path, objs[0], objs[1]);
   }
 
   public MethodInfo createMethod(String className, String methodName) {
-    return new MethodInfo(sf, className, methodName);
+    var path = getPath(className);
+    var objs = getClassObj(className);
+    return new MethodInfo(className, methodName, path, objs[0], objs[1]);
   }
 
   public FieldInfo createField(String className, String fieldName) {
-    return new FieldInfo(sf, className, fieldName);
+    var path = getPath(className);
+    var objs = getClassObj(className);
+    return new FieldInfo(className, fieldName, path, objs[0], objs[1]);
   }
 
   public LocalInfo createLocal(String className, String methodName, String localName) {
-    return new LocalInfo(sf, className, methodName, localName);
+    var path = getPath(className);
+    var objs = getClassObj(className);
+    return new LocalInfo(className, methodName, localName, path, objs[0], objs[1]);
   }
 }

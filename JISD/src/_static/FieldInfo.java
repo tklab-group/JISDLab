@@ -1,7 +1,7 @@
 package _static;
 
 import org.json.JSONException;
-import util.Name;
+import org.json.JSONObject;
 import util.Print;
 
 import java.util.ArrayList;
@@ -11,27 +11,17 @@ import java.util.Optional;
 public class FieldInfo extends StaticInfo {
   Optional<HashMap<String, ArrayList<Integer>>> canSetPoint = Optional.empty();
 
-  public FieldInfo(StaticFile sf, String className, String fieldName) {
-    super(sf, className, "this." + fieldName);
-  }
-
-  public LocalInfo local(String methodName) {
-    return new LocalInfo(sf, className, methodName, name);
+  public FieldInfo(String className, String fieldName, String path, JSONObject cd, JSONObject ps) {
+    super(className, "this." + fieldName, path, cd, ps);
+    canSet();
   }
 
   public HashMap<String, ArrayList<Integer>> canSet() {
     if (canSetPoint.isPresent()) {
       return canSetPoint.get();
     }
-    var ps = sf.getPs();
-    var packageAndClassName = Name.splitClassName(className);
-    if (ps.isEmpty()) {
-      return new HashMap<>();
-    }
-    var psObj = ps.get();
     try {
-      var packageObj = psObj.getJSONObject(packageAndClassName.get("package"));
-      var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
+      var classObj = classObjFromPS;
       var canSetPoint = new HashMap<String, ArrayList<Integer>>();
       classObj
           .keySet()
@@ -56,6 +46,6 @@ public class FieldInfo extends StaticInfo {
 
   @Override
   public void clearCache() {
-    return;
+    canSetPoint = Optional.empty();
   }
 }

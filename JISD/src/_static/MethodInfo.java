@@ -1,7 +1,7 @@
 package _static;
 
 import org.json.JSONException;
-import util.Name;
+import org.json.JSONObject;
 import util.Print;
 import util.Stream;
 
@@ -11,28 +11,27 @@ import java.util.Optional;
 public class MethodInfo extends StaticInfo {
   private Optional<ArrayList<String>> locals = Optional.empty();
 
-  MethodInfo(StaticFile sf, String className, String methodName) {
-    super(sf, className, methodName);
+  MethodInfo(String className, String methodName, String path, JSONObject cd, JSONObject ps) {
+    super(className, methodName, path, cd, ps);
+    locals();
   }
 
   public LocalInfo local(String localName) {
-    return new LocalInfo(sf, className, name, localName);
+    if (locals.isEmpty()) {
+      throw new RuntimeException("No such local variable");
+    }
+    if (!locals.get().contains(localName)) {
+      throw new RuntimeException("No such local variable");
+    }
+    return new LocalInfo(className, name, localName, path, classObjFromCD, classObjFromPS);
   }
 
   public ArrayList<String> locals() {
     if (locals.isPresent()) {
       return locals.get();
     }
-    var ps = sf.getPs();
-    var packageAndClassName = Name.splitClassName(className);
-    if (ps.isEmpty()) {
-      return new ArrayList<>();
-    }
-    var psObj = ps.get();
     try {
-      var packageObj = psObj.getJSONObject(packageAndClassName.get("package"));
-      var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
-      var methodsObj = classObj.getJSONObject(name);
+      var methodsObj = classObjFromPS.getJSONObject(name);
       var names = (ArrayList<String>) methodsObj.keySet().stream().collect(Stream.toArrayList());
       locals = Optional.of(names);
       return names;
