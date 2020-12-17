@@ -39,7 +39,7 @@ public class ProbeJTest {
         } else if (inputLine.equals("on")) {
           c.sendCommand("PrintSocketOn");
         } else if (inputLine.equals("S")) {
-          c.sendCommand("Set LoopN.java var1 22");
+          c.sendCommand("Set LoopN.java hello.a 39");
         }
       } catch (IOException e) {
         e.printStackTrace();

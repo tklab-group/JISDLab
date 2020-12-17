@@ -6,13 +6,14 @@ import org.junit.jupiter.api.Test;
 
 /** @author sugiyama */
 public class ProbePointTest {
+  String[] vars = new String[] {"var1"};
 
-  void testProbeDebugger(Debugger dbg) {
-    dbg.run(0);
-    Point p = dbg.watch("LoopN", 22, new String[] {"var1"}).get();
+  void testProbeDebugger(Debugger dbg, String[] vars) {
+    dbg.run(1000);
+    Point p = dbg.watch("LoopN", 39, vars).get();
     dbg.sleep(1000);
     var results = p.getResults();
-    var dr = results.get("var1");
+    var dr = results.get("a");
     DebuggerTest.showResult(dr);
     dr.getValues()
         .forEach(
@@ -25,24 +26,38 @@ public class ProbePointTest {
   @Test
   void basicTest() {
     Debugger dbg = new Debugger("demo.LoopN", "-cp bin", true);
-    testProbeDebugger(dbg);
+    testProbeDebugger(dbg, vars);
+  }
+
+  @Test
+  void fieldTest() {
+    Debugger dbg = new Debugger("demo.LoopN", "-cp bin", true);
+    String[] vars = {"hello.a"};
+    testProbeDebugger(dbg, vars);
+  }
+
+  @Test
+  void fieldTest2() {
+    Debugger dbg = new Debugger("localhost", 39876, true);
+    String[] vars = {"a"};
+    testProbeDebugger(dbg, vars);
   }
 
   // remote vm with probej required
   @Test
   void probePointTest() {
     Debugger dbg = new Debugger("localhost", 39876, true);
-    testProbeDebugger(dbg);
+    testProbeDebugger(dbg, vars);
   }
 
   @Test
   void probePointClearTest() {
     Debugger dbg = new Debugger("demo.LoopN", "-cp bin", true);
     dbg.run(1000);
-    Point p = dbg.watch("LoopN", 22, new String[] {"var1"}).get();
+    Point p = dbg.watch("LoopN", 39, vars).get();
     dbg.sleep(1000);
-    Assertions.assertTrue(p.getVarNames().get(0).equals("var1"));
-    p.remove("var1");
+    Assertions.assertTrue(p.getVarNames().get(0).equals(vars[0]));
+    p.remove(vars[0]);
     Assertions.assertTrue(p.getVarNames().isEmpty());
     dbg.sleep(1000);
     dbg.exit();

@@ -50,10 +50,10 @@ public class ProbePoint extends Point {
       return;
     }
     p = Optional.of(((ProbeJManager) vmMgr).getProbeJ());
-    requestSetPoint(p);
+    requestSetPoint();
   }
 
-  void requestSetPoint(Optional<ProbeJ> p) {
+  void requestSetPoint() {
     if (p.isEmpty()) {
       return;
     }
@@ -95,7 +95,7 @@ public class ProbePoint extends Point {
     isEnable = true;
     varNames.forEach(
         varName -> {
-          requestSetPoint(p);
+          requestSetPoint();
         });
   }
 
