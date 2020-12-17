@@ -70,7 +70,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
-  public String getSuper() {
+  public String superName() {
     if (superClass.isPresent()) {
       return superClass.get();
     }
@@ -84,7 +84,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
-  public ArrayList<String> getInterfaces() {
+  public ArrayList<String> interfaces() {
     if (interfaces.isPresent()) {
       return interfaces.get();
     }
