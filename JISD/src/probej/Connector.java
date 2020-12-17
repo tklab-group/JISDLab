@@ -126,7 +126,7 @@ class Connector {
                   }
                   for (int j = 0; j < noOfValue; j++) {
                     String valueStr = readLine(client, outBuf);
-                    Optional<ValueInfo> value = parser.parseValue(valueStr);
+                    Optional<ValueInfo> value = parser.parseValue(loc.getVarName(), valueStr);
                     if (value.isPresent()) {
                       values.add(value.get());
                     }

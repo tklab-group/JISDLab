@@ -16,13 +16,13 @@ public class PrimitiveInfo extends ValueInfo {
    * @param stratum No. of the variable expansion
    * @param jValue jdi value
    */
-  public PrimitiveInfo(int stratum, LocalDateTime createdAt, Value jValue) {
-    super(stratum, createdAt, jValue);
+  public PrimitiveInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
+    super(name, stratum, createdAt, jValue);
     isExpanded = true;
   }
 
-  public PrimitiveInfo(int stratum, LocalDateTime createdAt, String value) {
-    super(stratum, createdAt, value);
+  public PrimitiveInfo(String name, int stratum, LocalDateTime createdAt, String value) {
+    super(name, stratum, createdAt, value);
     isExpanded = true;
   }
 }

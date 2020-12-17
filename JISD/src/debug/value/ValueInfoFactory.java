@@ -18,18 +18,19 @@ public class ValueInfoFactory {
    * @param jValue jdi value
    * @return value info
    */
-  public static ValueInfo create(int stratum, Value jValue, String value, LocalDateTime createdAt) {
+  public static ValueInfo create(
+      String name, int stratum, Value jValue, String value, LocalDateTime createdAt) {
     if (jValue == null) { // no jValue
-      return new PrimitiveInfo(stratum, createdAt, value);
+      return new PrimitiveInfo(name, stratum, createdAt, value);
     }
     char sign = jValue.type().signature().charAt(0);
     switch (sign) {
       case '[':
-        return new ArrayInfo(stratum, createdAt, jValue);
+        return new ArrayInfo(name, stratum, createdAt, jValue);
       case 'L':
-        return new ObjectInfo(stratum, createdAt, jValue);
+        return new ObjectInfo(name, stratum, createdAt, jValue);
       default:
-        return new PrimitiveInfo(stratum, createdAt, jValue);
+        return new PrimitiveInfo(name, stratum, createdAt, jValue);
     }
   }
 }

@@ -14,6 +14,8 @@ import java.util.ArrayList;
 public abstract class ValueInfo {
   /** time stamp */
   @Getter static volatile long count = 0;
+  /** variable name */
+  @Getter String name;
   /** saved value */
   @Getter String value;
   /** value number */
@@ -35,8 +37,9 @@ public abstract class ValueInfo {
    * @param stratum the current number of variable expansion strata
    * @param jValue jdi value
    */
-  public ValueInfo(int stratum, LocalDateTime createdAt, Value jValue) {
+  public ValueInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
     this.number = count++;
+    this.name = name;
     this.stratum = stratum;
     if (jValue != null) {
       this.value = jValue.toString();
@@ -45,8 +48,9 @@ public abstract class ValueInfo {
     this.createdAt = createdAt;
   }
 
-  public ValueInfo(int stratum, LocalDateTime createdAt, String value) {
+  public ValueInfo(String name, int stratum, LocalDateTime createdAt, String value) {
     this.number = count++;
+    this.name = name;
     this.stratum = stratum;
     this.value = value;
     this.createdAt = createdAt;

@@ -98,12 +98,6 @@ public class BreakPoint extends Point {
         return;
       }
       DebugResult dr = new DebugResult(loc);
-      if (maxRecords.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxRecords.get(varName));
-      }
-      if (maxExpands.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxExpands.get(varName));
-      }
       dr.addValue(jValue);
       addDebugResult(varName, dr);
     }
@@ -236,32 +230,6 @@ public class BreakPoint extends Point {
         });
     DebuggerInfo.print(
         "Deferring breakpoint in " + className + ". It will be set after the class is loaded.");
-  }
-
-  @Override
-  public void setMaxRecordNoOfValue(String varName, int number) {
-    if (number <= 0) {
-      DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
-      return;
-    }
-    maxRecords.put(varName, number);
-    Optional<DebugResult> dr = getResults(varName);
-    if (dr.isPresent()) {
-      dr.get().setMaxRecordNoOfValue(number);
-    }
-  }
-
-  @Override
-  public void setMaxNoOfExpand(String varName, int number) {
-    if (number < 0) {
-      DebuggerInfo.printError(
-          "A max number of the variable expansion must be a positive integer(>= 0).");
-    }
-    maxExpands.put(varName, number);
-    Optional<DebugResult> dr = getResults(varName);
-    if (dr.isPresent()) {
-      dr.get().setMaxNoOfExpand(number);
-    }
   }
 
   @Override

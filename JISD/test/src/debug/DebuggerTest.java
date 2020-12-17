@@ -176,11 +176,9 @@ class DebuggerTest {
     dbg.watch(bpln2, varNames);
     dbg.run(1000);
     ArrayList<DebugResult> results = dbg.getResults();
-    for (int i = 0; i < results.size(); i++) {
-      DebugResult res = results.get(i);
-      showResult(res);
-      Assertions.assertEquals(res.getLocation().getLineNumber(), bpln1);
-    }
+    DebugResult res = results.get(0);
+    showResult(res);
+    Assertions.assertEquals(res.getLocation().getLineNumber(), bpln1);
     dbg.cont();
     dbg.exit();
   }
@@ -189,9 +187,36 @@ class DebuggerTest {
   void valueInfoTest() {
     Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
     String[] varNames = {"a"};
-    dbg.watch(34, varNames);
     int maxRecords = 200;
     DebugResult.setDefaultMaxRecordNoOfValue(maxRecords);
+    dbg.watch(34, varNames);
+    dbg.run(2000);
+    ArrayList<DebugResult> results = dbg.getResults();
+    for (int i = 0; i < results.size(); i++) {
+      DebugResult res = results.get(i);
+      showResult(res);
+      Assertions.assertEquals(res.getValues().size(), maxRecords);
+    }
+    ArrayList<ValueInfo> values = results.get(0).getValues();
+    IntStream.range(0, maxRecords)
+        .forEach(
+            i -> {
+              System.out.print(values.get(i).getValue() + " ");
+              if (i % 10 == 9) {
+                System.out.println("");
+              }
+            });
+    dbg.exit();
+  }
+
+  @Test
+  void valueInfoTest2() {
+    Debugger dbg = new Debugger("demo.HelloWorld", "-cp bin");
+    String[] varNames = {"a"};
+    int maxRecords = 200;
+    Point p = dbg.watch(34, varNames).get();
+    var a = p.getResults("a").get();
+    a.setMaxRecordNoOfValue(maxRecords);
     dbg.run(2000);
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {

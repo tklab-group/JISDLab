@@ -30,7 +30,7 @@ class Parser {
     return Optional.ofNullable(loc);
   }
 
-  Optional<ValueInfo> parseValue(String valueStr) {
+  Optional<ValueInfo> parseValue(String varName, String valueStr) {
     String[] values = valueStr.split(",", 0);
     if (values.length != 7 && values.length != 8) {
       return Optional.empty();
@@ -45,7 +45,7 @@ class Parser {
     int second = Integer.parseInt(values[6 + offset]);
     int nanoOfSecond = Integer.parseInt(values[7 + offset]) * 1000000;
     var createdAt = LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond);
-    var value = ValueInfoFactory.create(0, null, values[0], createdAt);
+    var value = ValueInfoFactory.create(varName, 0, null, values[0], createdAt);
     return Optional.ofNullable(value);
   }
 }

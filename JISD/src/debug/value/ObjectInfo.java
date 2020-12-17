@@ -22,8 +22,8 @@ public class ObjectInfo extends ValueInfo {
    * @param stratum No. of the variable expansion
    * @param jValue jdi value
    */
-  public ObjectInfo(int stratum, LocalDateTime createdAt, Value jValue) {
-    super(stratum, createdAt, jValue);
+  public ObjectInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
+    super(name, stratum, createdAt, jValue);
     if (jValue != null) {
       rt = ((ObjectReference) jValue).referenceType();
     }
@@ -48,7 +48,8 @@ public class ObjectInfo extends ValueInfo {
           .getValues(rt.fields())
           .forEach(
               (field, value) -> {
-                ValueInfo vi = ValueInfoFactory.create(stratum + 1, value, "", createdAt);
+                ValueInfo vi =
+                    ValueInfoFactory.create(field.name(), stratum + 1, value, "", createdAt);
                 children.add(vi);
               });
     } catch (Exception e) {

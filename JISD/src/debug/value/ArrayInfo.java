@@ -17,8 +17,8 @@ public class ArrayInfo extends ObjectInfo {
    * @param stratum No. of the variable expansion
    * @param jValue jdi value
    */
-  public ArrayInfo(int stratum, LocalDateTime createdAt, Value jValue) {
-    super(stratum, createdAt, jValue);
+  public ArrayInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
+    super(name, stratum, createdAt, jValue);
   }
 
   /**
@@ -36,13 +36,11 @@ public class ArrayInfo extends ObjectInfo {
     }
     try {
       var arrayRef = (ArrayReference) jValue;
-      arrayRef
-          .getValues()
-          .forEach(
-              val -> {
-                ValueInfo vi = ValueInfoFactory.create(stratum + 1, val, "", createdAt);
-                children.add(vi);
-              });
+      var values = arrayRef.getValues();
+      for (int i = 0; i < values.size(); i++) {
+        ValueInfo vi = ValueInfoFactory.create(i + "", stratum + 1, values.get(i), "", createdAt);
+        children.add(vi);
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }

@@ -92,7 +92,8 @@ public class DebugResult {
   /** Add value to deque */
   void addValue(Value jValue) {
     ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
-    ValueInfo value = ValueInfoFactory.create(0, jValue, "", LocalDateTime.now());
+    String name = location.getVarName();
+    ValueInfo value = ValueInfoFactory.create(name, 0, jValue, "", LocalDateTime.now());
     valueExpansionQue.add(value);
     while (true) {
       ValueInfo v = valueExpansionQue.pop();
@@ -134,6 +135,9 @@ public class DebugResult {
    * @return latest value
    */
   public ValueInfo getLatestValue() {
+    if (values.size() == 0) {
+      throw new RuntimeException("No value was set");
+    }
     return values.getLast();
   }
 

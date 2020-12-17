@@ -18,10 +18,6 @@ public abstract class Point {
   @Getter String methodName;
   /** varNames and debugresult */
   HashMap<String, DebugResult> drs = new HashMap<>();
-  /** varNames and maxRecordNoOfValue */
-  @Getter HashMap<String, Integer> maxRecords = new HashMap<>();
-  /** varNames and maxNoOfExpand */
-  @Getter HashMap<String, Integer> maxExpands = new HashMap<>();
 
   boolean isEnable = true;
   /** variable names */
@@ -74,6 +70,10 @@ public abstract class Point {
     varNames.remove("");
     this.varNames = varNames;
     this.isBreak = isBreak;
+    varNames.forEach(
+        varName -> {
+          createDebugResult(varName);
+        });
   }
 
   abstract void reset();
@@ -119,30 +119,6 @@ public abstract class Point {
     disable();
   }
 
-  public void setMaxRecordNoOfValue(String varName, int number) {
-    if (number <= 0) {
-      DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
-      return;
-    }
-    maxRecords.put(varName, number);
-    Optional<DebugResult> dr = getResults(varName);
-    if (dr.isPresent()) {
-      dr.get().setMaxRecordNoOfValue(number);
-    }
-  }
-
-  public void setMaxNoOfExpand(String varName, int number) {
-    if (number < 0) {
-      DebuggerInfo.printError(
-          "A max number of the variable expansion must be a positive integer(>= 0).");
-    }
-    maxExpands.put(varName, number);
-    Optional<DebugResult> dr = getResults(varName);
-    if (dr.isPresent()) {
-      dr.get().setMaxNoOfExpand(number);
-    }
-  }
-
   public abstract void add(String varName);
 
   public abstract void remove(String varName);
@@ -158,12 +134,8 @@ public abstract class Point {
   void removeVarName(String varName) {
     // for local
     drs.remove(varName);
-    maxExpands.remove(varName);
-    maxRecords.remove(varName);
     // for field
     drs.remove("this." + varName);
-    maxExpands.remove("this." + varName);
-    maxRecords.remove("this." + varName);
     // for local and field
     varNames.remove(varName);
   }
@@ -175,17 +147,15 @@ public abstract class Point {
         res.get().addValue(value);
         return;
       }
-      Location loc = new Location(className, methodName, lineNumber, varName);
-      DebugResult dr = new DebugResult(loc);
-      if (maxRecords.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxRecords.get(varName));
-      }
-      if (maxExpands.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxExpands.get(varName));
-      }
-      dr.addValue(value);
-      addDebugResult(varName, dr);
+      createDebugResult(varName).addValue(value);
     }
+  }
+
+  DebugResult createDebugResult(String varName) {
+    Location loc = new Location(className, methodName, lineNumber, varName);
+    DebugResult dr = new DebugResult(loc);
+    addDebugResult(varName, dr);
+    return dr;
   }
 
   @Override

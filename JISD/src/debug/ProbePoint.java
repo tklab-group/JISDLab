@@ -140,12 +140,6 @@ public class ProbePoint extends Point {
       }
       Location loc = new Location(className, methodName, lineNumber, varName);
       DebugResult dr = new DebugResult(loc);
-      if (maxRecords.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxRecords.get(varName));
-      }
-      if (maxExpands.containsKey(varName)) {
-        dr.setMaxRecordNoOfValue(maxExpands.get(varName));
-      }
       dr.addValues(values);
       addDebugResult(varName, dr);
     }
