@@ -95,11 +95,6 @@ public class Debugger {
     vmManager.prepareStart(pm);
   }
 
-  // ********** debugger settings ************************************************************//
-
-  // ********** stop ************************************************************//
-
-  // ********** debugger settings ************************************************************//
   public void setPort(int port) {
     if (port < 1024 || port > 65535) {
       this.port = 8000;
@@ -348,9 +343,6 @@ public class Debugger {
   public void list(String srcDir) {
     pm.printSrcAtCurrentLocation("Current location,", srcDir);
   }
-  // ********** on breakpoint ************************************************************//
-
-  // ********** remove breakpoint ************************************************************//
 
   /** Print all local variables in current stack frame */
   public void locals() {
@@ -390,10 +382,6 @@ public class Debugger {
     clear(main, methodName);
   }
 
-  // ********** remove breakpoint ************************************************************//
-
-  // ********** debugger control ************************************************************//
-
   /**
    * Remove breakpoint with a method name.
    *
@@ -402,6 +390,10 @@ public class Debugger {
    */
   public void clear(String className, String methodName) {
     pm.removePoint(className, methodName);
+  }
+
+  public void run() {
+    run(0);
   }
 
   /**
@@ -444,6 +436,9 @@ public class Debugger {
     exit();
   }
 
+  public void restart() {
+    restart(0);
+  }
   /**
    * Restart the debugger.
    *
@@ -456,9 +451,6 @@ public class Debugger {
     vmManager.prepareStart(pm);
     run(sleepTime);
   }
-  // ********** debugger control ************************************************************//
-
-  // ********** debug result ************************************************************//
 
   /** Clear debug results all. */
   public void clearResults() {
@@ -487,9 +479,6 @@ public class Debugger {
   public ArrayList<DebugResult> getResults(String varName) {
     return pm.getResults(varName);
   }
-  // ********** debug result ************************************************************//
-
-  // ********** breakpoint ************************************************************//
 
   /**
    * Get observation points.
@@ -499,5 +488,4 @@ public class Debugger {
   public ArrayList<Point> getPoints() {
     return new ArrayList<>(pm.getPoints());
   }
-  // ********** breakpoint ************************************************************//
 }
