@@ -11,6 +11,8 @@ import java.util.Optional;
 public class ClassInfo extends StaticInfo {
   private Optional<ArrayList<String>> methods = Optional.empty();
   private Optional<ArrayList<String>> fields = Optional.empty();
+  private Optional<String> superClass = Optional.empty();
+  private Optional<ArrayList<String>> interfaces = Optional.empty();
 
   ClassInfo(String className, String path, JSONObject cd, JSONObject ps) {
     super(className, className, path, cd, ps);
@@ -61,6 +63,38 @@ public class ClassInfo extends StaticInfo {
       var fieldsObj = classObjFromCD.getJSONObject("fields");
       var names = (ArrayList<String>) fieldsObj.keySet().stream().collect(Stream.toArrayList());
       fields = Optional.of(names);
+      return names;
+    } catch (JSONException e) {
+      Print.out("Data not found");
+      return new ArrayList<>();
+    }
+  }
+
+  public String getSuper() {
+    if (superClass.isPresent()) {
+      return superClass.get();
+    }
+    try {
+      var superName = classObjFromCD.getString("super");
+      superClass = Optional.of(superName);
+      return superName;
+    } catch (JSONException e) {
+      Print.out("Data not found");
+      return "";
+    }
+  }
+
+  public ArrayList<String> getInterfaces() {
+    if (interfaces.isPresent()) {
+      return interfaces.get();
+    }
+    try {
+      var interfacesObj = classObjFromCD.getJSONArray("interfaces");
+      var names = new ArrayList<String>();
+      for (int i = 0; i < interfacesObj.length(); i++) {
+        names.add(interfacesObj.getString(i));
+      }
+      interfaces = Optional.of(names);
       return names;
     } catch (JSONException e) {
       Print.out("Data not found");

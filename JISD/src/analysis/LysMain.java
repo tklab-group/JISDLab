@@ -267,7 +267,7 @@ public class LysMain {
       HashMap<String, Object> pobj_class_md = new HashMap<>();
       pobj_class_md.put("methods", pobj_methods_md);
       pobj_class_md.put("fields", pobj_fields_md);
-      pobj_class_md.put("supers", Name.toClassNameFromSourcePath(cn.superName));
+      pobj_class_md.put("super", Name.toClassNameFromSourcePath(cn.superName));
       ArrayList<String> interfacesStr = new ArrayList<>();
       cn.interfaces.forEach(
           in -> {

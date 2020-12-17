@@ -29,6 +29,9 @@ public class StaticTest {
   @Test
   public void getStaticTest() {
     var sif = new StaticInfoFactory("src", "bin");
+    ClassInfo ci = sif.createClass("debug.VMManager");
+    out(ci.getSuper());
+    out(ci.getInterfaces());
     ClassInfo c = sif.createClass("demo.HelloWorld");
     out(c.fields());
     out(c.methods());
