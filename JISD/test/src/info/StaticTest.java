@@ -31,14 +31,14 @@ public class StaticTest {
     var sif = new StaticInfoFactory("src", "bin");
     ClassInfo ci = sif.createClass("debug.VMManager");
     out(ci.superName());
-    out(ci.interfaces());
+    out(ci.interfaceNames());
     ClassInfo c = sif.createClass("demo.HelloWorld");
-    out(c.fields());
-    out(c.methods());
+    out(c.fieldNames());
+    out(c.methodNames());
     var f = c.field("helloTo");
     f.name();
     var m = c.method("main(java.lang.String[])");
-    out(m.locals());
+    out(m.localNames());
     var l = m.local("a");
     l.name();
     out(l.canSet());
@@ -48,8 +48,8 @@ public class StaticTest {
   public void getStaticErrorTest() {
     var sif = new StaticInfoFactory("src", "bin");
     ClassInfo c = sif.createClass("demo.HelloWorld");
-    out(c.fields());
-    out(c.methods());
+    out(c.fieldNames());
+    out(c.methodNames());
     FieldInfo f;
     try {
       f = c.field("hello");
@@ -64,7 +64,7 @@ public class StaticTest {
       fail();
     } catch (RuntimeException e) {
       m = c.method("main(java.lang.String[])");
-      out(m.locals());
+      out(m.localNames());
     }
     LocalInfo l;
     try {

@@ -16,8 +16,8 @@ public class ClassInfo extends StaticInfo {
 
   ClassInfo(String className, String path, JSONObject cd, JSONObject ps) {
     super(className, className, path, cd, ps);
-    methods();
-    fields();
+    methodNames();
+    fieldNames();
   }
 
   public FieldInfo field(String name) {
@@ -40,7 +40,7 @@ public class ClassInfo extends StaticInfo {
     return new MethodInfo(className, name, path, classObjFromCD, classObjFromPS);
   }
 
-  public ArrayList<String> methods() {
+  public ArrayList<String> methodNames() {
     if (methods.isPresent()) {
       return methods.get();
     }
@@ -55,7 +55,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
-  public ArrayList<String> fields() {
+  public ArrayList<String> fieldNames() {
     if (fields.isPresent()) {
       return fields.get();
     }
@@ -84,7 +84,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
-  public ArrayList<String> interfaces() {
+  public ArrayList<String> interfaceNames() {
     if (interfaces.isPresent()) {
       return interfaces.get();
     }

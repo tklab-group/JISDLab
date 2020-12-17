@@ -25,9 +25,9 @@ public class DebugResult {
   /** saved values */
   ArrayDeque<ValueInfo> values = new ArrayDeque<>();
   /** the max record number of values */
-  @Getter int maxRecordNoOfValue;
+  @Getter volatile int maxRecordNoOfValue;
   /** the max number of the variable expantion strata */
-  @Getter int maxNoOfExpand;
+  @Getter volatile int maxNoOfExpand;
 
   /** Constructor */
   DebugResult(Location loc) {

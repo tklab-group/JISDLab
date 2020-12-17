@@ -13,7 +13,7 @@ public class MethodInfo extends StaticInfo {
 
   MethodInfo(String className, String methodName, String path, JSONObject cd, JSONObject ps) {
     super(className, methodName, path, cd, ps);
-    locals();
+    localNames();
   }
 
   public LocalInfo local(String localName) {
@@ -26,7 +26,7 @@ public class MethodInfo extends StaticInfo {
     return new LocalInfo(className, name, localName, path, classObjFromCD, classObjFromPS);
   }
 
-  public ArrayList<String> locals() {
+  public ArrayList<String> localNames() {
     if (locals.isPresent()) {
       return locals.get();
     }
