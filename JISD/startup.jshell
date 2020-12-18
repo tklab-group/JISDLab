@@ -1,10 +1,10 @@
 // debugger classes
-import debug.*;
-import debug.value.*;
-import static debug.Utility.*;
+import jisd.debug.*;
+
+import static jisd.debug.Utility.*;
 
 // static analysis classes
-import info.*;
+import jisd.info.*;
 
 // often use classes
 import java.util.*;
