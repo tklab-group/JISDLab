@@ -23,8 +23,8 @@ task delombok(type: Exec, dependsOn: compileJava) {
 javadoc {
   dependsOn delombok
   source = "build/delombok/src"
-  exclude('demo/**')
-  exclude('util/**')
+  exclude('jisd/demo/**')
+  exclude('jisd/util/**')
   destinationDir = file("../JISD-doc/docs")
   failOnError = true
   options.setMemberLevel(JavadocMemberLevel.PUBLIC)
@@ -39,12 +39,14 @@ javadoc {
 jar {
   archiveBaseName = 'jisd'
   archiveVersion = '0.0.2'
-  exclude('demo/**')
+  exclude('jisd/demo/**')
+  exclude('.jisd_static_data*')
 }
 
 shadowJar {
   dependsOn jar
-  exclude('demo/**')
+  exclude('jisd/demo/**')
+  exclude('.jisd_static_data*')
 }
 
 test {
