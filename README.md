@@ -50,7 +50,8 @@ For Windows:
 cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;<your app's class path>" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
 ```
 ---
-And, you need to modify `kernel.json` for static analysis.  
+And, you need to modify `kernel.json` for static analysis.If you want to know the location of `kernel.json`, please see https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs.  
+
 For Linux:
 ```bash
 RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your app's class path> && cd ..
