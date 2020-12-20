@@ -1,11 +1,12 @@
 # JISDLab
 Java scriptable debugger on JupyterLab.
 
-## Requirements
+## Installation using Docker 
+### Requirements
 - docker
 - docker-compose
 
-## Setup
+### Setup
 First of all, you should clone this repository with a `--recursive` option.
 ```
 git clone --recursive https://github.com/tklab-group/JISDLab.git
@@ -21,6 +22,57 @@ Then, at this project root:
 docker-compose up --build -d
 ```
 Access http://localhost:21510 and enter a password(an initial password is `passwd`), then you can debug your Java application!
+
+## Manual Installation
+You can also set up JISDLab without Docker.
+### Requirements
+- JupyterLab
+- Java JDK >= 11
+
+### Setup
+First of all, you should clone this repository with a `--recursive` option.
+```bash
+git clone --recursive https://github.com/tklab-group/JISDLab.git
+```
+
+Next, please set **the absolute path of JISDLab root directory** to your environment variable `JISDLAB_HOME`.
+
+---
+
+And then, install `IJava`, Jupyter kernel for Java.When installing IJava, please set classpaths and `startup.jshell` by param.There are sample classes in `sample` dir which contains `demo.HelloWorld` class(which source file is debugspace/HelloWorld.java).  
+For Linux, MacOS:
+```bash
+cd IJava && ./gradlew installKernel --param classpath:$JISDLAB_HOME/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:$JISDLAB_HOME/JISD/build/libs/jisd-all.jar:<your app's class path> --param startup-scripts-path:$JISDLAB_HOME/JISD/startup.jshell && cd ..
+```
+
+For Windows:
+```bash
+cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;<your app's class path>" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
+```
+---
+And, you need to modify `kernel.json` for static analysis.  
+For Linux:
+```bash
+RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your app's class path> && cd ..
+```
+
+For Windows:
+```bash
+cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp=<your app's class path>; cd ..
+```
+
+For MacOS:
+```bash
+RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your app's class path> && cd ..
+```
+---
+Then, start the Jupyter server
+```bash
+jupyter lab
+```
+
+Please access the server from your web browser, or IDE which support Jupyter (ex. Vidual Studio Code).  
+
 
 ## Demo
 Please see `debugspace/DebugTutorial.ipynb`.
