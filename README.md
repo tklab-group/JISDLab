@@ -42,29 +42,29 @@ Next, please set **the absolute path of JISDLab root directory** to your environ
 And then, install `IJava`, Jupyter kernel for Java.When installing IJava, please set classpaths and `startup.jshell` by param.There are sample classes in `sample` dir which contains `demo.HelloWorld` class(which source file is debugspace/HelloWorld.java).  
 For Linux, MacOS:
 ```bash
-cd IJava && ./gradlew installKernel --param classpath:$JISDLAB_HOME/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:$JISDLAB_HOME/JISD/build/libs/jisd-all.jar:<your app's class path> --param startup-scripts-path:$JISDLAB_HOME/JISD/startup.jshell && cd ..
+cd IJava && ./gradlew installKernel --param classpath:$JISDLAB_HOME/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:$JISDLAB_HOME/JISD/build/libs/jisd-all.jar:<your classpaths> --param startup-scripts-path:$JISDLAB_HOME/JISD/startup.jshell && cd ..
 ```
 
 For Windows:
 ```bash
-cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;<your app's class path>" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
+cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;<your classpaths>" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
 ```
 ---
 And, you need to modify `kernel.json` for static analysis.If you want to know the location of `kernel.json`, please see https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs.  
 
 For Linux:
 ```bash
-RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your app's class path> && cd ..
+RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
 ```
 
 For Windows:
 ```bash
-cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp=<your app's class path>; cd ..
+cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp=<your classpaths>; cd ..
 ```
 
 For MacOS:
 ```bash
-RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your app's class path> && cd ..
+RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
 ```
 ---
 Then, start the Jupyter server
