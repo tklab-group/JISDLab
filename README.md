@@ -23,7 +23,7 @@ docker-compose up --build -d
 Access http://localhost:21510 and enter a password(an initial password is `passwd`), then you can debug your Java application!
 
 ## Demo
-Please see `debugspace/debuggerDemo.ipynb`.
+Please see `debugspace/DebugTutorial.ipynb`.
 
 ## See also
 - JISD's javadoc: https://sakupo.github.io/JISD-doc/
