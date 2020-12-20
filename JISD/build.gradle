@@ -39,7 +39,6 @@ javadoc {
 jar {
   archiveBaseName = 'jisd'
   archiveVersion = '0.0.2'
-  exclude('jisd/demo/**')
   exclude('.jisd_static_data*')
 }
 
@@ -66,6 +65,10 @@ dependencies {
 
   // https://mvnrepository.com/artifact/org.json/json
   implementation 'org.json:json:20171018'
+
+  // https://mvnrepository.com/artifact/commons-io/commons-io
+  implementation 'commons-io:commons-io:2.8.0'
+
 
   // jdiscript
   implementation files('../jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar')

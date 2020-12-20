@@ -1,6 +1,7 @@
 package jisd.analysis;
 
 import jisd.util.Name;
+import jisd.util.Print;
 import org.json.JSONObject;
 import org.objectweb.asm.tree.*;
 
@@ -40,19 +41,30 @@ public class LysMain {
     /*
      * preparation (get all cns & fields)
      *******************************************/
-
-    String root = "."; // directory to find class files of this analysis program (from the root
-    // directory)
-    if (args.length > 1) {
-      root = args[1];
+    if (args.length < 2) {
+      Print.out("No class file is set.");
+      return;
     }
-    // find class files recursively
-    Path start = Paths.get(root);
-    FileVisitor<Path> visitor = new ClassFileVisitor(cns, root.length());
-    try {
-      Files.walkFileTree(start, visitor);
-    } catch (IOException e) {
-      e.printStackTrace();
+    for (int i = 1; i < args.length; i++) {
+      String root = args[i];
+      // find class files from jar.
+      if (root.endsWith(".jar")) {
+        JarFileLoader jfl = new JarFileLoader();
+        File jarFile = new File(root);
+        try {
+          jfl.loadClasses(cns, jarFile);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      // find class files from binDir
+      Path start = Paths.get(root);
+      FileVisitor<Path> visitor = new ClassFileVisitor(cns, root.length());
+      try {
+        Files.walkFileTree(start, visitor);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 
     // get all fields

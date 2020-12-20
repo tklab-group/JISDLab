@@ -36,10 +36,7 @@ public class ClassFileVisitor implements FileVisitor<Path> {
     String fullClassName = file.toString();
 
     if (fullClassName.endsWith(".class")) {
-      String classname =
-          fullClassName.substring(
-              offset, fullClassName.length() - postOffset); // .replace(File.separator.charAt(0),
-      // '.');
+      String classname = fullClassName.substring(offset, fullClassName.length() - postOffset);
 
       // create ClassNode
       classNodes.put(classname, new ClassNode());

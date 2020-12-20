@@ -11,8 +11,8 @@ public class StaticInfoFactory {
   @Getter(AccessLevel.PACKAGE)
   StaticFile sf;
 
-  public StaticInfoFactory(String srcDir, String binDir) {
-    sf = new StaticFile(srcDir, binDir);
+  public StaticInfoFactory(String srcDir, String... bins) {
+    sf = new StaticFile(srcDir, bins);
   }
 
   JSONObject[] getClassObj(String className) {

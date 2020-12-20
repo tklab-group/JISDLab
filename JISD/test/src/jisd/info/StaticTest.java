@@ -75,4 +75,35 @@ public class StaticTest {
       out(l.canSet());
     }
   }
+
+  @Test
+  public void getStaticFromJarTest() {
+    var sif = new StaticInfoFactory("src", "test/src/jisd/analysis/jisd.jar");
+    ClassInfo ci = sif.createClass("jisd.debug.VMManager");
+    out(ci.superName());
+    out(ci.interfaceNames());
+    ClassInfo c = sif.createClass("jisd.demo.HelloWorld");
+    out(c.fieldNames());
+    out(c.methodNames());
+    var f = c.field("helloTo");
+    f.name();
+    var m = c.method("main(java.lang.String[])");
+    out(m.localNames());
+    var l = m.local("a");
+    l.name();
+    out(l.canSet());
+  }
+
+  @Test
+  public void getStaticFromMultipleFilesTest() {
+    var sif =
+        new StaticInfoFactory(
+            "src", "test/src/jisd/analysis/jisd.jar", "bin", "lib/lombok-1.18.16.jar");
+    ClassInfo ci = sif.createClass("jisd.debug.VMManager");
+    out(ci.superName());
+    out(ci.interfaceNames());
+    ClassInfo c = sif.createClass("lombok.launch.Agent");
+    out(c.fieldNames());
+    out(c.methodNames());
+  }
 }

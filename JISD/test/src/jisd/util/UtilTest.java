@@ -11,8 +11,8 @@ public class UtilTest {
   @Test
   void IJavaKernelJsonCreateTest() {
     String[] args = new String[3];
-    args[0] = "test/src/util/kernel.json";
-    args[1] = "test/src/util/output_kernel.json";
+    args[0] = "test/src/jisd/util/kernel.json";
+    args[1] = "test/src/jisd/util/output_kernel.json";
     args[2] = "/workspaces/sample";
     JISDPreProcess.main(args);
   }

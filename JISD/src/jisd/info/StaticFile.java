@@ -9,6 +9,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static jisd.util.Json.readJsonFile;
@@ -27,40 +29,43 @@ public class StaticFile {
 
   @Getter
   @Setter(AccessLevel.PACKAGE)
-  String binDir = ".";
+  ArrayList<String> paths = new ArrayList<>();
 
   @Getter Optional<JSONObject> cd = Optional.empty();
   @Getter Optional<JSONObject> ps = Optional.empty();
   // private static StaticFile me = new StaticFile();
 
-  StaticFile(String srcDir, String binDir) {
+  StaticFile(String srcDir, String... paths) {
     number = count++;
-    load(srcDir, binDir);
+    load(srcDir, paths);
   }
 
-  void load(String srcDir, String binDir) {
-    if (!srcDir.isBlank()) {
-      setSrcDir((srcDir.endsWith(File.separator)) ? srcDir : srcDir + File.separator);
-    }
-    if (!binDir.isBlank()) {
-      setBinDir((binDir.endsWith(File.separator)) ? binDir : binDir + File.separator);
-    }
+  void load(String srcDir, String... bins) {
     setStaticFilePath();
+    if (!srcDir.isBlank()) {
+      setSrcDir(formatDirName(srcDir));
+    }
+    paths = new ArrayList<>();
+    paths.add(rootDirPath); // in
+    Arrays.stream(bins)
+        .forEach(
+            bin -> {
+              if (!bin.isBlank()) {
+                paths.add(formatDirName(bin));
+              }
+            });
     createStaticData();
     readStaticData();
   }
 
   void setStaticFilePath() {
-    setRootDirPath(binDir + rootDirName + number + File.separator);
+    setRootDirPath(rootDirName + File.separator + number + File.separator);
     setClassDataFilePath(rootDirPath + "class_data.json");
     setProgramStructureFilePath(rootDirPath + "program_structure.json");
   }
 
   void createStaticData() {
-    String[] args = new String[2];
-    args[0] = rootDirPath; // out
-    args[1] = binDir; // in
-    LysMain.main(args);
+    LysMain.main((paths.toArray(new String[0])));
   }
 
   void readStaticData() {
@@ -96,5 +101,15 @@ public class StaticFile {
     var packageObj = cdObj.getJSONObject(packageAndClassName.get("package"));
     var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
     return classObj;
+  }
+
+  String formatDirName(String oldDir) {
+    String newDir;
+    if (oldDir.endsWith(File.separator) || oldDir.endsWith(".jar")) {
+      newDir = oldDir;
+    } else {
+      newDir = oldDir + File.separator;
+    }
+    return newDir;
   }
 }
