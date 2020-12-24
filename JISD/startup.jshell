@@ -1,5 +1,6 @@
 // debugger classes
 import jisd.debug.*;
+import jisd.debug.value.*;
 
 import static jisd.debug.Utility.*;
 

@@ -46,7 +46,7 @@ javadoc {
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.0.2'
+  archiveVersion = '0.0.3'
   exclude('.jisd_static_data*')
 }
 
@@ -92,7 +92,7 @@ dependencies {
 }
 
 task createKernelJson(type: JavaExec) {
-  main = "util.JISDPreProcess"
+  main = "jisd.util.JISDPreProcess"
   classpath = sourceSets.main.runtimeClasspath
   def path = project.hasProperty("jsonpath") ? project.property("jsonpath") : ""
   def cp = project.hasProperty("cp") ? project.property("cp") : ""
