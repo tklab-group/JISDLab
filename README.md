@@ -54,7 +54,7 @@ And, you need to modify `kernel.json` for static analysis.If you want to know th
 
 For Linux:
 ```bash
-RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
+cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
 ```
 
 For Windows:
@@ -64,7 +64,7 @@ cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\j
 
 For MacOS:
 ```bash
-RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
+cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
 ```
 ---
 Then, start the Jupyter server
