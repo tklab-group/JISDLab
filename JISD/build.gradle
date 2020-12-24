@@ -17,17 +17,25 @@ wrapper {
 }
 
 task delombok(type: Exec, dependsOn: compileJava) {
+  doFirst {
+    def sourceDirName = "build/delombok/src"
+    def srcDir = file(sourceDirName)
+    srcDir.deleteDir()
+    srcDir.mkdir()
+  }
   commandLine "powershell", "-Command", "java", "-jar", "\"lib\\lombok-1.18.16.jar\"", "delombok", "src", "--classpath", "\"build\\libs\\jisd-all.jar\"", "-d", "build/delombok/src"
 }
 
 javadoc {
   dependsOn delombok
-  source = "build/delombok/src"
-  exclude('demo/**')
-  exclude('util/**')
+  def sourceDirName = "build/delombok/src"
+  source = sourceDirName
+  exclude('jisd/demo/**')
+  exclude('jisd/util/**')
   destinationDir = file("../JISD-doc/docs")
   failOnError = true
   options.setMemberLevel(JavadocMemberLevel.PUBLIC)
+  options.addStringOption('Xdoclint:none', '-quiet')
   doLast {
     copy {
       from "../JISD-doc/.nojekyll"
@@ -38,13 +46,14 @@ javadoc {
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.0.2'
-  exclude('demo/**')
+  archiveVersion = '0.0.3'
+  exclude('.jisd_static_data*')
 }
 
 shadowJar {
   dependsOn jar
-  exclude('demo/**')
+  exclude('jisd/demo/**')
+  exclude('.jisd_static_data*')
 }
 
 test {
@@ -65,6 +74,10 @@ dependencies {
   // https://mvnrepository.com/artifact/org.json/json
   implementation 'org.json:json:20171018'
 
+  // https://mvnrepository.com/artifact/commons-io/commons-io
+  implementation 'commons-io:commons-io:2.8.0'
+
+
   // jdiscript
   implementation files('../jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar')
 
@@ -79,7 +92,7 @@ dependencies {
 }
 
 task createKernelJson(type: JavaExec) {
-  main = "util.JISDPreProcess"
+  main = "jisd.util.JISDPreProcess"
   classpath = sourceSets.main.runtimeClasspath
   def path = project.hasProperty("jsonpath") ? project.property("jsonpath") : ""
   def cp = project.hasProperty("cp") ? project.property("cp") : ""
