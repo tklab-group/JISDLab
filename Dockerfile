@@ -29,9 +29,6 @@ ARG ws_dir=/workspaces
 ARG jisdlab_dir=/JISDLab
 ARG jisd_dir=${jisdlab_dir}/JISD
 
-COPY . $jisdlab_dir
-WORKDIR $jisdlab_dir
-
 # set env
 RUN export JISDLAB_HOME=${jisdlab_dir}
 
@@ -43,6 +40,9 @@ ARG cp2=${jisd_dir}/build/libs/jisd-all.jar
 
 # your application's absolute classpaths in a container(classpath1:classpath2:...)
 ARG cp3=${ws_dir}/sample
+
+COPY . $jisdlab_dir
+WORKDIR $jisdlab_dir
 
 # IJava install
 RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3} --param startup-scripts-path:${jisd_dir}/startup.jshell
