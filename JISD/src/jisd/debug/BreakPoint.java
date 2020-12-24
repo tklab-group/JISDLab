@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Breakpoint infomation
+ * Manages a breakpoint or a watchpoint.
  *
  * @author sugiyama
  */

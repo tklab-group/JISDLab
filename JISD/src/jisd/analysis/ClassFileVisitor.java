@@ -15,8 +15,11 @@ import java.util.HashMap;
  * For visiting all class files recursively and create ClassNode of each class file. <br>
  * After creating an instance of this class, call {@linkplain Files#walkFileTree} with the instance
  * as one of its arguments.
+ *
+ * @author khiranouchi
+ * @author sugiyama
  */
-public class ClassFileVisitor implements FileVisitor<Path> {
+class ClassFileVisitor implements FileVisitor<Path> {
   private final int postOffset = 6; // to remove ".class"
   private HashMap<String, ClassNode> classNodes;
   private int offset;

@@ -11,22 +11,22 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 /**
- * Debug result
+ * Debug results which contains observed values.
  *
  * @author sugiyama
  */
 public class DebugResult {
-  /** the default max record number of values */
+  /** Get the default max record number of values */
   @Getter static volatile int defaultMaxRecordNoOfValue = 100;
-  /** the default max number of the variable expantion strata */
+  /** Get the default max number of the variable expantion strata */
   @Getter static volatile int defaultMaxNoOfExpand = 1;
-  /** class name */
+  /** Get the location this result belongs to */
   @Getter Location location;
-  /** saved values */
+  /** Observed values */
   ArrayDeque<ValueInfo> values = new ArrayDeque<>();
-  /** the max record number of values */
+  /** Get the max record number of values */
   @Getter volatile int maxRecordNoOfValue;
-  /** the max number of the variable expantion strata */
+  /** Get the max number of the variable expantion strata */
   @Getter volatile int maxNoOfExpand;
 
   /** Constructor */
@@ -36,6 +36,7 @@ public class DebugResult {
     this.location = loc;
   }
 
+  /** Set the default max number of the variable expantion strata */
   public static void setDefaultMaxNoOfExpand(int number) {
     if (number < 0) {
       DebuggerInfo.printError(
@@ -44,6 +45,7 @@ public class DebugResult {
     defaultMaxNoOfExpand = number;
   }
 
+  /** Set the default max record number of values */
   public static void setDefaultMaxRecordNoOfValue(int number) {
     if (number <= 0) {
       DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
@@ -121,6 +123,7 @@ public class DebugResult {
     return (ArrayList<ValueInfo>) values.stream().collect(Stream.toArrayList());
   }
 
+  /** Get the max record number of values */
   public void setMaxRecordNoOfValue(int number) {
     if (number <= 0) {
       DebuggerInfo.printError("A max record number must be a non-negative integer(> 0).");
@@ -141,6 +144,7 @@ public class DebugResult {
     return values.getLast();
   }
 
+  /** Set the max number of the variable expantion strata */
   public void setMaxNoOfExpand(int number) {
     if (number < 0) {
       DebuggerInfo.printError(
@@ -149,6 +153,7 @@ public class DebugResult {
     maxNoOfExpand = number;
   }
 
+  /** Generate the hash code. */
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -157,6 +162,7 @@ public class DebugResult {
     return result;
   }
 
+  /** Check equality by location */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {

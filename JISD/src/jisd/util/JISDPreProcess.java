@@ -3,6 +3,11 @@ package jisd.util;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+/**
+ * A process which needs before JISDLab is available.
+ *
+ * @author sugiyama
+ */
 public class JISDPreProcess {
   public static void main(String[] args) {
     if (args.length != 3) {

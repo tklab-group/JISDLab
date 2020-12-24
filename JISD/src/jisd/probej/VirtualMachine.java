@@ -5,6 +5,11 @@ import jisd.util.Print;
 import java.io.IOException;
 import java.util.Optional;
 
+/**
+ * Manages VM with ProbeJ.
+ *
+ * @author sugiyama
+ */
 public class VirtualMachine implements Runnable {
   String main;
   String options;
@@ -17,6 +22,7 @@ public class VirtualMachine implements Runnable {
     this.port = port;
   }
 
+  /** Run a target VM. */
   @Override
   public void run() {
     try {
@@ -46,6 +52,7 @@ public class VirtualMachine implements Runnable {
     }
   }
 
+  /** Shutdown a target VM. */
   public void shutdown() {
     if (p.isPresent()) {
       p.get().destroy();

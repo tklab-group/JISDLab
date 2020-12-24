@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
+/** Provides Json utility. */
 public class Json {
   public static Optional<JSONObject> readJsonFile(String jsonFilePath) {
     Path path = Paths.get(jsonFilePath);

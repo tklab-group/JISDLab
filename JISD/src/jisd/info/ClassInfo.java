@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Optional;
 
+/** Class information. */
 public class ClassInfo extends StaticInfo {
   private Optional<ArrayList<String>> methods = Optional.empty();
   private Optional<ArrayList<String>> fields = Optional.empty();
@@ -20,6 +21,7 @@ public class ClassInfo extends StaticInfo {
     fieldNames();
   }
 
+  /** Get field information. */
   public FieldInfo field(String name) {
     if (fields.isEmpty()) {
       throw new RuntimeException("No such field");
@@ -30,6 +32,7 @@ public class ClassInfo extends StaticInfo {
     return new FieldInfo(className, name, path, classObjFromCD, classObjFromPS);
   }
 
+  /** Get method information. */
   public MethodInfo method(String name) {
     if (methods.isEmpty()) {
       throw new RuntimeException("No such method");
@@ -40,6 +43,7 @@ public class ClassInfo extends StaticInfo {
     return new MethodInfo(className, name, path, classObjFromCD, classObjFromPS);
   }
 
+  /** Get method names which belongs to this class. */
   public ArrayList<String> methodNames() {
     if (methods.isPresent()) {
       return methods.get();
@@ -55,6 +59,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
+  /** Get field names which belongs to this class. */
   public ArrayList<String> fieldNames() {
     if (fields.isPresent()) {
       return fields.get();
@@ -70,6 +75,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
+  /** Get super class name of this class. */
   public String superName() {
     if (superClass.isPresent()) {
       return superClass.get();
@@ -84,6 +90,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
+  /** Get implemented interface names. */
   public ArrayList<String> interfaceNames() {
     if (interfaces.isPresent()) {
       return interfaces.get();
@@ -102,6 +109,7 @@ public class ClassInfo extends StaticInfo {
     }
   }
 
+  /** Clear methods and fields data. */
   @Override
   public void clearCache() {
     methods = Optional.empty();

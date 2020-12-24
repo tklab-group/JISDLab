@@ -6,13 +6,13 @@ import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Debugger infomation
+ * Provides how to show debugger infomation.
  *
  * @author sugiyama
  */
 class DebuggerInfo {
   /**
-   * print debugger infomation to stdout.
+   * Prints debugger infomation to stdout.
    *
    * @param message debugger infomation
    */
@@ -21,7 +21,7 @@ class DebuggerInfo {
   }
 
   /**
-   * print debugger information to stderr.
+   * Prints debugger information to stderr.
    *
    * @param message debugger infomation
    */
@@ -30,7 +30,7 @@ class DebuggerInfo {
   }
 
   /**
-   * print source code.
+   * Prints source code.
    *
    * @param path source path
    * @param currentLineNumber line number the breakpoint is set at

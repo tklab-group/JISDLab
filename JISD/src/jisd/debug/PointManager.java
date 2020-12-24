@@ -16,7 +16,7 @@ import java.io.File;
 import java.util.*;
 
 /**
- * point manager
+ * Manages observation points.
  *
  * @author sugiyama
  */

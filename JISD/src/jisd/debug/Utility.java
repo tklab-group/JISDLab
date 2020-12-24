@@ -7,6 +7,11 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Optional;
 
+/**
+ * Provides debug utility.
+ *
+ * @author sugiyama
+ */
 public class Utility {
   /**
    * Execute external command.
@@ -63,6 +68,7 @@ public class Utility {
     }
   }
 
+  /** Alias of System.out.println(). */
   public static void println(Object o) {
     System.out.println(o);
   }

@@ -5,8 +5,11 @@ import java.util.Set;
 /**
  * This class corresponds to one valuable. Also analyze valuable and get the type and whether it can
  * be set as breakpoint.
+ *
+ * @author khiranouchi
+ * @author sugiyama
  */
-public class SrtVal {
+class SrtVal {
 
   /** name of the valuable (eg. "x", "sum", "val1") */
   public String name;

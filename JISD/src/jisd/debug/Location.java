@@ -3,7 +3,11 @@ package jisd.debug;
 
 import lombok.Getter;
 
-/** @author sugiyama */
+/**
+ * A point within the executing code of the target VM.
+ *
+ * @author sugiyama
+ */
 public class Location {
   @Getter String className;
   @Getter String methodName;

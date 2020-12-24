@@ -15,13 +15,20 @@ import java.util.Optional;
 
 import static jisd.util.Json.readJsonFile;
 
-public class StaticFile {
+/** Manage static analysis data files */
+class StaticFile {
   @Getter private static final String rootDirName = ".jisd_static_data";
   @Getter static int count = 0;
   @Getter int number;
-  @Setter String rootDirPath = rootDirName + File.separator;
-  @Setter String classDataFilePath = rootDirPath + "class_data.json";
-  @Setter String programStructureFilePath = rootDirPath + "program_structure.json";
+
+  @Setter(AccessLevel.PACKAGE)
+  String rootDirPath = rootDirName + File.separator;
+
+  @Setter(AccessLevel.PACKAGE)
+  String classDataFilePath = rootDirPath + "class_data.json";
+
+  @Setter(AccessLevel.PACKAGE)
+  String programStructureFilePath = rootDirPath + "program_structure.json";
 
   @Getter
   @Setter(AccessLevel.PACKAGE)
@@ -31,7 +38,9 @@ public class StaticFile {
   @Setter(AccessLevel.PACKAGE)
   ArrayList<String> paths = new ArrayList<>();
 
+  /** Get class data in json file. */
   @Getter Optional<JSONObject> cd = Optional.empty();
+  /** Get program structure in json file. */
   @Getter Optional<JSONObject> ps = Optional.empty();
   // private static StaticFile me = new StaticFile();
 

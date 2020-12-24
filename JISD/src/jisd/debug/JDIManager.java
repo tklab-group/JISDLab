@@ -5,7 +5,11 @@ import com.sun.jdi.VMDisconnectedException;
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnVMStart;
 
-/** @author sugiyama */
+/**
+ * Manages a target VM with JDI.
+ *
+ * @author sugiyama
+ */
 class JDIManager extends VMManager {
   /** JDI */
   JDIScript j;

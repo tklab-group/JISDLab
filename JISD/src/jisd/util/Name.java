@@ -4,7 +4,11 @@ package jisd.util;
 import java.io.File;
 import java.util.HashMap;
 
-/** @author sugiyama */
+/**
+ * Provides utility methods related to a name, Ex. class name, path name
+ *
+ * @author sugiyama
+ */
 public class Name {
   /**
    * generate a class path from a source path

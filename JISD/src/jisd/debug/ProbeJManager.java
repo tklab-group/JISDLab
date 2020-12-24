@@ -3,7 +3,11 @@ package jisd.debug;
 
 import jisd.probej.ProbeJ;
 
-/** @author sugiyama */
+/**
+ * Manages a target VM with ProbeJ.
+ *
+ * @author sugiyama
+ */
 class ProbeJManager extends VMManager {
   ProbeJ probeJ;
   /** */

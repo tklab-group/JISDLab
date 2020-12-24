@@ -1,7 +1,7 @@
 package jisd.debug;
 
 /**
- * Target JavaVM manager
+ * Manage a target VM.
  *
  * @author sugiyama
  */

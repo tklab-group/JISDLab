@@ -12,7 +12,11 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 
-/** @author sugiyama */
+/**
+ * Provides ProbeJ client.
+ *
+ * @author sugiyama
+ */
 public class ProbeJ {
   Connector connector;
   Optional<VirtualMachine> vm = Optional.empty();
@@ -28,6 +32,7 @@ public class ProbeJ {
     this.vm = Optional.ofNullable(vm);
   }
 
+  /** Run a targetVM. */
   public void runVM() {
     if (vm.isPresent()) {
       if (isVMStarted) {
@@ -42,6 +47,7 @@ public class ProbeJ {
     }
   }
 
+  /** Start connection with ProbeJ. */
   public void run() {
     if (connector.client != null && connector.client.isOpen()) {
       throw new VMCannotBeModifiedException("Connection already established.");
@@ -54,6 +60,11 @@ public class ProbeJ {
     }
   }
 
+  /**
+   * Request to set an observation point.
+   *
+   * @param loc location
+   */
   public void requestSetProbePoint(Location loc) {
     String cmd =
         "Set "
@@ -65,11 +76,21 @@ public class ProbeJ {
     connector.sendCommand(cmd);
   }
 
+  /**
+   * Fetch value info from ProbeJ.
+   *
+   * @return
+   */
   public HashMap<Location, ArrayList<ValueInfo>> getResults() {
     Location loc = new Location("", "", 0, "");
     return getResults(loc);
   }
 
+  /**
+   * Fetch value info from ProbeJ.
+   *
+   * @return
+   */
   public HashMap<Location, ArrayList<ValueInfo>> getResults(Location loc) {
     return connector.getResults(loc);
   }
@@ -78,6 +99,10 @@ public class ProbeJ {
     return connector;
   }
 
+  /**
+   * Close connection with ProbeJ. If a target VM was managed by this class, this class shutdowns
+   * it.
+   */
   public void exit() {
     connector.close();
     if (vm.isPresent()) {
@@ -88,6 +113,11 @@ public class ProbeJ {
     vmThread = Optional.empty();
   }
 
+  /**
+   * Request to remove an observation point.
+   *
+   * @param loc location
+   */
   public void requestRemoveProbePoint(Location loc) {
     String cmd =
         "Clear "

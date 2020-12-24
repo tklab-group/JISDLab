@@ -7,35 +7,37 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 /**
- * Saved value information
+ * Observed value information.
  *
  * @author sugiyama
  */
 public abstract class ValueInfo {
-  /** time stamp */
+  /** Get the ValueInfo count */
   @Getter static volatile long count = 0;
-  /** variable name */
+  /** Get a variable name */
   @Getter String name;
-  /** saved value */
+  /** Get an observed value */
   @Getter String value;
-  /** value number */
+  /** Get a value number */
   @Getter long number;
-  /** time stamp */
+  /** Get a time stamp */
   @Getter LocalDateTime createdAt;
-  /** the current number of variable expansion strata */
+  /** Get the current number of variable expansion strata */
   @Getter int stratum;
-  /** value */
+  /** Get a jdi value */
   @Getter Value jValue;
-  /** children value info */
+  /** value info children */
   ArrayList<ValueInfo> children = new ArrayList<>();
-  /** already expanded? */
+  /** Get already expanded? */
   @Getter boolean isExpanded = false;
 
   /**
    * Constructor
    *
+   * @param name a variable name
    * @param stratum the current number of variable expansion strata
-   * @param jValue jdi value
+   * @param createdAt a time stamp
+   * @param jValue a jdi value
    */
   public ValueInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
     this.number = count++;
@@ -48,6 +50,14 @@ public abstract class ValueInfo {
     this.createdAt = createdAt;
   }
 
+  /**
+   * Constructor
+   *
+   * @param name a variable name
+   * @param stratum the current number of variable expansion strata
+   * @param createdAt a time stamp
+   * @param value value's string expression
+   */
   public ValueInfo(String name, int stratum, LocalDateTime createdAt, String value) {
     this.number = count++;
     this.name = name;
@@ -56,14 +66,15 @@ public abstract class ValueInfo {
     this.createdAt = createdAt;
   }
 
+  /** Reset the ValueInfo count. */
   public static void resetNumber() {
     count = 0;
   }
 
   /**
-   * Create children value info
+   * Create value info children
    *
-   * @return children value info
+   * @return values
    */
   public ArrayList<ValueInfo> expand() {
     isExpanded = true;
@@ -76,11 +87,11 @@ public abstract class ValueInfo {
   }
 
   /**
-   * Get children value info
+   * Get value info children
    *
    * @return children
    */
   public ArrayList<ValueInfo> ch() {
-    return expand();
+    return children;
   }
 }

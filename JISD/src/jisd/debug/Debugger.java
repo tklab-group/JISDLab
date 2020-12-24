@@ -8,16 +8,16 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * JISDLab's main debugger
+ * The JISDLab's main debugger.
  *
  * @author sugiyama
  */
 public class Debugger {
-  /** Manage breakpoints */
+  /** Manage points */
   PointManager pm;
-  /** Target class setting items */
+
   @Getter @Setter String main, options;
-  /** JDI thread */
+  /** VM thread */
   Thread vmThread;
   /** VM manager */
   VMManager vmManager;
@@ -25,17 +25,11 @@ public class Debugger {
   boolean isRemoteDebug;
   /** uses ProbeJ ? */
   boolean usesProbeJ;
-  /** attaching port */
+
   @Getter int port;
-  /** */
+
   @Getter @Setter String host;
 
-  /**
-   * Constructor
-   *
-   * @param main A target class file name
-   * @param options A target class path setting
-   */
   public Debugger(String main, String options) {
     this(main, options, false);
   }
@@ -65,9 +59,9 @@ public class Debugger {
   }
 
   /**
-   * Sleep main thread
+   * Sleep main thread until current bpm process is done
    *
-   * @param sleepTime wait time
+   * @param sleepTime sleep time (milliseconds)
    */
   public static void sleep(int sleepTime) {
     try {
@@ -105,46 +99,19 @@ public class Debugger {
     }
   }
 
-  /**
-   * Set breakpoint with a line number.
-   *
-   * @param lineNumber A line number in a target java file
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a line number. */
   public Optional<Point> stopAt(int lineNumber) {
     return stopAt(main, lineNumber);
   }
-
-  /**
-   * Set breakpoint with a line number and variable names.
-   *
-   * @param lineNumber line number
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a line number. */
   public Optional<Point> stopAt(int lineNumber, String[] varNames) {
     return stopAt(main, lineNumber, varNames);
   }
-
-  /**
-   * Set breakpoint with a line number and variable names.
-   *
-   * @param className class name
-   * @param lineNumber line number
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a line number. */
   public Optional<Point> stopAt(String className, int lineNumber) {
     return stopAt(className, lineNumber, new String[0]);
   }
-
-  /**
-   * Set breakpoint with a line number and variable names.
-   *
-   * @param className class name
-   * @param lineNumber line number
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a line number. */
   public Optional<Point> stopAt(String className, int lineNumber, String[] varNames) {
     if (usesProbeJ) {
       DebuggerInfo.printError("If you use ProbeJ, you can use watch() only.");
@@ -154,46 +121,19 @@ public class Debugger {
         vmManager, className, lineNumber, new ArrayList<>(Arrays.asList(varNames)), true, false);
   }
 
-  /**
-   * Set breakpoint with a method name.
-   *
-   * @param methodName A method name in a target java file
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a method name. */
   public Optional<Point> stopAt(String methodName) {
     return stopAt(main, methodName);
   }
-
-  /**
-   * Set breakpoint with a method name and variable names.
-   *
-   * @param methodName method name
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a method name. */
   public Optional<Point> stopAt(String methodName, String[] varNames) {
     return stopAt(main, methodName, varNames);
   }
-
-  /**
-   * Set breakpoint with a method name.
-   *
-   * @param className class name
-   * @param methodName method name
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a method name. */
   public Optional<Point> stopAt(String className, String methodName) {
     return stopAt(className, methodName, new String[0]);
   }
-
-  /**
-   * Set breakpoint with a method name and variable names.
-   *
-   * @param className class name
-   * @param methodName method name
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a breakpoint by a method name. */
   public Optional<Point> stopAt(String className, String methodName, String[] varNames) {
     if (usesProbeJ) {
       DebuggerInfo.printError("If you use ProbeJ, you can use watch() only.");
@@ -203,12 +143,7 @@ public class Debugger {
         vmManager, className, methodName, new ArrayList<>(Arrays.asList(varNames)), true, false);
   }
 
-  /**
-   * Set watchpoint with a line number.
-   *
-   * @param lineNumber A line number in a target java file
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint by a line number. */
   public Optional<Point> watch(int lineNumber) {
     if (usesProbeJ) {
       DebuggerInfo.printError("variable names are not set.");
@@ -217,24 +152,12 @@ public class Debugger {
     return watch(main, lineNumber);
   }
 
-  /**
-   * Set watchpoint with a line number and variable names.
-   *
-   * @param lineNumber line number
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint by a line number. */
   public Optional<Point> watch(int lineNumber, String[] varNames) {
     return watch(main, lineNumber, varNames);
   }
 
-  /**
-   * Set watchpoint with a line number.
-   *
-   * @param className class name
-   * @param lineNumber line number
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint by a line number. */
   public Optional<Point> watch(String className, int lineNumber) {
     if (usesProbeJ) {
       DebuggerInfo.printError("variable names are not set.");
@@ -243,14 +166,7 @@ public class Debugger {
     return watch(className, lineNumber, new String[0]);
   }
 
-  /**
-   * Set watchpoint with a line number and variable names.
-   *
-   * @param className class name
-   * @param lineNumber line number
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint or <strong>a probepoint</strong> by a line number. */
   public Optional<Point> watch(String className, int lineNumber, String[] varNames) {
     return pm.setPoint(
         vmManager,
@@ -261,46 +177,19 @@ public class Debugger {
         usesProbeJ);
   }
 
-  /**
-   * Set watchpoint with a method name.
-   *
-   * @param methodName A method name in a target java file
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint by a method name. */
   public Optional<Point> watch(String methodName) {
     return watch(main, methodName);
   }
-
-  /**
-   * Set watchpoint with a method name and variable names.
-   *
-   * @param methodName method name
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint by a method name. */
   public Optional<Point> watch(String methodName, String[] varNames) {
     return watch(main, methodName, varNames);
   }
-
-  /**
-   * Set watchpoint with a method name.
-   *
-   * @param className class name
-   * @param methodName method name
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint by a method name. */
   public Optional<Point> watch(String className, String methodName) {
     return watch(className, methodName, new String[0]);
   }
-
-  /**
-   * Set watchpoint with a method name and variable names.
-   *
-   * @param className class name
-   * @param methodName method name
-   * @param varNames variable names
-   * @return breakpoint(optional)
-   */
+  /** Set a watchpoint by a method name. */
   public Optional<Point> watch(String className, String methodName, String[] varNames) {
     if (usesProbeJ) {
       DebuggerInfo.printError("Cannot allow to set a probepoint by a method name.");
@@ -354,21 +243,12 @@ public class Debugger {
     pm.printStackTrace();
   }
 
-  /**
-   * Remove breakpoint with a line number.
-   *
-   * @param lineNumber A line number in a target java file
-   */
+  /** Remove breakpoint with a line number. */
   public void clear(int lineNumber) {
     clear(main, lineNumber);
   }
 
-  /**
-   * Remove breakpoint with a line number.
-   *
-   * @param className class name
-   * @param lineNumber line number
-   */
+  /** Remove breakpoint with a class name and a line number. */
   public void clear(String className, int lineNumber) {
     pm.removePoint(className, lineNumber);
   }
@@ -382,16 +262,12 @@ public class Debugger {
     clear(main, methodName);
   }
 
-  /**
-   * Remove breakpoint with a method name.
-   *
-   * @param className class name
-   * @param methodName method name
-   */
+  /** Remove breakpoint with a class name and a method name. */
   public void clear(String className, String methodName) {
     pm.removePoint(className, methodName);
   }
 
+  /** Start up the debugger.(equals to run(0)) */
   public void run() {
     run(0);
   }
@@ -431,14 +307,16 @@ public class Debugger {
     vmThread = null;
   }
 
-  /** Shutdown the debugger.(alias of "exit") */
+  /** Shutdown the debugger.(alias of exit()) */
   public void quit() {
     exit();
   }
 
+  /** Restart the debugger at once.(equals to restart(0)) */
   public void restart() {
     restart(0);
   }
+
   /**
    * Restart the debugger.
    *

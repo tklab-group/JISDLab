@@ -8,14 +8,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
+/** Field information. */
 public class FieldInfo extends StaticInfo {
   Optional<HashMap<String, ArrayList<Integer>>> canSetPoint = Optional.empty();
 
-  public FieldInfo(String className, String fieldName, String path, JSONObject cd, JSONObject ps) {
+  FieldInfo(String className, String fieldName, String path, JSONObject cd, JSONObject ps) {
     super(className, "this." + fieldName, path, cd, ps);
     canSet();
   }
 
+  /**
+   * Get HashMap of method name and line numbers(called canSetPoint) which can set an observation
+   * point in analyzed files.
+   */
   public HashMap<String, ArrayList<Integer>> canSet() {
     if (canSetPoint.isPresent()) {
       return canSetPoint.get();
@@ -44,6 +49,7 @@ public class FieldInfo extends StaticInfo {
     }
   }
 
+  /** Clear canSetPoint data. */
   @Override
   public void clearCache() {
     canSetPoint = Optional.empty();

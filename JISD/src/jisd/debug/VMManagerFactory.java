@@ -7,7 +7,11 @@ import org.jdiscript.JDIScript;
 import org.jdiscript.util.VMLauncher;
 import org.jdiscript.util.VMSocketAttacher;
 
-/** @author sugiyama */
+/**
+ * Creates VMManager.
+ *
+ * @author sugiyama
+ */
 class VMManagerFactory {
   static VMManager create(
       String main,

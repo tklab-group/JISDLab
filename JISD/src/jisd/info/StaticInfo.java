@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/** Static data information. */
 public abstract class StaticInfo {
   String className;
   String name;
@@ -23,6 +24,7 @@ public abstract class StaticInfo {
     this.classObjFromPS = ps;
   }
 
+  /** Get source contents. */
   public String src() {
     Path path = Paths.get(path());
     String str;
@@ -35,21 +37,26 @@ public abstract class StaticInfo {
     return str;
   }
 
+  /** Get the relative path this item is declared. */
   public String path() {
     return path;
   }
 
+  /** Get the absolute path this item is declared. */
   public String absPath() {
     return System.getProperty("user.dir") + File.separator + path;
   }
 
+  /** Get a class name. */
   public String className() {
     return className;
   }
 
+  /** Get this item's name. */
   public String name() {
     return name;
   }
 
+  /** Clear cache data. */
   public abstract void clearCache();
 }

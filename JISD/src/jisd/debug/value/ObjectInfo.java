@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 /**
- * Information of an object value
+ * Information of an object value.
  *
  * @author sugiyama
  */
@@ -18,10 +18,7 @@ public class ObjectInfo extends ValueInfo {
   /** reference type */
   ReferenceType rt;
 
-  /**
-   * @param stratum No. of the variable expansion
-   * @param jValue jdi value
-   */
+  /** */
   public ObjectInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
     super(name, stratum, createdAt, jValue);
     if (jValue != null) {

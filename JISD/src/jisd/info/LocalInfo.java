@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Optional;
 
+/** Local variable information. */
 public class LocalInfo extends StaticInfo {
   String methodName;
   Optional<ArrayList<Integer>> canSetPoint = Optional.empty();
@@ -18,10 +19,12 @@ public class LocalInfo extends StaticInfo {
     canSet();
   }
 
+  /** Get a method name this local variable belongs to. */
   public String methodName() {
     return methodName;
   }
 
+  /** Get line numbers(called canSetPoint) which can set an observation point in analyzed files. */
   public ArrayList<Integer> canSet() {
     if (canSetPoint.isPresent()) {
       return canSetPoint.get();
@@ -42,6 +45,7 @@ public class LocalInfo extends StaticInfo {
     }
   }
 
+  /** Clear canSetPoint data. */
   @Override
   public void clearCache() {
     canSetPoint = Optional.empty();

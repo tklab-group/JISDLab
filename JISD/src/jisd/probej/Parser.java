@@ -9,7 +9,11 @@ import jisd.util.Name;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-/** @author sugiyama */
+/**
+ * Parse received messages from ProbeJ.
+ *
+ * @author sugiyama
+ */
 class Parser {
 
   Optional<Location> parseLocation(String locStr) {

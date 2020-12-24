@@ -2,6 +2,11 @@ package jisd.util;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Provides print utility.
+ *
+ * @author sugiyama
+ */
 public class Print {
   public static void out(Object o) {
     System.out.println(o);

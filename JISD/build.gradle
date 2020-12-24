@@ -17,17 +17,25 @@ wrapper {
 }
 
 task delombok(type: Exec, dependsOn: compileJava) {
+  doFirst {
+    def sourceDirName = "build/delombok/src"
+    def srcDir = file(sourceDirName)
+    srcDir.deleteDir()
+    srcDir.mkdir()
+  }
   commandLine "powershell", "-Command", "java", "-jar", "\"lib\\lombok-1.18.16.jar\"", "delombok", "src", "--classpath", "\"build\\libs\\jisd-all.jar\"", "-d", "build/delombok/src"
 }
 
 javadoc {
   dependsOn delombok
-  source = "build/delombok/src"
+  def sourceDirName = "build/delombok/src"
+  source = sourceDirName
   exclude('jisd/demo/**')
   exclude('jisd/util/**')
   destinationDir = file("../JISD-doc/docs")
   failOnError = true
   options.setMemberLevel(JavadocMemberLevel.PUBLIC)
+  options.addStringOption('Xdoclint:none', '-quiet')
   doLast {
     copy {
       from "../JISD-doc/.nojekyll"

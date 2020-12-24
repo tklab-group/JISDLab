@@ -16,8 +16,21 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 
+/**
+ * A main class which analyzes Java bytecodes and generates static analysis data.
+ *
+ * @author khiranouchi
+ * @author sugiyama
+ */
 public class LysMain {
 
+  /**
+   * Analyzes Java bytecodes and generates static analysis data.
+   *
+   * @param args <br>
+   *     args[0]: an output dir name <br>
+   *     args[1 or later]: a binDir name or a jar file name.
+   */
   public static void main(String[] args) {
 
     Map<String, Object> pobj_all_ps = new HashMap<>();

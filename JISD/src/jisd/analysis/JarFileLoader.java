@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Stream;
-
-public class JarFileLoader {
+/** @author sugiyama */
+class JarFileLoader {
   Map<String, ClassNode> loadClasses(Map<String, ClassNode> cns, File jarFile) throws IOException {
     JarFile jar = new JarFile(jarFile);
     Stream<JarEntry> str = jar.stream();

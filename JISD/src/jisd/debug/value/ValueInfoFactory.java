@@ -6,17 +6,19 @@ import com.sun.jdi.Value;
 import java.time.LocalDateTime;
 
 /**
- * ValueInfo simple factory
+ * Creates ValueInfo.
  *
  * @author sugiyama
  */
 public class ValueInfoFactory {
   /**
-   * create ValueInfo
+   * Create ValueInfo.
    *
-   * @param stratum No. of the variable expansion
-   * @param jValue jdi value
-   * @return value info
+   * @param name a variable name
+   * @param stratum the current number of variable expansion strata
+   * @param jValue a jdi value
+   * @param value value's string expression
+   * @param createdAt a time stamp
    */
   public static ValueInfo create(
       String name, int stratum, Value jValue, String value, LocalDateTime createdAt) {

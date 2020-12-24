@@ -9,22 +9,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
+/**
+ * Provides an observation point.
+ *
+ * @author sugiyama
+ */
 public abstract class Point {
-  /** class name */
   @Getter String className;
-  /** line number */
   @Getter int lineNumber;
-  /** method name */
   @Getter String methodName;
-  /** varNames and debugresult */
+  /** varNames and debug result */
   HashMap<String, DebugResult> drs = new HashMap<>();
 
   boolean isEnable = true;
-  /** variable names */
   @Getter ArrayList<String> varNames;
-  /** break or not at points */
+  /** Break or not */
   @Getter boolean isBreak;
-  /** already request to set Breakpoint? */
+  /** Already request to set Breakpoint? */
   @Getter
   @Setter(AccessLevel.PACKAGE)
   boolean isRequested = false;
@@ -82,13 +83,18 @@ public abstract class Point {
    * Get DebugResult a variable name matches.
    *
    * @param varName variable name
-   * @return debug result
+   * @return debug result (Optional)
    */
   public Optional<DebugResult> getResults(String varName) {
     Optional<DebugResult> result = Optional.ofNullable(drs.get(varName));
     return result;
   }
 
+  /**
+   * Get DebugResults.
+   *
+   * @return
+   */
   public HashMap<String, DebugResult> getResults() {
     return drs;
   }
@@ -111,16 +117,29 @@ public abstract class Point {
   /** Request VM to set a breakpoint */
   abstract void requestSetPoint(VMManager vmMgr, PointManager bpm);
 
+  /** Enable this observation point. */
   public abstract void enable();
 
+  /** Disable this observation point. */
   public abstract void disable();
 
+  /** Disable this observation point. (alias of disable()) */
   public void clear() {
     disable();
   }
 
+  /**
+   * Add a targeted variable name.
+   *
+   * @param varName
+   */
   public abstract void add(String varName);
 
+  /**
+   * Remove a targeted variable name.
+   *
+   * @param varName
+   */
   public abstract void remove(String varName);
 
   void addVarName(String varName) {
@@ -158,6 +177,7 @@ public abstract class Point {
     return dr;
   }
 
+  /** Generate the hash code. */
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -168,6 +188,7 @@ public abstract class Point {
     return result;
   }
 
+  /** Check equality by className, methodName, lineNumber. */
   @Override
   public boolean equals(Object obj) {
     if (this == obj) {

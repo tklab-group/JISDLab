@@ -8,7 +8,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Optional;
 
-/** @author sugiyama */
+/**
+ * Manages a probepoint.
+ *
+ * @author sugiyama
+ */
 public class ProbePoint extends Point {
 
   Optional<ProbeJ> p;
@@ -108,6 +112,11 @@ public class ProbePoint extends Point {
         });
   }
 
+  /**
+   * Fetch and get debug results.
+   *
+   * @return HashMap of variable name and debug result
+   */
   @Override
   public HashMap<String, DebugResult> getResults() {
     fetchResults();

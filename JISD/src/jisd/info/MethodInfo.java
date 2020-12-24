@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Optional;
 
+/** Method information. */
 public class MethodInfo extends StaticInfo {
   private Optional<ArrayList<String>> locals = Optional.empty();
 
@@ -16,6 +17,7 @@ public class MethodInfo extends StaticInfo {
     localNames();
   }
 
+  /** Get local variable information. */
   public LocalInfo local(String localName) {
     if (locals.isEmpty()) {
       throw new RuntimeException("No such local variable");
@@ -26,6 +28,7 @@ public class MethodInfo extends StaticInfo {
     return new LocalInfo(className, name, localName, path, classObjFromCD, classObjFromPS);
   }
 
+  /** Get local variable names which belongs to this class. */
   public ArrayList<String> localNames() {
     if (locals.isPresent()) {
       return locals.get();
@@ -41,6 +44,7 @@ public class MethodInfo extends StaticInfo {
     }
   }
 
+  /** Clear local variables data. */
   @Override
   public void clearCache() {
     locals = Optional.empty();

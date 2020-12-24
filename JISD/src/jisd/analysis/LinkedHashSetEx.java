@@ -9,9 +9,10 @@ import java.util.Set;
  * element or subset. <br>
  *
  * @param <E> The element type of this set
+ * @author khiranouchi
  */
 @SuppressWarnings("serial")
-public class LinkedHashSetEx<E> extends LinkedHashSet<E> {
+class LinkedHashSetEx<E> extends LinkedHashSet<E> {
 
   /**
    * Get the value of the first element. (when this method is called, the instance should have at

@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 
+/** Creates StaticInfo. */
 public class StaticInfoFactory {
   @Getter(AccessLevel.PACKAGE)
   StaticFile sf;
@@ -26,24 +27,26 @@ public class StaticInfoFactory {
     return sf.getSrcDir() + File.separator + Name.toSourcePathFromClassName(className);
   }
 
+  /** Create ClassInfo. */
   public ClassInfo createClass(String className) {
     var path = getPath(className);
     var objs = getClassObj(className);
     return new ClassInfo(className, path, objs[0], objs[1]);
   }
-
+  /** Create MethodInfo. */
   public MethodInfo createMethod(String className, String methodName) {
     var path = getPath(className);
     var objs = getClassObj(className);
     return new MethodInfo(className, methodName, path, objs[0], objs[1]);
   }
 
+  /** Create FieldInfo. */
   public FieldInfo createField(String className, String fieldName) {
     var path = getPath(className);
     var objs = getClassObj(className);
     return new FieldInfo(className, fieldName, path, objs[0], objs[1]);
   }
-
+  /** Create LocalInfo. */
   public LocalInfo createLocal(String className, String methodName, String localName) {
     var path = getPath(className);
     var objs = getClassObj(className);

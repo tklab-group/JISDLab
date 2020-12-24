@@ -20,7 +20,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-/** @author sugiyama */
+/**
+ * Connects with ProbeJ and sends/receives messages.
+ *
+ * @author sugiyama
+ */
 class Connector {
   String host;
   int port;

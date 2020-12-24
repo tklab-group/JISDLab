@@ -8,15 +8,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 /**
- * Information of an array value
+ * Information of an array value.
  *
  * @author sugiyama
  */
 public class ArrayInfo extends ObjectInfo {
-  /**
-   * @param stratum No. of the variable expansion
-   * @param jValue jdi value
-   */
+  /** */
   public ArrayInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
     super(name, stratum, createdAt, jValue);
   }

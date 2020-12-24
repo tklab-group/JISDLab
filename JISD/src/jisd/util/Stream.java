@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collector.Characteristics;
 
-/** @author sugiyama */
+/**
+ * Provides stream utility.
+ *
+ * @author sugiyama
+ */
 public class Stream {
   public static <T> Collector<T, ?, List<T>> toArrayList() {
     Collector<T, ?, List<T>> toArrayList =
