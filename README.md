@@ -81,8 +81,8 @@ Please see [debugspace/DebugTutorial.ipynb](debugspace/DebugTutorial.ipynb).
 ## Demo
 Please see
 
-- Docker: `debugspace/DemoForDocker.ipynb`
-- VSCode: `debugspace/DemoForVSCode.ipynb`
+- Docker: [debugspace/DemoForDocker.ipynb](debugspace/DemoForDocker.ipynb)
+- VSCode: [debugspace/DemoForVSCode.ipynb](debugspace/DemoForVSCode.ipynb)
 
 ## See also
 - JISD's javadoc: https://sakupo.github.io/JISD-doc/
