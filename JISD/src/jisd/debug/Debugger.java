@@ -1,5 +1,6 @@
 package jisd.debug;
 
+import com.sun.jdi.ThreadReference;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +21,7 @@ public class Debugger {
   /** VM thread */
   Thread vmThread;
   /** VM manager */
-  VMManager vmManager;
+  @Getter VMManager vmManager;
   /** use attaching connector or not */
   boolean isRemoteDebug;
   /** uses ProbeJ ? */
@@ -365,5 +366,9 @@ public class Debugger {
    */
   public ArrayList<Point> getPoints() {
     return new ArrayList<>(pm.getPoints());
+  }
+
+  public ThreadReference thread() {
+    return pm.thread();
   }
 }
