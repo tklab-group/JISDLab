@@ -418,4 +418,11 @@ class PointManager {
                 .collect(Stream.toArrayList());
     return drs;
   }
+
+  ThreadReference thread() {
+    if (!checkCurrentTRef()) {
+      return null;
+    }
+    return currentTRef;
+  }
 }

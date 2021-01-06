@@ -1,5 +1,7 @@
 package jisd.debug.value;
 
+import com.sun.jdi.ObjectReference;
+import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 import lombok.Getter;
 
@@ -26,6 +28,8 @@ public abstract class ValueInfo {
   @Getter int stratum;
   /** Get a jdi value */
   @Getter Value jValue;
+  /** reference type */
+  @Getter ReferenceType rt;
   /** value info children */
   ArrayList<ValueInfo> children = new ArrayList<>();
   /** Get already expanded? */
@@ -77,13 +81,42 @@ public abstract class ValueInfo {
    * @return values
    */
   public ArrayList<ValueInfo> expand() {
+    if (jValue == null) {
+      return children;
+    }
+    if (isExpanded) {
+      return children;
+    }
+    try {
+      var objectRef = (ObjectReference) jValue;
+      objectRef
+          .getValues(rt.fields())
+          .forEach(
+              (field, value) -> {
+                ValueInfo vi =
+                    ValueInfoFactory.create(field.name(), stratum + 1, value, "", createdAt);
+                children.add(vi);
+              });
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     isExpanded = true;
     return children;
   }
 
+  public ValueInfo expand(String name) {
+    expand();
+    return getField(name);
+  }
+
+  public ValueInfo getField(String name) {
+    var child = children.stream().filter(ch -> ch.getName().equals(name)).findFirst();
+    return (child.isPresent()) ? child.get() : this;
+  }
+
   @Override
   public String toString() {
-    return "ValueInfo [value=" + value + ", number=" + number + ", stratum=" + stratum + "]";
+    return name + "=" + value + "\n";
   }
 
   /**

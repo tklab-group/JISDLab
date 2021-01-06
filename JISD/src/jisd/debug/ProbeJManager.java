@@ -8,7 +8,7 @@ import jisd.probej.ProbeJ;
  *
  * @author sugiyama
  */
-class ProbeJManager extends VMManager {
+public class ProbeJManager extends VMManager {
   ProbeJ probeJ;
   /** */
   public ProbeJManager(ProbeJ probeJ) {

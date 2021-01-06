@@ -10,7 +10,7 @@ import org.jdiscript.handlers.OnVMStart;
  *
  * @author sugiyama
  */
-class JDIManager extends VMManager {
+public class JDIManager extends VMManager {
   /** JDI */
   JDIScript j;
   /** A procedure before the debugger runs */
