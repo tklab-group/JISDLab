@@ -46,7 +46,7 @@ javadoc {
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.0.3'
+  archiveVersion = '0.0.4'
   exclude('.jisd_static_data*')
 }
 
@@ -54,6 +54,11 @@ shadowJar {
   dependsOn jar
   exclude('jisd/demo/**')
   exclude('.jisd_static_data*')
+}
+
+task release {
+  dependsOn javadoc
+  dependsOn shadowJar
 }
 
 test {
