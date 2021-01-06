@@ -54,7 +54,7 @@ And, you need to modify `kernel.json` for static analysis.If you want to know th
 
 For Linux:
 ```bash
-RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
+cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
 ```
 
 For Windows:
@@ -64,7 +64,7 @@ cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\j
 
 For MacOS:
 ```bash
-RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
+cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
 ```
 ---
 Then, start the Jupyter server
@@ -75,21 +75,17 @@ jupyter lab
 Please access the server from your web browser, or IDE which support Jupyter (ex. Vidual Studio Code).  
 
 
+## Tutorial
+Please see [debugspace/DebugTutorial.ipynb](debugspace/DebugTutorial.ipynb).
+
 ## Demo
-Please see `debugspace/DebugTutorial.ipynb`.
+Please see
+
+- Docker: [debugspace/DemoForDocker.ipynb](debugspace/DemoForDocker.ipynb)
+- VSCode: [debugspace/DemoForVSCode.ipynb](debugspace/DemoForVSCode.ipynb)
 
 ## See also
 - JISD's javadoc: https://sakupo.github.io/JISD-doc/
-
-## Restart & Stop
-### Restart
-```bash
-docker-compose restart
-```
-### Stop
-```bash
-docker-compose down -v
-```
 
 ## Trouble Shooting
 Please see https://github.com/tklab-group/JISDLab/wiki/Trouble-Shooting (Japanese only)
