@@ -1,13 +1,11 @@
 /** */
 package jisd.debug.value;
 
-import com.sun.jdi.ObjectReference;
-import com.sun.jdi.ReferenceType;
-import com.sun.jdi.Value;
+import com.sun.jdi.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Optional;
+import java.util.Arrays;
 
 /**
  * Information of an object value.
@@ -15,8 +13,6 @@ import java.util.Optional;
  * @author sugiyama
  */
 public class ObjectInfo extends ValueInfo {
-  /** reference type */
-  ReferenceType rt;
 
   /** */
   public ObjectInfo(String name, int stratum, LocalDateTime createdAt, Value jValue) {
@@ -26,42 +22,41 @@ public class ObjectInfo extends ValueInfo {
     }
   }
 
-  /**
-   * Create value info of fields
-   *
-   * @return children
-   */
-  @Override
-  public ArrayList<ValueInfo> expand() {
-    if (jValue == null) {
-      return children;
-    }
-    if (isExpanded) {
-      return children;
-    }
+  public ValueInfo invokeMethod(ThreadReference thread, String name, Object... args) {
     try {
-      var objectRef = (ObjectReference) jValue;
-      objectRef
-          .getValues(rt.fields())
+      var values = new ArrayList<Value>();
+      Arrays.stream(args)
           .forEach(
-              (field, value) -> {
-                ValueInfo vi =
-                    ValueInfoFactory.create(field.name(), stratum + 1, value, "", createdAt);
-                children.add(vi);
+              arg -> {
+                Value argValue;
+                if (arg instanceof String) {
+                  argValue = thread.virtualMachine().mirrorOf((String) arg);
+                } else if (arg instanceof Integer) {
+                  argValue = thread.virtualMachine().mirrorOf((Integer) arg);
+                } else {
+                  return;
+                }
+                values.add(argValue);
               });
-    } catch (Exception e) {
+      var returnValue =
+          ((ObjectReference) jValue)
+              .invokeMethod(
+                  thread,
+                  rt.methodsByName(name).get(0),
+                  values,
+                  ObjectReference.INVOKE_SINGLE_THREADED);
+      ValueInfo value =
+          ValueInfoFactory.create("return of " + name, 0, returnValue, "", LocalDateTime.now());
+      return value;
+    } catch (InvalidTypeException e) {
+      e.printStackTrace();
+    } catch (ClassNotLoadedException e) {
+      e.printStackTrace();
+    } catch (IncompatibleThreadStateException e) {
+      e.printStackTrace();
+    } catch (InvocationException e) {
       e.printStackTrace();
     }
-    isExpanded = true;
-    return children;
-  }
-
-  /**
-   * Get ReferenceType
-   *
-   * @return reference type
-   */
-  public Optional<ReferenceType> getRT() {
-    return Optional.ofNullable(rt);
+    return null;
   }
 }

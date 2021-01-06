@@ -135,6 +135,27 @@ public class BreakPoint extends Point {
             List<LocalVariable> vars;
             StackFrame stackFrame = be.thread().frame(0);
             if (varNames.size() == 0) {
+              var obj = stackFrame.thisObject();
+              if (obj != null) {
+                obj.getValues(rt.visibleFields())
+                    .forEach(
+                        (f, v) -> {
+                          Location loc =
+                              new Location(
+                                  bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                          addValue(loc, v);
+                        });
+              } else {
+                rt.allFields().stream()
+                    .filter(f -> f.isStatic())
+                    .forEach(
+                        f -> {
+                          Location loc =
+                              new Location(
+                                  bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                          addValue(loc, rt.getValue(f));
+                        });
+              }
               vars = stackFrame.visibleVariables();
             } else {
               vars =
@@ -142,6 +163,30 @@ public class BreakPoint extends Point {
                       .map(
                           name -> {
                             try {
+                              if (name.startsWith("this.")) {
+                                var obj = stackFrame.thisObject();
+                                if (obj != null) {
+                                  var f = rt.fieldByName(name.substring(5));
+                                  Location loc =
+                                      new Location(
+                                          bpClassName,
+                                          bpMethodName,
+                                          bpLineNumber,
+                                          "this." + f.name());
+                                  addValue(loc, obj.getValue(f));
+                                } else {
+                                  var f = rt.fieldByName(name.substring(5));
+                                  if (rt.isStatic()) {
+                                    Location loc =
+                                        new Location(
+                                            bpClassName,
+                                            bpMethodName,
+                                            bpLineNumber,
+                                            "this." + f.name());
+                                    addValue(loc, rt.getValue(f));
+                                  }
+                                }
+                              }
                               return stackFrame.visibleVariableByName(name);
                             } catch (AbsentInformationException ee) {
                               DebuggerInfo.printError("such a variable name not found.");
