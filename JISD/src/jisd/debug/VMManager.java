@@ -5,7 +5,7 @@ package jisd.debug;
  *
  * @author sugiyama
  */
-abstract class VMManager implements Runnable {
+public abstract class VMManager implements Runnable {
 
   /** Run the debugger. */
   @Override
