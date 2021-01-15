@@ -47,6 +47,6 @@ class VMManagerFactory {
       vm = new VMLauncher(options, main).start();
     }
     JDIScript j = new JDIScript(vm);
-    return new JDIManager(j);
+    return new JDIManager(j, isRemoteDebug);
   }
 }
