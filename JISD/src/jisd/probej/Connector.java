@@ -56,18 +56,14 @@ class Connector {
 
   void sendCommand(String cmd) {
     checkClientState();
-    Thread sender =
-        new Thread(
-            () -> {
-              sendCommandSync(cmd);
-            });
-    sender.start();
+    sendCommandSync(cmd);
   }
 
   void sendCommandSync(String cmd) {
-    ByteBuffer inBuf = ByteBuffer.allocate(1024);
     String inputLine = cmd;
-    inBuf = ByteBuffer.wrap(inputLine.getBytes());
+    ByteBuffer inBuf = ByteBuffer.allocate(1024);
+    inBuf.put(inputLine.getBytes());
+    inBuf.clear();
     Future<Integer> writeResult = client.write(inBuf);
     try {
       int len = writeResult.get(5, TimeUnit.SECONDS);
@@ -81,7 +77,6 @@ class Connector {
     } catch (TimeoutException e) {
       e.printStackTrace();
     }
-    inBuf.clear();
   }
 
   HashMap<Location, ArrayList<ValueInfo>> getResults(Location loc) {
