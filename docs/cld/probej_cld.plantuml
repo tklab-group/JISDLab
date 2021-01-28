@@ -1,0 +1,35 @@
+@startuml probej_cld
+!include plantumlcolor.inc
+
+ProbeJ o-- Connector
+ProbeJ o-- VirtualMachine
+Connector --> Parser : Uses >
+class ProbeJ {
+  Connector c
+  Optional<VirtualMachine> vm
+  void run()
+  void exit()
+  HashMap<Location, ArrayList<ValueInfo>> getResults()
+  HashMap<Location, ArrayList<ValueInfo>> getResults(Location)
+  void requestSetProbePoint(Location)
+}
+class Connector {
+  String host
+  int port
+  void openConnection()
+  void close()
+  void sendCommand()
+  getResults(Location)
+}
+class VirtualMachine {
+  String main
+  String options
+  int port
+  void run()
+  void shutdown()
+}
+class Parser {
+  parseLocation()
+  parseValue()
+}
+@enduml
