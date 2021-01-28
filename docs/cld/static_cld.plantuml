@@ -1,21 +1,22 @@
 @startuml static_cld
 !include plantumlcolor.inc
 
-StaticFile -le-o Static
-Static <|-- Class 
-Static <|-- Method 
-Static <|-- Field
-Static <|-- Local 
+StaticFile -le-o StaticInfoFactory
+StaticInfo <|-- ClassInfo 
+StaticInfo <|-- MethodInfo
+StaticInfo <|-- FieldInfo
+StaticInfo <|-- LocalInfo 
+class StaticInfoFactory {
+  create()
+}
 
 class StaticFile {
   String srcDir
   String binDir
-  void init()
-  void createStaticData()
-  void readStaticData()
+  void load()
 }
 
-abstract class Static {
+abstract class StaticInfo {
   StaticFile sf
   String className
   String name
@@ -23,22 +24,22 @@ abstract class Static {
   String path()
 }
 
-class Class {
+class ClassInfo {
   ArrayList<String> methods()
   ArrayList<String> fields()
-  Method method(String name)
-  Field field(String name)
+  MethodInfo method(String name)
+  FieldInfo field(String name)
 }
 
-class Method {
+class MethodInfo {
   ArrayList<String> locals()
-  Local local(String name)
+  LocalInfo local(String name)
 }
 
-class Field {
+class FieldInfo {
 }
 
-class Local {
+class LocalInfo {
   String methodName
   ArrayList<Integer> canSet()
   ArrayList<Integer> recom()
