@@ -4,6 +4,8 @@ package jisd.debug;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static jisd.debug.Utility.sleep;
+
 /** @author sugiyama */
 public class ProbePointTest {
   String[] vars = new String[] {"var1"};
@@ -11,7 +13,7 @@ public class ProbePointTest {
   void testProbeDebugger(Debugger dbg, String[] vars) {
     dbg.run(1000);
     Point p = dbg.watch("LoopN", 39, vars).get();
-    dbg.sleep(1000);
+    Utility.sleep(1000);
     var results = p.getResults();
     var dr = results.get(vars[0]);
     DebuggerTest.showResult(dr);
@@ -55,11 +57,11 @@ public class ProbePointTest {
     Debugger dbg = new Debugger("jisd.demo.LoopN", "-cp bin", true);
     dbg.run(1000);
     Point p = dbg.watch("LoopN", 39, vars).get();
-    dbg.sleep(1000);
+    sleep(1000);
     Assertions.assertTrue(p.getVarNames().get(0).equals(vars[0]));
     p.remove(vars[0]);
     Assertions.assertTrue(p.getVarNames().isEmpty());
-    dbg.sleep(1000);
+    sleep(1000);
     dbg.exit();
   }
 }

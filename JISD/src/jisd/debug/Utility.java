@@ -72,4 +72,17 @@ public class Utility {
   public static void println(Object o) {
     System.out.println(o);
   }
+
+  /**
+   * Sleep main thread
+   *
+   * @param sleepTime sleep time (milliseconds)
+   */
+  public static void sleep(int sleepTime) {
+    try {
+      Thread.sleep(sleepTime);
+    } catch (InterruptedException e) {
+      DebuggerInfo.print("Interrupted.");
+    }
+  }
 }

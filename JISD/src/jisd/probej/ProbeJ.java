@@ -2,8 +2,8 @@
 package jisd.probej;
 
 import com.sun.jdi.VMCannotBeModifiedException;
-import jisd.debug.Debugger;
 import jisd.debug.Location;
+import jisd.debug.Utility;
 import jisd.debug.value.ValueInfo;
 import jisd.util.Name;
 
@@ -41,7 +41,7 @@ public class ProbeJ {
       Thread tmp = new Thread(vm.get());
       tmp.start();
       vmThread = Optional.of(tmp);
-      Debugger.sleep(800); // wait for vm start.
+      Utility.sleep(800); // wait for vm start.
       System.out.println("VM with ProbeJ started.");
       isVMStarted = true;
     }

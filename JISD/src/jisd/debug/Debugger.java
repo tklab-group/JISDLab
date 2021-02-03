@@ -59,19 +59,6 @@ public class Debugger {
     init("", "", host, port, true, usesProbeJ);
   }
 
-  /**
-   * Sleep main thread until current bpm process is done
-   *
-   * @param sleepTime sleep time (milliseconds)
-   */
-  public static void sleep(int sleepTime) {
-    try {
-      Thread.sleep(sleepTime);
-    } catch (InterruptedException e) {
-      DebuggerInfo.print("Interrupted.");
-    }
-  }
-
   void init(
       String main,
       String options,
@@ -285,9 +272,9 @@ public class Debugger {
     vmThread = new Thread(vmManager);
     vmThread.start();
     if (!isRemoteDebug && usesProbeJ) {
-      sleep(1000);
+      Utility.sleep(1000);
     }
-    sleep(sleepTime);
+    Utility.sleep(sleepTime);
   }
 
   /** Sleep main thread until current bpm process is done */
