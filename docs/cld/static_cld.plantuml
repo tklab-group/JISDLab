@@ -5,9 +5,9 @@ StaticFile -le-o StaticInfoFactory
 StaticInfo <|-- ClassInfo 
 StaticInfo <|-- MethodInfo
 StaticInfo <|-- FieldInfo
-StaticInfo <|-- LocalInfo 
+StaticInfo <|-r- LocalInfo 
 class StaticInfoFactory {
-  create()
+  StaticInfo create()
 }
 
 class StaticFile {
@@ -37,12 +37,12 @@ class MethodInfo {
 }
 
 class FieldInfo {
+  HashMap<String, ArrayList<Integer>> canSet()
 }
 
 class LocalInfo {
   String methodName
   ArrayList<Integer> canSet()
-  ArrayList<Integer> recom()
 }
 
 @enduml
