@@ -1,9 +1,10 @@
 FROM python:3.8
 
 # JupyterLab install
-RUN pip install --upgrade pip
-RUN pip install jupyterlab
-RUN mkdir -p ~/.jupyter &&\
+RUN pip install --upgrade pip && \
+pip install jupyterlab
+
+RUN mkdir -p ~/.jupyter && \
 echo 'c = get_config()\n\
 c.IPKernelApp.pylab = "inline"\n\
 c.NotebookApp.ip = "0.0.0.0"\n\
@@ -19,18 +20,15 @@ c.NotebookApp.password = "sha1:c956c5379e61:c10306b11fa6b2d69fe0ad302c1bfe91c140
 # RUN jupyter serverextension enable --py jupyterlab
 
 # Java install
-RUN apt-get update
-RUN apt-get install -y openjdk-11-jdk
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk
 
 # workspace directory
 ARG ws_dir=/workspaces
 
 # jisdlab/jisd directory
-ARG jisdlab_dir=/JISDLab
+ENV jisdlab_dir=/JISDLab
 ARG jisd_dir=${jisdlab_dir}/JISD
-
-# set env
-RUN export JISDLAB_HOME=${jisdlab_dir}
 
 # jdiscript classpath  
 ARG cp1=${jisdlab_dir}/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar
@@ -47,9 +45,9 @@ WORKDIR $jisdlab_dir
 # IJava install
 RUN cd IJava && ./gradlew installKernel --param classpath:${cp1}:${cp2}:${cp3} --param startup-scripts-path:${jisd_dir}/startup.jshell
 # For Windows
-#cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;%JISDLAB_HOME%/sample" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
+# RUN cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;%JISDLAB_HOME%/sample" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
 
 #Modify kernel.json
 RUN cd JISD && ./gradlew createKernelJson -Pjsonpath=/root/.local/share/jupyter/kernels/java/kernel.json -Pcp=${cp3}
 # For Windows
-#cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp="%JISDLAB_HOME%\sample"; cd ..
+# RUN cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp="%JISDLAB_HOME%\sample"; cd ..
