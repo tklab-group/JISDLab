@@ -1,0 +1,2 @@
+# 主要言語からHTMLを除外
+*.html linguist-vendored
