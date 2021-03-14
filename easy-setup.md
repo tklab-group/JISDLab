@@ -1,5 +1,5 @@
 # 簡単セットアップ
-##　Dockerを使う場合
+## Dockerを使う場合
 ### 必要なもの
 - docker
 - docker-compose
