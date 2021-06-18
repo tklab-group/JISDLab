@@ -14,14 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author sugiyama
  */
-class DebuggerTest {
+public class DebuggerTest {
   /* line numbers a breakpoint is set */
   static final int bpln1 = 20;
   static final int bpln2 = 22;
   static final int bpln3 = 25;
   ArrayList<Integer> bps = new ArrayList<>();
 
-  DebuggerTest() {
+  public DebuggerTest() {
     bps.add(bpln1);
     bps.add(bpln2);
   }
@@ -35,7 +35,7 @@ class DebuggerTest {
     System.out.println("");
   }
 
-  Debugger makeDebugger() {
+  public Debugger makeDebugger() {
     Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
     bps.forEach(
         item -> {

@@ -9,6 +9,7 @@ import jisd.info.*;
 
 // often use classes
 import java.util.*;
+import java.util.stream.*;
 
 // graph libraryd
 import org.knowm.xchart.*;

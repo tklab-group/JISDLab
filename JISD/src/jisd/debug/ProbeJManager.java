@@ -11,7 +11,8 @@ import jisd.probej.ProbeJ;
 public class ProbeJManager extends VMManager {
   ProbeJ probeJ;
   /** */
-  public ProbeJManager(ProbeJ probeJ) {
+  public ProbeJManager(Debugger debugger, ProbeJ probeJ) {
+    super(debugger);
     this.probeJ = probeJ;
   }
 

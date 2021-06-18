@@ -1,6 +1,7 @@
 package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
+import jisd.vis.Exporter;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,6 +27,8 @@ public class Debugger {
   boolean isRemoteDebug;
   /** uses ProbeJ ? */
   boolean usesProbeJ;
+  /** observer(exporter) */
+  @Getter Optional<Exporter> exporter = Optional.empty();
 
   @Getter int port;
 
@@ -73,7 +76,7 @@ public class Debugger {
     this.usesProbeJ = usesProbeJ;
     this.isRemoteDebug = isRemoteDebug;
     pm = new PointManager();
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
   }
 
@@ -85,6 +88,10 @@ public class Debugger {
     } else {
       this.port = port;
     }
+  }
+
+  public void setExporter(Exporter exporter) {
+    this.exporter = Optional.of(exporter);
   }
 
   /** Set a breakpoint by a line number. */
@@ -313,7 +320,7 @@ public class Debugger {
   public void restart(int sleepTime) {
     exit();
     clearResults();
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
     run(sleepTime);
   }

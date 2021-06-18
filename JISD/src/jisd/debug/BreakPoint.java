@@ -203,6 +203,13 @@ public class BreakPoint extends Point {
               Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
               addValue(loc, entry.getValue());
             }
+            // update prometeus metrics
+            var dbg = vmMgr.getDebugger();
+            var exporter_opt = dbg.exporter;
+            if (exporter_opt.isPresent()) {
+              var exporter = exporter_opt.get();
+              exporter.update(dbg);
+            }
             // if isBreak is true
             if (isBreak()) {
               if (bpm.isProcessing()) {

@@ -82,6 +82,16 @@ dependencies {
   // https://mvnrepository.com/artifact/commons-io/commons-io
   implementation 'commons-io:commons-io:2.8.0'
 
+  // jisdvis
+  implementation 'io.prometheus:simpleclient:0.11.0'
+  implementation 'io.prometheus:simpleclient_hotspot:0.11.0'
+  implementation 'io.prometheus:simpleclient_httpserver:0.11.0'
+  implementation 'io.prometheus:simpleclient_servlet:0.11.0'
+
+  // undertow server
+  implementation 'io.undertow:undertow-servlet:2.2.8.Final'
+  implementation 'org.jboss.resteasy:resteasy-undertow:4.5.12.Final'
+  implementation 'org.jboss.resteasy:resteasy-servlet-initializer:4.5.12.Final'
 
   // jdiscript
   implementation files('../jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar')

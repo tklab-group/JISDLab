@@ -14,6 +14,7 @@ import org.jdiscript.util.VMSocketAttacher;
  */
 class VMManagerFactory {
   static VMManager create(
+      Debugger debugger,
       String main,
       String options,
       String host,
@@ -34,7 +35,7 @@ class VMManagerFactory {
       } else {
         probeJ = new ProbeJ(host, port);
       }
-      return new ProbeJManager(probeJ);
+      return new ProbeJManager(debugger, probeJ);
     }
 
     // JDI
@@ -47,6 +48,6 @@ class VMManagerFactory {
       vm = new VMLauncher(options, main).start();
     }
     JDIScript j = new JDIScript(vm);
-    return new JDIManager(j, isRemoteDebug);
+    return new JDIManager(debugger, j, isRemoteDebug);
   }
 }
