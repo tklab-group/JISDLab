@@ -1,6 +1,7 @@
 package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
+import jisd.debug.value.ValueInfo;
 import jisd.vis.Exporter;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,7 +29,7 @@ public class Debugger {
   /** uses ProbeJ ? */
   boolean usesProbeJ;
   /** observer(exporter) */
-  @Getter Optional<Exporter> exporter = Optional.empty();
+  @Getter Optional<Exporter> exporterOpt = Optional.empty();
 
   @Getter int port;
 
@@ -91,7 +92,14 @@ public class Debugger {
   }
 
   public void setExporter(Exporter exporter) {
-    this.exporter = Optional.of(exporter);
+    this.exporterOpt = Optional.of(exporter);
+  }
+
+  public void notifyExporter(ValueInfo valueInfo) {
+    if (exporterOpt.isPresent()) {
+      var exporter = exporterOpt.get();
+      exporter.update(valueInfo);
+    }
   }
 
   /** Set a breakpoint by a line number. */
