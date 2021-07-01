@@ -2,7 +2,6 @@ package jisd.vis;
 
 import jisd.debug.Debugger;
 import jisd.debug.DebuggerTest;
-import jisd.util.Print;
 import org.junit.jupiter.api.Test;
 
 public class JisdVisTest {

@@ -92,7 +92,7 @@ public class DebugResult {
   }
 
   /** Add value to deque */
-  void addValue(Value jValue) {
+  ValueInfo addValue(Value jValue) {
     ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
     String name = location.getVarName();
     ValueInfo value = ValueInfoFactory.create(name, 0, jValue, "", LocalDateTime.now());
@@ -112,6 +112,7 @@ public class DebugResult {
       }
     }
     addValue(value);
+    return value;
   }
 
   /**

@@ -1,4 +1,6 @@
-/** */
+/**
+ *
+ */
 package jisd.debug;
 
 import jisd.debug.value.ValueInfo;
@@ -16,6 +18,7 @@ import java.util.Optional;
 public class ProbePoint extends Point {
 
   Optional<ProbeJ> p;
+
   /**
    * Constructor
    *
@@ -66,9 +69,9 @@ public class ProbePoint extends Point {
       return;
     }
     varNames.forEach(
-        (varName) -> {
-          p.get().requestSetProbePoint(new Location(className, methodName, lineNumber, varName));
-        });
+      (varName) -> {
+        p.get().requestSetProbePoint(new Location(className, methodName, lineNumber, varName));
+      });
     setRequested(true);
   }
 
@@ -98,18 +101,18 @@ public class ProbePoint extends Point {
   public void enable() {
     isEnable = true;
     varNames.forEach(
-        varName -> {
-          requestSetPoint();
-        });
+      varName -> {
+        requestSetPoint();
+      });
   }
 
   @Override
   public void disable() {
     isEnable = false;
     varNames.forEach(
-        varName -> {
-          remove(varName);
-        });
+      varName -> {
+        remove(varName);
+      });
   }
 
   /**
@@ -130,27 +133,29 @@ public class ProbePoint extends Point {
     /* TODO: when varNames is empty */
 
     varNames.forEach(
-        (varName) -> {
-          var results =
-              p.get().getResults(new Location(className, methodName, lineNumber, varName));
-          results.forEach(
-              (key, values) -> {
-                addValues(key.varName, values);
-              });
-        });
+      (varName) -> {
+        var results =
+          p.get().getResults(new Location(className, methodName, lineNumber, varName));
+        results.forEach(
+          (key, values) -> {
+            addValues(key.varName, values);
+          });
+      });
   }
 
-  void addValues(String varName, ArrayList<ValueInfo> values) {
+  DebugResult addValues(String varName, ArrayList<ValueInfo> values) {
     synchronized (this) {
-      Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
-      if (res.isPresent()) {
-        res.get().addValues(values);
-        return;
+      Optional<DebugResult> res_opt = Optional.ofNullable(drs.get(varName));
+      if (res_opt.isPresent()) {
+        var res = res_opt.get();
+        res.addValues(values);
+        return res;
       }
       Location loc = new Location(className, methodName, lineNumber, varName);
       DebugResult dr = new DebugResult(loc);
       dr.addValues(values);
       addDebugResult(varName, dr);
+      return dr;
     }
   }
 }
