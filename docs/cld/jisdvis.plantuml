@@ -1,0 +1,42 @@
+@startuml jisdvis
+!include plantumlcolor.inc
+participant Prometheus as p
+participant Exporter as e
+participant Debugger as d
+e <- d: hit breakpoint/set value **a=0**
+p -> e: pull metrics
+p <- e: response metrics
+note left
+metrics
+a: 0
+end note
+e <- d: hit breakpoint/set value **a=1**
+e <- d: hit breakpoint/set value **a=2**
+e <- d: hit breakpoint/set value **a=3**
+e <- d: hit breakpoint/set value **a=4**
+p -> e: pull metrics
+p <- e: response metrics
+note left
+metrics
+a: 4
+end note
+@enduml
+
+@startuml jisdvis-exporter-debugger
+!include plantumlcolor.inc
+participant Exporter as e
+participant Debugger as d
+participant TargetVM as t
+d <- t: breakpoint hit(a=1)
+e <- d: notify(ValueInfo)
+note left 
+metrics
+a: 1
+end note
+d <- t: breakpoint hit(a=2)
+e <- d: notify(ValueInfo)
+note left 
+metrics
+a: 2
+end note
+@enduml
