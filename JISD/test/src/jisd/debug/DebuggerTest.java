@@ -1,6 +1,7 @@
 package jisd.debug;
 
 import jisd.debug.value.ValueInfo;
+import jisd.util.Print;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +56,18 @@ public class DebuggerTest {
       Assertions.assertEquals(res.getLocation().getLineNumber(), bps.get(i / 4));
     }
     dbg.exit();
+  }
+
+  @Test
+  void binarySearchDemoTest() {
+    var dbg = new Debugger("jisd.demo.BinarySearch", "-cp bin");
+    dbg.watch(22, new String[]{"left","right"});
+    dbg.run(1000);
+    ArrayList<DebugResult> results = dbg.getResults();
+    for (int i = 0; i < results.size(); i++) {
+      DebugResult res = results.get(i);
+      res.getValues().forEach(v->Print.out(v));
+    }
   }
 
   @Test
