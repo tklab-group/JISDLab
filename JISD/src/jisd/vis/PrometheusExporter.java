@@ -17,7 +17,7 @@ import java.util.*;
 
 import jisd.util.Number;
 
-public class Exporter {
+public class PrometheusExporter implements IExporter {
   String host;
   int port;
   String path;
@@ -26,18 +26,18 @@ public class Exporter {
   Optional<DeploymentManager> manager = Optional.empty();
   DebugResource resource = new DebugResource();
 
-  public Exporter(String host, int port, String path, String name) {
+  public PrometheusExporter(String host, int port, String path, String name) {
     this.host = host;
     this.port = port;
     this.path = path;
     this.name = name;
   }
 
-  public Exporter(String host, int port) {
+  public PrometheusExporter(String host, int port) {
     this(host, port, "/metrics");
   }
 
-  public Exporter(String host, int port, String path) {
+  public PrometheusExporter(String host, int port, String path) {
     this(host, port, path, "jisdvis");
   }
 
@@ -50,7 +50,7 @@ public class Exporter {
     try {
       deployment = Servlets
         .deployment()
-        .setClassLoader(Exporter.class.getClassLoader())
+        .setClassLoader(PrometheusExporter.class.getClassLoader())
         .setDeploymentName("prometheus-client")
         .setContextPath(contextPath)
         .addServlet(createPrometheusServlet())  // サーブレットを追加
@@ -103,6 +103,7 @@ public class Exporter {
     }
   }
 
+  @Override
   public void update(ValueInfo valueInfo) {
     String varName = valueInfo.getName();
     String value = valueInfo.getValue();

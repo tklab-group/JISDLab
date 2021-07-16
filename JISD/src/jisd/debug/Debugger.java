@@ -2,7 +2,7 @@ package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
 import jisd.debug.value.ValueInfo;
-import jisd.vis.Exporter;
+import jisd.vis.IExporter;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,7 +29,7 @@ public class Debugger {
   /** uses ProbeJ ? */
   boolean usesProbeJ;
   /** observer(exporter) */
-  @Getter Optional<Exporter> exporterOpt = Optional.empty();
+  @Getter Optional<IExporter> exporterOpt = Optional.empty();
 
   @Getter int port;
 
@@ -91,7 +91,7 @@ public class Debugger {
     }
   }
 
-  public void setExporter(Exporter exporter) {
+  public void setExporter(IExporter exporter) {
     this.exporterOpt = Optional.of(exporter);
   }
 

@@ -197,7 +197,7 @@ public class BreakPoint extends Point {
             String varName = entry.getKey().name();
             Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
             var valueInfo = addValue(loc, entry.getValue());
-            // update prometeus metrics
+            // update metrics
             dbg.notifyExporter(valueInfo);
           }
           // if isBreak is true
