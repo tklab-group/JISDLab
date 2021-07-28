@@ -8,11 +8,8 @@ import jisd.util.Number;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
-import static java.lang.System.getProperty;
-
-public class JsonExporter implements IExporter {
+public class ElasticSearchExporter implements IExporter {
   String host;
   int port;
   String name;
@@ -20,17 +17,30 @@ public class JsonExporter implements IExporter {
   Thread exporterThread;
   volatile boolean isStop = false;
   long id = 0;
+  private String timeLocale;
+  private int sleepTime = 1000;
 
-  public JsonExporter(String host, int port, String name) {
+  public ElasticSearchExporter(String host, int port, String name) {
+    this(host, port, name, "09:00");
+  }
+
+  public ElasticSearchExporter(String host, int port, String name, String timeLocale) {
     this.host = host;
     this.port = port;
     this.name = name;
+    this.timeLocale = timeLocale;
   }
 
   public void run() {
+    run(1000);
+  }
+
+  public void run(int sleepTime) {
     isStop = false;
+    this.sleepTime = sleepTime;
     exporterThread = new Thread(()->{
       while (!isStop) {
+        // 1秒毎に送信
         Utility.sleep(1000);
         postJson();
       }
@@ -46,26 +56,28 @@ public class JsonExporter implements IExporter {
   @Override
   public void update(ValueInfo valueInfo) {
     var jsonQuery = createJson(valueInfo);
-    Utility.sleep(10);
     synchronized (jsonCache) {
       jsonCache.append(jsonQuery);
     }
+    Utility.sleep(sleepTime);
   }
 
   String createJson(ValueInfo valueInfo) {
     var varName = valueInfo.getName();
     var value = valueInfo.getValue();
+    var valueStr = value;
     if (!Number.isNumeric(value)) {
       value = "0";
     }
     var timestamp = valueInfo.getCreatedAt().toString();
     StringBuilder sb = new StringBuilder();
-    sb.append("{\"update\":{\"_index\":\"").append(name).append("\",\"_id\": \"").append(id++).append("\"}}\n")
-      .append("{\"doc\":{")
-      .append("\"@timestamp\":").append("\"").append(timestamp+"+09:00").append("\",")
+    sb.append("{\"create\":{\"_index\":\"").append(name).append("\"}}\n")
+      .append("{")
+      .append("\"@timestamp\":").append("\"").append(timestamp+"+"+timeLocale).append("\",")
       .append("\"name\":").append("\"").append(varName).append("\",")
-      .append("\"value\":").append(value)
-      .append("}}\n");
+      .append("\"value\":").append(value).append(",")
+      .append("\"value_string\":").append("\"").append(valueStr).append("\"")
+      .append("}\n");
     return sb.toString();
   }
 

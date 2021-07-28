@@ -21,7 +21,7 @@ public class JisdVisTest {
     void elasticSearchTest() {
         var dbgTest = new DebuggerTest();
         Debugger dbg = dbgTest.makeDebugger();
-        JsonExporter esExporter = new JsonExporter("http://localhost", 9200, "sample");
+        ElasticSearchExporter esExporter = new ElasticSearchExporter("http://localhost", 9200, "sample");
         dbg.setExporter(esExporter);
         dbg.watch(25, new String[]{"a"});
         esExporter.run();
@@ -32,13 +32,13 @@ public class JisdVisTest {
     @Test
     void elasticSearchWithBinarySearchTest() {
         var dbg = new Debugger("jisd.demo.BinarySearch", "-cp bin");
-        JsonExporter esExporter = new JsonExporter("http://localhost", 9200, "sample");
+        ElasticSearchExporter esExporter = new ElasticSearchExporter("http://localhost", 9200, "sample");
         dbg.setExporter(esExporter);
-        dbg.watch(15, new String[]{"left","right"});
-        dbg.watch(22, new String[]{"left","right"});
+        dbg.watch(12, new String[]{"bs"});
+        dbg.watch(19, new String[]{"left","right"});
         dbg.watch(25, new String[]{"left","right"});
-        esExporter.run();
-        dbg.run(10000);
+        esExporter.run(10);
+        dbg.run(5000);
         esExporter.stop();
     }
 }
