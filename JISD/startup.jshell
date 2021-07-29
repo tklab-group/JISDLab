@@ -11,5 +11,5 @@ import jisd.info.*;
 import java.util.*;
 import java.util.stream.*;
 
-// graph libraryd
+// graph library
 import org.knowm.xchart.*;
