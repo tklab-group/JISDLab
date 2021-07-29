@@ -238,7 +238,7 @@ public class LysMain {
           int idx_delim = mdesc.indexOf(')');
           String mretdesc = mdesc.substring(idx_delim + 1, mdesc.length());
           SrtVal sv = new SrtVal("dummy", mretdesc, cns.keySet()); // noneed so much<<<
-          rettype = sv.typename;
+          rettype = sv.typeName;
         }
         parr_method_md.add(rettype);
 
@@ -253,7 +253,7 @@ public class LysMain {
             String startlabel = lvn.start.getLabel().toString();
             if (method_line_labels.getFirstValue().equals(startlabel)) {
               SrtVal sl = new SrtVal(lvn.name, lvn.desc, cns.keySet());
-              argtype.add(sl.typename);
+              argtype.add(sl.typeName);
               argname.add(sl.name);
             }
           }
@@ -286,7 +286,7 @@ public class LysMain {
       var fieldVals = fields.get(cn.name);
       fieldVals.forEach(
           val -> {
-            pobj_fields_md.put(val.name, val.typename);
+            pobj_fields_md.put(val.name, val.typeName);
           });
 
       HashMap<String, Object> pobj_class_md = new HashMap<>();

@@ -3,7 +3,7 @@ package jisd.analysis;
 import java.util.Set;
 
 /**
- * This class corresponds to one valuable. Also analyze valuable and get the type and whether it can
+ * This class corresponds to one variable. Also analyze variable and get the type and whether it can
  * be set as breakpoint.
  *
  * @author khiranouchi
@@ -11,26 +11,26 @@ import java.util.Set;
  */
 class SrtVal {
 
-  /** name of the valuable (eg. "x", "sum", "val1") */
-  public String name;
+  /** name of the variable (eg. "x", "sum", "val1") */
+  String name;
 
   /**
-   * kind of the valuable type <br>
-   * 0: can be set as breakpoint <br>
-   * 1: user-defined class (whether its field is can be set or not) <br>
-   * 2: cannot be set as breakpoint
+   * kind of the variable type <br>
+   * PRIMITIVE : can be set as breakpoint <br>
+   * USERDEFINED: user-defined class (whether its field is can be set or not) <br>
+   * OTHER: cannot be set as breakpoint
    */
-  public int typekind;
+  VariableType typeKind;
 
-  /** the valuable type name (eg. "int", "java.lang.String", "Student", "int[]", "int[][]") */
-  public String typename; // 'L' and ';' removed
+  /** the variable type name (eg. "int", "java.lang.String", "Student", "int[]", "int[][]") */
+  String typeName; // 'L' and ';' removed
 
   /**
-   * Create instance by analyzing the valuable
+   * Create instance by analyzing the variable
    *
-   * @param name name of the valuable
-   * @param desc descriptor of the valuable
-   * @param cnKeySet set of ClassNode key (used to get whether the valuable type is user-defined or
+   * @param name name of the variable
+   * @param desc descriptor of the variable
+   * @param cnKeySet set of ClassNode key (used to get whether the variable type is user-defined or
    *     not)
    */
   public SrtVal(String name, String desc, Set<String> cnKeySet) {
@@ -42,60 +42,60 @@ class SrtVal {
       dimen++;
     }
 
-    int typekind_tmp;
-    String typename_tmp;
+    VariableType typeKindTmp;
+    String typeNameTmp;
 
     char c = desc.charAt(dimen);
     if (c == 'L') {
-      typename_tmp = desc.substring(dimen + 1, desc.length() - 1); // remove 'L' and ';'
-      if (cnKeySet.contains(typename_tmp)) {
-        typekind_tmp = 1; // userclass
+      typeNameTmp = desc.substring(dimen + 1, desc.length() - 1); // remove 'L' and ';'
+      if (cnKeySet.contains(typeNameTmp)) {
+        typeKindTmp = VariableType.USERDEFINED; // userclass
       } else {
-        typekind_tmp = 1;
-        // typekind_tmp = 2;// cannot
-        typename_tmp = typename_tmp.replace('/', '.');
+        typeKindTmp = VariableType.USERDEFINED;
+        // TODO: typeKindTmp = VariableType.OTHER;// cannot
+        typeNameTmp = typeNameTmp.replace('/', '.');
       }
     } else {
-      typekind_tmp = 0; // can
+      typeKindTmp = VariableType.PRIMITIVE; // can
       switch (c) {
         case 'B':
-          typename_tmp = "bool";
+          typeNameTmp = "bool";
           break;
         case 'C':
-          typename_tmp = "char";
+          typeNameTmp = "char";
           break;
         case 'D':
-          typename_tmp = "double";
+          typeNameTmp = "double";
           break;
         case 'F':
-          typename_tmp = "float";
+          typeNameTmp = "float";
           break;
         case 'I':
-          typename_tmp = "int";
+          typeNameTmp = "int";
           break;
         case 'J':
-          typename_tmp = "long";
+          typeNameTmp = "long";
           break;
         case 'S':
-          typename_tmp = "short";
+          typeNameTmp = "short";
           break;
         case 'Z':
-          typename_tmp = "boolean";
+          typeNameTmp = "boolean";
           break;
         default: // 'V'
-          typename_tmp = "void";
+          typeNameTmp = "void";
       }
     }
 
     // take array
     if (dimen > 0) {
-      typekind_tmp = 2; // cannot
+      typeKindTmp = VariableType.OTHER; // cannot
       for (int i = 0; i < dimen; i++) {
-        typename_tmp += "[]";
+        typeNameTmp += "[]";
       }
     }
 
-    this.typekind = typekind_tmp;
-    this.typename = typename_tmp;
+    this.typeKind = typeKindTmp;
+    this.typeName = typeNameTmp;
   }
 }
