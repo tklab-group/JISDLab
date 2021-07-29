@@ -7,7 +7,9 @@ import java.nio.ByteBuffer;
  *
  * @author sugiyama
  */
-public class Print {
+public final class Print {
+  private Print() {}
+
   public static void out(Object o) {
     System.out.println(o);
   }

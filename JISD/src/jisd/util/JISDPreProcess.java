@@ -3,12 +3,16 @@ package jisd.util;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import static jisd.util.Name.cpSeparator;
+
 /**
  * A process which needs before JISDLab is available.
  *
  * @author sugiyama
  */
-public class JISDPreProcess {
+public final class JISDPreProcess {
+  private JISDPreProcess() {}
+
   public static void main(String[] args) {
     if (args.length != 3) {
       return;
@@ -38,15 +42,6 @@ public class JISDPreProcess {
     } catch (JSONException e) {
       e.printStackTrace();
       return;
-    }
-  }
-
-  static String cpSeparator() {
-    var os = System.getProperty("os.name").toLowerCase();
-    if (os.startsWith("windows")) {
-      return ";";
-    } else {
-      return ":";
     }
   }
 }

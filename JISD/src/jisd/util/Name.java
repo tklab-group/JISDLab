@@ -9,7 +9,9 @@ import java.util.HashMap;
  *
  * @author sugiyama
  */
-public class Name {
+public final class Name {
+  private Name() {}
+
   /**
    * generate a class path from a source path
    *
@@ -63,5 +65,14 @@ public class Name {
     map.put("package", packageName);
     map.put("class", className);
     return map;
+  }
+
+  public static String cpSeparator() {
+    var os = System.getProperty("os.name").toLowerCase();
+    if (os.startsWith("windows")) {
+      return ";";
+    } else {
+      return ":";
+    }
   }
 }

@@ -12,6 +12,8 @@ import java.util.stream.Collector.Characteristics;
  * @author sugiyama
  */
 public class Stream {
+  private Stream() {}
+
   public static <T> Collector<T, ?, List<T>> toArrayList() {
     Collector<T, ?, List<T>> toArrayList =
         Collector.of(
