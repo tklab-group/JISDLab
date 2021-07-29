@@ -205,6 +205,7 @@ public class DebuggerTest {
     DebugResult.setDefaultMaxRecordNoOfValue(maxRecords);
     dbg.watch(bpln3, varNames);
     dbg.run(2000);
+    dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
@@ -220,7 +221,6 @@ public class DebuggerTest {
                 System.out.println("");
               }
             });
-    dbg.exit();
   }
 
   @Test
@@ -232,6 +232,7 @@ public class DebuggerTest {
     var a = p.getResults("a").get();
     a.setMaxRecordNoOfValue(maxRecords);
     dbg.run(2000);
+    dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
@@ -247,7 +248,6 @@ public class DebuggerTest {
                 System.out.println("");
               }
             });
-    dbg.exit();
   }
 
   @Test
