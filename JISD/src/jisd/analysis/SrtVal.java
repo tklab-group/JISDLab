@@ -82,8 +82,11 @@ class SrtVal {
         case 'Z':
           typeNameTmp = "boolean";
           break;
-        default: // 'V'
+        case 'V':
           typeNameTmp = "void";
+          break;
+        default:
+          throw new IllegalArgumentException("desc = "+desc);
       }
     }
 
