@@ -24,7 +24,9 @@ public class StaticInfoFactory {
   }
 
   String getPath(String className) {
-    return sf.getSrcDir() + File.separator + Name.toSourcePathFromClassName(className);
+    var srcDir = sf.getSrcDir();
+    srcDir = (srcDir.endsWith(File.separator)) ? srcDir : srcDir + File.separator;
+    return srcDir + Name.toSourcePathFromClassName(className);
   }
 
   /** Create ClassInfo. */

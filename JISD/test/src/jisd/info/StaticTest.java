@@ -3,6 +3,8 @@ package jisd.info;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+
 import static jisd.util.Print.out;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -11,7 +13,8 @@ public class StaticTest {
   public void basicTest() {
     var sif = new StaticInfoFactory("src", "bin");
     ClassInfo s = sif.createClass("jisd.demo.HelloWorld");
-    Assertions.assertEquals(s.path(), "src\\\\jisd\\demo\\HelloWorld.java");
+    var sep = File.separator;
+    Assertions.assertEquals(s.path(), "src"+sep+"jisd"+sep+"demo"+sep+"HelloWorld.java");
     out(s.path());
     out(s.absPath());
     out(s.src());
