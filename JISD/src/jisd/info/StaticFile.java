@@ -1,6 +1,7 @@
 package jisd.info;
 
 import jisd.analysis.LysMain;
+import jisd.util.ClassName;
 import jisd.util.Name;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -90,25 +91,25 @@ class StaticFile {
     ps = readJsonFile(programStructureFilePath);
   }
 
-  JSONObject getClassObjFromCD(String className) {
-    var packageAndClassName = Name.splitClassName(className);
+  JSONObject getClassObjFromCD(String classNameStr) {
+    var className = new ClassName(classNameStr);
     if (cd.isEmpty()) {
       throw new JSONException("");
     }
     var cdObj = cd.get();
-    var packageObj = cdObj.getJSONObject(packageAndClassName.get("package"));
-    var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
+    var packageObj = cdObj.getJSONObject(className.getPackageName());
+    var classObj = packageObj.getJSONObject(className.getClassName());
     return classObj;
   }
 
-  JSONObject getClassObjFromPS(String className) {
-    var packageAndClassName = Name.splitClassName(className);
+  JSONObject getClassObjFromPS(String classNameStr) {
+    var className = new ClassName(classNameStr);
     if (ps.isEmpty()) {
       throw new JSONException("");
     }
     var cdObj = ps.get();
-    var packageObj = cdObj.getJSONObject(packageAndClassName.get("package"));
-    var classObj = packageObj.getJSONObject(packageAndClassName.get("class"));
+    var packageObj = cdObj.getJSONObject(className.getPackageName());
+    var classObj = packageObj.getJSONObject(className.getClassName());
     return classObj;
   }
 

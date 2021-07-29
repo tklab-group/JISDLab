@@ -5,6 +5,7 @@ import com.sun.jdi.VMCannotBeModifiedException;
 import jisd.debug.Location;
 import jisd.debug.Utility;
 import jisd.debug.value.ValueInfo;
+import jisd.util.ClassName;
 import jisd.util.Name;
 
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class ProbeJ {
   public void requestSetProbePoint(Location loc) {
     String cmd =
         "Set "
-            + Name.splitClassName(loc.getClassName()).get("class")
+            + (new ClassName(loc.getClassName())).getClassName()
             + ".java "
             + loc.getVarName()
             + " "
@@ -121,7 +122,7 @@ public class ProbeJ {
   public void requestRemoveProbePoint(Location loc) {
     String cmd =
         "Clear "
-            + Name.splitClassName(loc.getClassName()).get("class")
+            + (new ClassName(loc.getClassName())).getClassName()
             + ".java "
             + loc.getVarName()
             + " "

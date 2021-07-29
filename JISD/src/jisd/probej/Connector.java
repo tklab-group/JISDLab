@@ -4,6 +4,7 @@ package jisd.probej;
 import com.sun.jdi.VMDisconnectedException;
 import jisd.debug.Location;
 import jisd.debug.value.ValueInfo;
+import jisd.util.ClassName;
 import jisd.util.Name;
 import jisd.util.Print;
 
@@ -145,7 +146,7 @@ class Connector {
     if (loc.getLineNumber() > 0) {
       cmd =
           "Print "
-              + Name.splitClassName(loc.getClassName()).get("class")
+              + (new ClassName(loc.getClassName())).getClassName()
               + ".java "
               + loc.getVarName()
               + " "
