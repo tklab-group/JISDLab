@@ -14,10 +14,9 @@ import java.util.stream.Stream;
 /** @author sugiyama */
 class JarFileLoader {
   Map<String, ClassNode> loadClasses(Map<String, ClassNode> cns, File jarFile) throws IOException {
-    JarFile jar = new JarFile(jarFile);
-    Stream<JarEntry> str = jar.stream();
-    str.forEach(z -> readJar(jar, z, cns));
-    jar.close();
+    try (JarFile jar = new JarFile(jarFile)) {
+      jar.stream().forEach(z -> readJar(jar, z, cns));
+    }
     return cns;
   }
 
