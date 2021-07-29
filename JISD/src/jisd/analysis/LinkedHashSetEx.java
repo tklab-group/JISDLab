@@ -22,7 +22,10 @@ class LinkedHashSetEx<E> extends LinkedHashSet<E> {
    */
   public E getFirstValue() {
     Iterator<E> itr = this.iterator();
-    return itr.next();
+    if (itr.hasNext()) {
+      return itr.next();
+    }
+    return null;
   }
 
   /**
