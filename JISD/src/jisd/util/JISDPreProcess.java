@@ -3,7 +3,7 @@ package jisd.util;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import static jisd.util.Name.cpSeparator;
+import java.io.File;
 
 /**
  * A process which needs before JISDLab is available.
@@ -33,7 +33,7 @@ public final class JISDPreProcess {
       }
       argvObj.put(originalArgvObj.get(0)); // java
       argvObj.put("-cp"); // -cp
-      String allClasspath = originalArgvObj.get(2) + cpSeparator() + classpath;
+      String allClasspath = originalArgvObj.get(2) + File.pathSeparator + classpath;
       argvObj.put(allClasspath); // classpath
       argvObj.put("io.github.spencerpark.ijava.IJava"); // main class
       argvObj.put("{connection_file}"); // jupyter connection file

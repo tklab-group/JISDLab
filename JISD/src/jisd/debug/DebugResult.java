@@ -3,12 +3,12 @@ package jisd.debug;
 import com.sun.jdi.Value;
 import jisd.debug.value.ValueInfo;
 import jisd.debug.value.ValueInfoFactory;
-import jisd.util.Stream;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Debug results which contains observed values.
@@ -121,7 +121,7 @@ public class DebugResult {
    * @return value
    */
   public ArrayList<ValueInfo> getValues() {
-    return (ArrayList<ValueInfo>) values.stream().collect(Stream.toArrayList());
+    return (ArrayList<ValueInfo>) values.stream().collect(Collectors.toList());
   }
 
   /** Get the max record number of values */

@@ -22,7 +22,7 @@ public final class Name {
     if (sp == null) {
       return "";
     }
-    String className = sp.replace('/', '.').replace(File.separator.charAt(0), '.');
+    String className = sp.replace('/', '.').replace(File.separatorChar, '.');
     int length = className.length();
     if (className.substring(length - 5, length).equals(".java")) {
       return className.substring(0, length - 5);
@@ -34,7 +34,7 @@ public final class Name {
   }
 
   public static String toSourcePathFromClassName(String cn) {
-    String srcPath = cn.replace('.', File.separator.charAt(0));
+    String srcPath = cn.replace('.', File.separatorChar);
     srcPath += ".java";
     return srcPath;
   }
@@ -65,14 +65,5 @@ public final class Name {
     map.put("package", packageName);
     map.put("class", className);
     return map;
-  }
-
-  public static String cpSeparator() {
-    var os = System.getProperty("os.name").toLowerCase();
-    if (os.startsWith("windows")) {
-      return ";";
-    } else {
-      return ":";
-    }
   }
 }

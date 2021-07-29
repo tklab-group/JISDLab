@@ -4,7 +4,6 @@ import com.sun.jdi.*;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.sun.jdi.request.StepRequest;
 import jisd.util.Name;
-import jisd.util.Stream;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +13,7 @@ import org.jdiscript.requests.ChainingStepRequest;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Manages observation points.
@@ -415,7 +415,7 @@ class PointManager {
                 .filter(res -> res.isPresent())
                 .map(res -> res.get())
                 .sorted(compDR)
-                .collect(Stream.toArrayList());
+                .collect(Collectors.toList());
     return drs;
   }
 

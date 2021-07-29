@@ -6,7 +6,6 @@ package jisd.debug;
 import com.sun.jdi.*;
 import jisd.debug.value.ValueInfo;
 import jisd.util.Name;
-import jisd.util.Stream;
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnBreakpoint;
 import org.jdiscript.requests.ChainingBreakpointRequest;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Manages a breakpoint or a watchpoint.
@@ -189,7 +189,7 @@ public class BreakPoint extends Point {
                     }
                   })
                 .filter(o -> o != null)
-                .collect(Stream.toArrayList());
+                .collect(Collectors.toList());
           }
           Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
           // add debug result

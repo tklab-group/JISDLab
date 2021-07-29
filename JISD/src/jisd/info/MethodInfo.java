@@ -1,12 +1,12 @@
 package jisd.info;
 
 import jisd.util.Print;
-import jisd.util.Stream;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /** Method information. */
 public class MethodInfo extends StaticInfo {
@@ -35,7 +35,7 @@ public class MethodInfo extends StaticInfo {
     }
     try {
       var methodsObj = classObjFromPS.getJSONObject(name);
-      var names = (ArrayList<String>) methodsObj.keySet().stream().collect(Stream.toArrayList());
+      var names = (ArrayList<String>) methodsObj.keySet().stream().collect(Collectors.toList());
       locals = Optional.of(names);
       return names;
     } catch (JSONException e) {
