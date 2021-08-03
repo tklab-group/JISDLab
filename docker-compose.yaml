@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 services:
   jisdlab:
     build: ./
@@ -14,3 +14,8 @@ services:
       - ./debugspace:/workspaces/debugspace
       - ./sample:/workspaces/sample
     working_dir: /workspaces
+    networks:
+      - jisdlab-network
+networks:
+  jisdlab-network:
+    external: true
