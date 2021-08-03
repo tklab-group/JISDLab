@@ -8,6 +8,9 @@ import jisd.util.Number;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 public class ElasticSearchExporter implements IExporter {
   String host;
@@ -19,6 +22,7 @@ public class ElasticSearchExporter implements IExporter {
   long id = 0;
   private String timeLocale;
   private int sleepTime = 0;
+  private Optional<LocalDateTime> previousUpdateTimeOpt = Optional.empty();
 
   public ElasticSearchExporter(String host, int port, String name) {
     this(host, port, name, "09:00");
@@ -59,7 +63,15 @@ public class ElasticSearchExporter implements IExporter {
     synchronized (jsonCache) {
       jsonCache.append(jsonQuery);
     }
-    Utility.sleep(sleepTime);
+    var currentTime = valueInfo.getCreatedAt();
+    if (previousUpdateTimeOpt.isPresent()) {
+      var previousUpdateTime = previousUpdateTimeOpt.get();
+      if (! previousUpdateTime.equals(currentTime)) {
+        // different observed point
+        Utility.sleep(sleepTime);
+      }
+    }
+    previousUpdateTimeOpt = Optional.of(currentTime);
   }
 
   String createJson(ValueInfo valueInfo) {

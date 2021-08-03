@@ -10,6 +10,7 @@ import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnBreakpoint;
 import org.jdiscript.requests.ChainingBreakpointRequest;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -93,17 +94,17 @@ public class BreakPoint extends Point {
     setRequested(false);
   }
 
-  ValueInfo addValue(Location loc, Value jValue) {
+  ValueInfo addValue(Location loc, Value jValue, LocalDateTime date) {
     String varName = loc.getVarName();
     synchronized (this) {
       Optional<DebugResult> res_opt = Optional.ofNullable(drs.get(varName));
       if (res_opt.isPresent()) {
         var res = res_opt.get();
-        var valueInfo = res.addValue(jValue);
+        var valueInfo = res.addValue(jValue, date);
         return valueInfo;
       }
       DebugResult dr = new DebugResult(loc);
-      var valueInfo = dr.addValue(jValue);
+      var valueInfo = dr.addValue(jValue, date);
       addDebugResult(varName, dr);
       return valueInfo;
     }
@@ -139,6 +140,7 @@ public class BreakPoint extends Point {
           int bpLineNumber = be.location().lineNumber();
           String bpClassName = Name.toClassNameFromSourcePath(be.location().sourcePath());
           String bpMethodName = be.location().method().name();
+          var date = LocalDateTime.now();
           // get variable data from target VM
           List<LocalVariable> vars;
           StackFrame stackFrame = be.thread().frame(0);
@@ -151,7 +153,9 @@ public class BreakPoint extends Point {
                     Location loc =
                       new Location(
                         bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                    addValue(loc, v);
+                    var valueInfo = addValue(loc, v, date);
+                    // update metrics
+                    dbg.notifyExporters(valueInfo);
                   });
             } else {
               rt.allFields().stream()
@@ -161,7 +165,9 @@ public class BreakPoint extends Point {
                     Location loc =
                       new Location(
                         bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                    addValue(loc, rt.getValue(f));
+                    var valueInfo = addValue(loc, rt.getValue(f), date);
+                    // update metrics
+                    dbg.notifyExporters(valueInfo);
                   });
             }
             vars = stackFrame.visibleVariables();
@@ -177,9 +183,13 @@ public class BreakPoint extends Point {
                         Location loc =
                           new Location(bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
                         if (obj != null) {
-                          addValue(loc, obj.getValue(f));
+                          var valueInfo = addValue(loc, obj.getValue(f), date);
+                          // update metrics
+                          dbg.notifyExporters(valueInfo);
                         } else if (rt.isStatic()) {
-                          addValue(loc, rt.getValue(f));
+                          var valueInfo = addValue(loc, rt.getValue(f), date);
+                          // update metrics
+                          dbg.notifyExporters(valueInfo);
                         }
                       }
                       return stackFrame.visibleVariableByName(name);
@@ -196,9 +206,9 @@ public class BreakPoint extends Point {
           for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
             String varName = entry.getKey().name();
             Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
-            var valueInfo = addValue(loc, entry.getValue());
+            var valueInfo = addValue(loc, entry.getValue(), date);
             // update metrics
-            dbg.notifyExporter(valueInfo);
+            dbg.notifyExporters(valueInfo);
           }
           // if isBreak is true
           if (isBreak()) {

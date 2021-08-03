@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,7 +30,8 @@ public class Debugger {
   /** uses ProbeJ ? */
   boolean usesProbeJ;
   /** observer(exporter) */
-  @Getter Optional<IExporter> exporterOpt = Optional.empty();
+  @Getter
+  List<IExporter> exporters = new ArrayList<IExporter>();
 
   @Getter int port;
 
@@ -91,15 +93,34 @@ public class Debugger {
     }
   }
 
+  /**
+   * Set an exporter
+   */
   public void setExporter(IExporter exporter) {
-    this.exporterOpt = Optional.of(exporter);
+    exporters.add(exporter);
   }
 
-  public void notifyExporter(ValueInfo valueInfo) {
-    if (exporterOpt.isPresent()) {
-      var exporter = exporterOpt.get();
+  /**
+   * Notify all exporters to update debug data
+   */
+  public void notifyExporters(ValueInfo valueInfo) {
+    exporters.forEach(exporter -> {
       exporter.update(valueInfo);
-    }
+    });
+  }
+
+  /**
+   * Clear all exporters
+   */
+  public void clearExporters() {
+    exporters.clear();
+  }
+
+  /**
+   * Remove an exporter
+   */
+  public void removeExporter(IExporter exporter) {
+    exporters.remove(exporter);
   }
 
   /** Set a breakpoint by a line number. */
