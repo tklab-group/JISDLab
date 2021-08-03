@@ -18,7 +18,7 @@ public class ElasticSearchExporter implements IExporter {
   volatile boolean isStop = false;
   long id = 0;
   private String timeLocale;
-  private int sleepTime = 1000;
+  private int sleepTime = 0;
 
   public ElasticSearchExporter(String host, int port, String name) {
     this(host, port, name, "09:00");
@@ -32,7 +32,7 @@ public class ElasticSearchExporter implements IExporter {
   }
 
   public void run() {
-    run(1000);
+    run(0);
   }
 
   public void run(int sleepTime) {
