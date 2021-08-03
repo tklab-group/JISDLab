@@ -4,6 +4,8 @@ import jisd.debug.Utility;
 import jisd.debug.value.ValueInfo;
 import jisd.util.Print;
 import jisd.util.Number;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -22,6 +24,10 @@ public class ElasticSearchExporter implements IExporter {
   long id = 0;
   private String timeLocale;
   private int sleepTime = 0;
+  @Getter @Setter
+  private volatile boolean isVerbose = false;
+  @Getter @Setter
+  private volatile boolean isSuppressError = false;
   private Optional<LocalDateTime> previousUpdateTimeOpt = Optional.empty();
 
   public ElasticSearchExporter(String host, int port, String name) {
@@ -68,6 +74,13 @@ public class ElasticSearchExporter implements IExporter {
       var previousUpdateTime = previousUpdateTimeOpt.get();
       if (! previousUpdateTime.equals(currentTime)) {
         // different observed point
+        long timeDiff = previousUpdateTime.until(currentTime, ChronoUnit.MILLIS);
+        if (timeDiff < 10) {
+          // 前回時刻から10ms以上経過していないとき
+          if (!isSuppressError) {
+            Print.err("Some values may not be displayed in the visualization tool because the time interval is too short(< 10ms).");
+          }
+        }
         Utility.sleep(sleepTime);
       }
     }
@@ -96,7 +109,9 @@ public class ElasticSearchExporter implements IExporter {
   public void postJson() {
     synchronized (jsonCache) {
       postJson(jsonCache.toString());
-      Print.out("post json");
+      if (isVerbose) {
+        Print.out("post json");
+      }
       jsonCache.delete(0,jsonCache.length());
     }
   }
