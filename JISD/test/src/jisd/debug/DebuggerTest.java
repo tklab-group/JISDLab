@@ -1,6 +1,7 @@
 package jisd.debug;
 
 import jisd.debug.value.ValueInfo;
+import jisd.util.Print;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -14,14 +15,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author sugiyama
  */
-class DebuggerTest {
+public class DebuggerTest {
   /* line numbers a breakpoint is set */
   static final int bpln1 = 20;
   static final int bpln2 = 22;
   static final int bpln3 = 25;
   ArrayList<Integer> bps = new ArrayList<>();
 
-  DebuggerTest() {
+  public DebuggerTest() {
     bps.add(bpln1);
     bps.add(bpln2);
   }
@@ -35,7 +36,7 @@ class DebuggerTest {
     System.out.println("");
   }
 
-  Debugger makeDebugger() {
+  public Debugger makeDebugger() {
     Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
     bps.forEach(
         item -> {
@@ -55,6 +56,18 @@ class DebuggerTest {
       Assertions.assertEquals(res.getLocation().getLineNumber(), bps.get(i / 4));
     }
     dbg.exit();
+  }
+
+  @Test
+  void binarySearchDemoTest() {
+    var dbg = new Debugger("jisd.demo.BinarySearch", "-cp bin");
+    dbg.watch(22, new String[]{"left","right"});
+    dbg.run(1000);
+    ArrayList<DebugResult> results = dbg.getResults();
+    for (int i = 0; i < results.size(); i++) {
+      DebugResult res = results.get(i);
+      res.getValues().forEach(v->Print.out(v));
+    }
   }
 
   @Test
@@ -192,6 +205,7 @@ class DebuggerTest {
     DebugResult.setDefaultMaxRecordNoOfValue(maxRecords);
     dbg.watch(bpln3, varNames);
     dbg.run(2000);
+    dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
@@ -207,7 +221,6 @@ class DebuggerTest {
                 System.out.println("");
               }
             });
-    dbg.exit();
   }
 
   @Test
@@ -219,6 +232,7 @@ class DebuggerTest {
     var a = p.getResults("a").get();
     a.setMaxRecordNoOfValue(maxRecords);
     dbg.run(2000);
+    dbg.exit();
     ArrayList<DebugResult> results = dbg.getResults();
     for (int i = 0; i < results.size(); i++) {
       DebugResult res = results.get(i);
@@ -234,7 +248,6 @@ class DebuggerTest {
                 System.out.println("");
               }
             });
-    dbg.exit();
   }
 
   @Test

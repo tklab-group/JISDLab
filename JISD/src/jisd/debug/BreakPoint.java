@@ -1,17 +1,22 @@
-/** */
+/**
+ *
+ */
 package jisd.debug;
 
 import com.sun.jdi.*;
+import jisd.debug.value.ValueInfo;
 import jisd.util.Name;
-import jisd.util.Stream;
 import org.jdiscript.JDIScript;
 import org.jdiscript.handlers.OnBreakpoint;
 import org.jdiscript.requests.ChainingBreakpointRequest;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Manages a breakpoint or a watchpoint.
@@ -20,6 +25,7 @@ import java.util.Optional;
  */
 public class BreakPoint extends Point {
   Optional<ChainingBreakpointRequest> bpr = Optional.empty();
+
   /**
    * Constructor
    *
@@ -74,11 +80,11 @@ public class BreakPoint extends Point {
    * @param isBreak break or not at points
    */
   BreakPoint(
-      String className,
-      int lineNumber,
-      String methodName,
-      ArrayList<String> varNames,
-      boolean isBreak) {
+    String className,
+    int lineNumber,
+    String methodName,
+    ArrayList<String> varNames,
+    boolean isBreak) {
     super(className, lineNumber, methodName, varNames, isBreak);
   }
 
@@ -89,19 +95,22 @@ public class BreakPoint extends Point {
     setRequested(false);
   }
 
-  void addValue(Location loc, Value jValue) {
+  ValueInfo addValue(Location loc, Value jValue, LocalDateTime date) {
     String varName = loc.getVarName();
     synchronized (this) {
-      Optional<DebugResult> res = Optional.ofNullable(drs.get(varName));
-      if (res.isPresent()) {
-        res.get().addValue(jValue);
-        return;
+      Optional<DebugResult> res_opt = Optional.ofNullable(drs.get(varName));
+      if (res_opt.isPresent()) {
+        var res = res_opt.get();
+        var valueInfo = res.addValue(jValue, date);
+        return valueInfo;
       }
       DebugResult dr = new DebugResult(loc);
-      dr.addValue(jValue);
+      var valueInfo = dr.addValue(jValue, date);
       addDebugResult(varName, dr);
+      return valueInfo;
     }
   }
+
   /** Request VM to set a breakpoint */
   @Override
   void requestSetPoint(VMManager vmMgr, PointManager bpm) {
@@ -109,6 +118,7 @@ public class BreakPoint extends Point {
       /* do nothing */
       return;
     }
+    var dbg = vmMgr.getDebugger();
     JDIScript j = ((JDIManager) vmMgr).getJDI();
     String className = getClassName();
     List<ReferenceType> rts = j.vm().classesByName(className);
@@ -121,133 +131,148 @@ public class BreakPoint extends Point {
     ReferenceType rt = rts.get(0);
     /** A procedure on breakpoints. */
     OnBreakpoint breakpoint =
-        be -> {
-          boolean isNotSuspended = !bpm.checkCurrentTRef(false);
-          if (isNotSuspended) {
-            bpm.setCurrentTRef(be.thread());
-          }
-          try {
-            // search the breakpoint which caused this event.
-            int bpLineNumber = be.location().lineNumber();
-            String bpClassName = Name.toClassNameFromSourcePath(be.location().sourcePath());
-            String bpMethodName = be.location().method().name();
-            // get variable data from target VM
-            List<LocalVariable> vars;
-            StackFrame stackFrame = be.thread().frame(0);
-            if (varNames.size() == 0) {
-              var obj = stackFrame.thisObject();
-              if (obj != null) {
-                obj.getValues(rt.visibleFields())
-                    .forEach(
-                        (f, v) -> {
-                          Location loc =
-                              new Location(
-                                  bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                          addValue(loc, v);
-                        });
-              } else {
-                rt.allFields().stream()
-                    .filter(f -> f.isStatic())
-                    .forEach(
-                        f -> {
-                          Location loc =
-                              new Location(
-                                  bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                          addValue(loc, rt.getValue(f));
-                        });
-              }
-              vars = stackFrame.visibleVariables();
+      be -> {
+        boolean isNotSuspended = !bpm.checkCurrentTRef(false);
+        if (isNotSuspended) {
+          bpm.setCurrentTRef(be.thread());
+        }
+        try {
+          // search the breakpoint which caused this event.
+          int bpLineNumber = be.location().lineNumber();
+          String bpClassName = Name.toClassNameFromSourcePath(be.location().sourcePath());
+          String bpMethodName = be.location().method().name();
+          var date = LocalDateTime.now();
+          AtomicInteger sleepTimeMax = new AtomicInteger();
+          // get variable data from target VM
+          List<LocalVariable> vars;
+          StackFrame stackFrame = be.thread().frame(0);
+          if (varNames.size() == 0) {
+            var obj = stackFrame.thisObject();
+            if (obj != null) {
+              obj.getValues(rt.visibleFields())
+                .forEach(
+                  (f, v) -> {
+                    Location loc =
+                      new Location(
+                        bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                    var valueInfo = addValue(loc, v, date);
+                    // update metrics
+                    int sleepTime = dbg.notifyExporters(valueInfo);
+                    if (sleepTime > sleepTimeMax.get()) {
+                      sleepTimeMax.set(sleepTime);
+                    }
+                  });
             } else {
-              vars =
-                  varNames.stream()
-                      .map(
-                          name -> {
-                            try {
-                              if (name.startsWith("this.")) {
-                                var obj = stackFrame.thisObject();
-                                if (obj != null) {
-                                  var f = rt.fieldByName(name.substring(5));
-                                  Location loc =
-                                      new Location(
-                                          bpClassName,
-                                          bpMethodName,
-                                          bpLineNumber,
-                                          "this." + f.name());
-                                  addValue(loc, obj.getValue(f));
-                                } else {
-                                  var f = rt.fieldByName(name.substring(5));
-                                  if (rt.isStatic()) {
-                                    Location loc =
-                                        new Location(
-                                            bpClassName,
-                                            bpMethodName,
-                                            bpLineNumber,
-                                            "this." + f.name());
-                                    addValue(loc, rt.getValue(f));
-                                  }
-                                }
-                              }
-                              return stackFrame.visibleVariableByName(name);
-                            } catch (AbsentInformationException ee) {
-                              DebuggerInfo.printError("such a variable name not found.");
-                              return null;
-                            }
-                          })
-                      .filter(o -> o != null)
-                      .collect(Stream.toArrayList());
+              rt.allFields().stream()
+                .filter(f -> f.isStatic())
+                .forEach(
+                  f -> {
+                    Location loc =
+                      new Location(
+                        bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                    var valueInfo = addValue(loc, rt.getValue(f), date);
+                    // update metrics
+                    int sleepTime = dbg.notifyExporters(valueInfo);
+                    if (sleepTime > sleepTimeMax.get()) {
+                      sleepTimeMax.set(sleepTime);
+                    }
+                  });
             }
-            Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
-            // add debug result
-            for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
-              String varName = entry.getKey().name();
-              Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
-              addValue(loc, entry.getValue());
-            }
-            // if isBreak is true
-            if (isBreak()) {
-              if (bpm.isProcessing()) {
-                bpm.completeStep();
-                DebuggerInfo.print("Step completed");
-              }
-              bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
-              bpm.setBreaked(true);
-              if (isNotSuspended) {
-                ThreadReference currentTRef = bpm.getCurrentTRef();
-                currentTRef.suspend();
-              }
-            }
-          } catch (IncompatibleThreadStateException | AbsentInformationException e) {
-            e.printStackTrace();
+            vars = stackFrame.visibleVariables();
+          } else {
+            vars =
+              varNames.stream()
+                .map(
+                  name -> {
+                    try {
+                      if (name.startsWith("this.")) {
+                        var obj = stackFrame.thisObject();
+                        var f = rt.fieldByName(name.substring(5));
+                        Location loc =
+                          new Location(bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                        if (obj != null) {
+                          var valueInfo = addValue(loc, obj.getValue(f), date);
+                          // update metrics
+                          int sleepTime = dbg.notifyExporters(valueInfo);
+                          if (sleepTime > sleepTimeMax.get()) {
+                            sleepTimeMax.set(sleepTime);
+                          }
+                        } else if (rt.isStatic()) {
+                          var valueInfo = addValue(loc, rt.getValue(f), date);
+                          // update metrics
+                          int sleepTime = dbg.notifyExporters(valueInfo);
+                          if (sleepTime > sleepTimeMax.get()) {
+                            sleepTimeMax.set(sleepTime);
+                          }
+                        }
+                      }
+                      return stackFrame.visibleVariableByName(name);
+                    } catch (AbsentInformationException ee) {
+                      DebuggerInfo.printError("such a variable name not found.");
+                      return null;
+                    }
+                  })
+                .filter(o -> o != null)
+                .collect(Collectors.toList());
           }
-        };
+          Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
+          // add debug result
+          for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
+            String varName = entry.getKey().name();
+            Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
+            var valueInfo = addValue(loc, entry.getValue(), date);
+            // update metrics
+            int sleepTime = dbg.notifyExporters(valueInfo);
+            if (sleepTime > sleepTimeMax.get()) {
+              sleepTimeMax.set(sleepTime);
+            }
+          }
+          Utility.sleep(sleepTimeMax.get());
+          // if isBreak is true
+          if (isBreak()) {
+            if (bpm.isProcessing()) {
+              bpm.completeStep();
+              DebuggerInfo.print("Step completed");
+            }
+            bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
+            bpm.setBreaked(true);
+            if (isNotSuspended) {
+              ThreadReference currentTRef = bpm.getCurrentTRef();
+              currentTRef.suspend();
+            }
+          }
+        } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+          e.printStackTrace();
+        }
+      };
     if (getLineNumber() == 0) { // breakpoints set by methodName
       rt.methodsByName(getMethodName())
-          .forEach(
-              methods -> {
-                try {
-                  var locs = methods.allLineLocations();
-                  if (locs.size() > 0) {
-                    bpr = Optional.of(j.breakpointRequest(locs.get(0), breakpoint));
-                    if (bpr.isPresent() && isEnable) {
-                      bpr.get().enable();
-                    }
-                    setRequested(true);
-                  }
-                } catch (AbsentInformationException e) {
-                  e.printStackTrace();
+        .forEach(
+          methods -> {
+            try {
+              var locs = methods.allLineLocations();
+              if (locs.size() > 0) {
+                bpr = Optional.of(j.breakpointRequest(locs.get(0), breakpoint));
+                if (bpr.isPresent() && isEnable) {
+                  bpr.get().enable();
                 }
-              });
+                setRequested(true);
+              }
+            } catch (AbsentInformationException e) {
+              e.printStackTrace();
+            }
+          });
     } else { // breakpoints set by lineNumber
       try {
         rt.locationsOfLine(getLineNumber())
-            .forEach(
-                m -> {
-                  bpr = Optional.of(j.breakpointRequest(m, breakpoint));
-                  if (bpr.isPresent() && isEnable) {
-                    bpr.get().enable();
-                  }
-                  setRequested(true);
-                });
+          .forEach(
+            m -> {
+              bpr = Optional.of(j.breakpointRequest(m, breakpoint));
+              if (bpr.isPresent() && isEnable) {
+                bpr.get().enable();
+              }
+              setRequested(true);
+            });
       } catch (AbsentInformationException e) {
         e.printStackTrace();
       }
@@ -268,13 +293,13 @@ public class BreakPoint extends Point {
     JDIScript j = ((JDIManager) vmMgr).getJDI();
     String className = getClassName();
     j.onClassPrep(
-        p -> {
-          if (p.referenceType().name().equals(className)) {
-            requestSetPoint(vmMgr, bpm);
-          }
-        });
+      p -> {
+        if (p.referenceType().name().equals(className)) {
+          requestSetPoint(vmMgr, bpm);
+        }
+      });
     DebuggerInfo.print(
-        "Deferring breakpoint in " + className + ". It will be set after the class is loaded.");
+      "Deferring breakpoint in " + className + ". It will be set after the class is loaded.");
   }
 
   @Override

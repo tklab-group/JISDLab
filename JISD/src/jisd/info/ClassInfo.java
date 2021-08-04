@@ -1,12 +1,12 @@
 package jisd.info;
 
 import jisd.util.Print;
-import jisd.util.Stream;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /** Class information. */
 public class ClassInfo extends StaticInfo {
@@ -50,7 +50,7 @@ public class ClassInfo extends StaticInfo {
     }
     try {
       var methodsObj = classObjFromCD.getJSONObject("methods");
-      var names = (ArrayList<String>) methodsObj.keySet().stream().collect(Stream.toArrayList());
+      var names = (ArrayList<String>) methodsObj.keySet().stream().collect(Collectors.toList());
       methods = Optional.of(names);
       return names;
     } catch (JSONException e) {
@@ -66,7 +66,7 @@ public class ClassInfo extends StaticInfo {
     }
     try {
       var fieldsObj = classObjFromCD.getJSONObject("fields");
-      var names = (ArrayList<String>) fieldsObj.keySet().stream().collect(Stream.toArrayList());
+      var names = (ArrayList<String>) fieldsObj.keySet().stream().collect(Collectors.toList());
       fields = Optional.of(names);
       return names;
     } catch (JSONException e) {

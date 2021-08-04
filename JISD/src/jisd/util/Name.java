@@ -1,15 +1,15 @@
-/** */
 package jisd.util;
 
 import java.io.File;
-import java.util.HashMap;
 
 /**
  * Provides utility methods related to a name, Ex. class name, path name
  *
  * @author sugiyama
  */
-public class Name {
+public final class Name {
+  private Name() {}
+
   /**
    * generate a class path from a source path
    *
@@ -20,7 +20,7 @@ public class Name {
     if (sp == null) {
       return "";
     }
-    String className = sp.replace('/', '.').replace(File.separator.charAt(0), '.');
+    String className = sp.replace('/', '.').replace(File.separatorChar, '.');
     int length = className.length();
     if (className.substring(length - 5, length).equals(".java")) {
       return className.substring(0, length - 5);
@@ -32,36 +32,8 @@ public class Name {
   }
 
   public static String toSourcePathFromClassName(String cn) {
-    String srcPath = cn.replace('.', File.separator.charAt(0));
+    String srcPath = cn.replace('.', File.separatorChar);
     srcPath += ".java";
     return srcPath;
-  }
-
-  public static HashMap<String, String> splitClassName(String name) {
-    var cns = name.split("\\.");
-    var cnsLen = cns.length;
-    HashMap<String, String> map = new HashMap<>();
-    if (cnsLen == 0) {
-      map.put("package", "");
-      map.put("class", "");
-      return map;
-    }
-    // default package
-    if (cnsLen == 1) {
-      map.put("package", "default");
-      map.put("class", cns[0]);
-      return map;
-    }
-    StringBuilder sb = new StringBuilder();
-    sb.append(cns[0]);
-    for (int i = 1; i < cnsLen - 1; i++) {
-      sb.append(".");
-      sb.append(cns[i]);
-    }
-    String packageName = sb.toString();
-    String className = cns[cnsLen - 1];
-    map.put("package", packageName);
-    map.put("class", className);
-    return map;
   }
 }

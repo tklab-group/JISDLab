@@ -7,8 +7,12 @@ import static jisd.debug.Utility.*;
 // static analysis classes
 import jisd.info.*;
 
+// jisdvis classes
+import jisd.vis.*;
+
 // often use classes
 import java.util.*;
+import java.util.stream.*;
 
-// graph libraryd
+// graph library
 import org.knowm.xchart.*;

@@ -7,7 +7,9 @@ import java.nio.ByteBuffer;
  *
  * @author sugiyama
  */
-public class Print {
+public final class Print {
+  private Print() {}
+
   public static void out(Object o) {
     System.out.println(o);
   }
@@ -16,12 +18,9 @@ public class Print {
     System.err.println(o);
   }
 
-  public static String ByteToString(ByteBuffer b) {
-    StringBuilder buf = new StringBuilder(1024);
-    while (b.hasRemaining()) {
-      char c = (char) b.get();
-      buf.append(c);
-    }
-    return buf.toString();
+  public static String byteToString(ByteBuffer b) {
+    byte[] array = new byte[b.remaining()];
+    b.get(array);
+    return new String(array);
   }
 }

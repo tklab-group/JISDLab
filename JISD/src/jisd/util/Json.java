@@ -10,8 +10,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
-/** Provides Json utility. */
-public class Json {
+/**
+ * Provides Json utility.
+ */
+public final class Json {
+  private Json() {}
+
   public static Optional<JSONObject> readJsonFile(String jsonFilePath) {
     Path path = Paths.get(jsonFilePath);
     String jsonStr;
@@ -29,12 +33,12 @@ public class Json {
     Path path = Paths.get(jsonFilePath);
     try {
       Files.writeString(
-          path,
-          jsonObj.toString(),
-          Charset.forName("UTF-8"),
-          StandardOpenOption.WRITE,
-          StandardOpenOption.CREATE,
-          StandardOpenOption.TRUNCATE_EXISTING);
+        path,
+        jsonObj.toString(),
+        Charset.forName("UTF-8"),
+        StandardOpenOption.WRITE,
+        StandardOpenOption.CREATE,
+        StandardOpenOption.TRUNCATE_EXISTING);
     } catch (IOException e) {
       e.printStackTrace();
       return;

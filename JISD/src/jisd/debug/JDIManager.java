@@ -24,14 +24,15 @@ public class JDIManager extends VMManager {
    * @param j JDI
    * @param start A procedure before the debugger runs
    */
-  JDIManager(JDIScript j, OnVMStart start, boolean isRemoteDebug) {
+  JDIManager(Debugger debugger, JDIScript j, OnVMStart start, boolean isRemoteDebug) {
+    super(debugger);
     this.j = j;
     this.start = start;
     this.isRemoteDebug = isRemoteDebug;
   }
 
-  JDIManager(JDIScript j, boolean isRemoteDebug) {
-    this(j, (s) -> {}, isRemoteDebug);
+  JDIManager(Debugger debugger, JDIScript j, boolean isRemoteDebug) {
+    this(debugger, j, (s) -> {}, isRemoteDebug);
   }
 
   void addStart(OnVMStart start) {

@@ -33,23 +33,23 @@ public class LysMain {
    */
   public static void main(String[] args) {
 
-    Map<String, Object> pobj_all_ps = new HashMap<>();
-    Map<String, Object> pobj_all_md = new HashMap<>();
-    Map<String, Object> pobj_all_df = new HashMap<>();
+    Map<String, Object> packageStructure = new HashMap<>();
+    Map<String, Object> classData = new HashMap<>();
+    Map<String, Object> definedFileNames = new HashMap<>();
 
     HashMap<String, ClassNode> cns = new HashMap<>(); // key:classname
     HashMap<String, ArrayList<SrtVal>> fields = new HashMap<>(); // key:classname,value:fields
 
-    HashMap<String, String> packagenames =
-        new HashMap<>(); // key:classname,value:packagename (just for cache)
-    HashMap<String, String> onlyclassnames =
+    HashMap<String, String> packageNames =
+        new HashMap<>(); // key:classname,value:packageName (just for cache)
+    HashMap<String, String> onlyClassNames =
         new HashMap<>(); // key:classname,value:classname(short) (just for cache)
-    HashMap<String, Map<String, Object>> map_pobj_package_ps =
-        new HashMap<>(); // key:packagename,value:pobj_package_ps
-    HashMap<String, Map<String, Object>> map_pobj_package_md =
-        new HashMap<>(); // key:packagename,value:pobj_package_md
-    HashMap<String, Map<String, Object>> map_pobj_package_df =
-        new HashMap<>(); // key:packagename,value:pobj_package_df
+    HashMap<String, Map<String, Object>> packageNameAndStructure =
+        new HashMap<>(); // key:packageName,value:pobj_package_ps
+    HashMap<String, Map<String, Object>> packageNameAndClassData =
+        new HashMap<>(); // key:packageName,value:pobj_package_md
+    HashMap<String, Map<String, Object>> packageNameAndDefinedFileNames =
+        new HashMap<>(); // key:packageName,value:pobj_package_df
 
     /*
      * preparation (get all cns & fields)
@@ -85,8 +85,8 @@ public class LysMain {
       ClassNode cn = cn_entry.getValue();
 
       ArrayList<SrtVal> tmp_fields = new ArrayList<>();
-      List<FieldNode> fieldlist = cn.fields;
-      for (FieldNode fn : fieldlist) {
+      List<FieldNode> fieldList = cn.fields;
+      for (FieldNode fn : fieldList) {
         tmp_fields.add(new SrtVal(fn.name, fn.desc, cns.keySet()));
       }
 
@@ -100,248 +100,248 @@ public class LysMain {
     for (Entry<String, ClassNode> cn_entry : cns.entrySet()) {
       ClassNode cn = cn_entry.getValue();
 
-      String packagename, onlyclassname;
-      String classname = cn.name;
-      if (classname == null) {
-        classname = "Not Found";
+      String packageName, onlyClassName;
+      String className = cn.name;
+      if (className == null) {
+        className = "Not Found";
       }
-      int pos = classname.lastIndexOf("/");
+      int pos = className.lastIndexOf("/");
       if (pos == -1) {
-        packagename = "default";
-        onlyclassname = classname;
+        packageName = "default";
+        onlyClassName = className;
       } else {
-        packagename = classname.substring(0, pos).replace('/', '.');
-        onlyclassname = classname.substring(pos + 1);
+        packageName = className.substring(0, pos).replace('/', '.');
+        onlyClassName = className.substring(pos + 1);
       }
 
-      packagenames.put(cn.name, packagename);
-      onlyclassnames.put(cn.name, onlyclassname);
+      packageNames.put(cn.name, packageName);
+      onlyClassNames.put(cn.name, onlyClassName);
 
       // create new pobj_package_xx
-      HashMap<String, Object> pobj_package_ps = new HashMap<>();
-      HashMap<String, Object> pobj_package_md = new HashMap<>();
-      HashMap<String, Object> pobj_package_df = new HashMap<>();
-      map_pobj_package_ps.put(packagename, pobj_package_ps);
-      map_pobj_package_md.put(packagename, pobj_package_md);
-      map_pobj_package_df.put(packagename, pobj_package_df);
-      pobj_all_ps.put(packagename, pobj_package_ps);
-      pobj_all_md.put(packagename, pobj_package_md);
-      pobj_all_df.put(packagename, pobj_package_df);
+      HashMap<String, Object> ps = new HashMap<>();
+      HashMap<String, Object> cd = new HashMap<>();
+      HashMap<String, Object> df = new HashMap<>();
+      packageNameAndStructure.put(packageName, ps);
+      packageNameAndClassData.put(packageName, cd);
+      packageNameAndDefinedFileNames.put(packageName, df);
+      packageStructure.put(packageName, ps);
+      classData.put(packageName, cd);
+      definedFileNames.put(packageName, df);
     }
 
     /*
      * for each class
      ****************************************************************/
 
-    for (Entry<String, ClassNode> cn_entry : cns.entrySet()) {
-      ClassNode cn = cn_entry.getValue();
+    for (Entry<String, ClassNode> cnEntry : cns.entrySet()) {
+      ClassNode classNode = cnEntry.getValue();
 
-      Map<String, Object> pobj_class_ps = new HashMap<>();
-      Map<String, Object> pobj_methods_md = new HashMap<>();
+      Map<String, Object> classPs = new HashMap<>();
+      Map<String, Object> methodsCd = new HashMap<>();
 
       /* for each method ********************************************************/
-      List<MethodNode> methodlist = cn.methods;
-      for (MethodNode mn : methodlist) {
+      List<MethodNode> methodList = classNode.methods;
+      for (MethodNode methodNode : methodList) {
 
-        Map<String, Object> pobj_method_ps = new HashMap<>();
-        List<Object> parr_method_md = new ArrayList<>();
+        Map<String, Object> methodPs = new HashMap<>();
+        List<Object> ArrayMethodCd = new ArrayList<>();
 
-        LinkedHashSetEx<Integer> method_lines = new LinkedHashSetEx<>();
-        LinkedHashSetEx<String> method_line_labels = new LinkedHashSetEx<>();
+        LinkedHashSetEx<Integer> methodLines = new LinkedHashSetEx<>();
+        LinkedHashSetEx<String> methodLineLabels = new LinkedHashSetEx<>();
 
         // get all lines
-        InsnList insns = mn.instructions;
+        InsnList insns = methodNode.instructions;
         if (insns.size() != 0) {
           Iterator<AbstractInsnNode> j = insns.iterator();
           while (j.hasNext()) {
             AbstractInsnNode in = j.next();
             if (in instanceof LineNumberNode) {
-              method_lines.add(((LineNumberNode) in).line);
-              method_line_labels.add(((LineNumberNode) in).start.getLabel().toString());
+              methodLines.add(((LineNumberNode) in).line);
+              methodLineLabels.add(((LineNumberNode) in).start.getLabel().toString());
             }
           }
         }
 
         /* for each val(1) ************************************************/
-        for (SrtVal sf : fields.get(cn.name)) {
+        for (SrtVal sf : fields.get(classNode.name)) {
           // if can
-          Set<Object> parr_canset = new LinkedHashSet<>();
-          Set<Object> parr_recom = new LinkedHashSet<>();
-          for (Integer ml : method_lines) {
-            parr_canset.add(ml.toString());
-            // parr_recom.add(ml.toString()); // temporary<<<
+          Set<Object> ArrayCanSet = new LinkedHashSet<>();
+          Set<Object> ArrayRecom = new LinkedHashSet<>();
+          for (Integer ml : methodLines) {
+            ArrayCanSet.add(ml.toString());
+            // ArrayRecom.add(ml.toString()); // temporary<<<
           }
-          List<Object> parr_val = new ArrayList<>();
-          parr_val.add(parr_canset);
-          pobj_method_ps.put("this." + sf.name, parr_val);
+          List<Object> ArrayVal = new ArrayList<>();
+          ArrayVal.add(ArrayCanSet);
+          methodPs.put("this." + sf.name, ArrayVal);
         }
 
         /* for each val(2) ************************************************/
-        List<LocalVariableNode> localvallist = mn.localVariables;
-        if (localvallist != null) { // except when the method has no definition but only declaration
-          for (LocalVariableNode lvn : localvallist) {
+        List<LocalVariableNode> localVarList = methodNode.localVariables;
+        if (localVarList != null) { // except when the method has no definition but only declaration
+          for (LocalVariableNode lvn : localVarList) {
             // if "this"
             if (lvn.name.equals("this")) {
               continue;
             }
-            String startlabel = lvn.start.getLabel().toString();
-            String endlabel = lvn.end.getLabel().toString();
+            String startLabel = lvn.start.getLabel().toString();
+            String endLabel = lvn.end.getLabel().toString();
 
             SrtVal sl = new SrtVal(lvn.name, lvn.desc, cns.keySet());
 
             // if can
-            Set<Object> parr_canset = new LinkedHashSet<>();
-            Set<Object> parr_recom = new LinkedHashSet<>();
+            Set<Object> ArrayCanSet = new LinkedHashSet<>();
+            Set<Object> ArrayRecom = new LinkedHashSet<>();
 
-            int idx_start = method_line_labels.getIndexOfValue(startlabel);
-            int idx_end = method_line_labels.getIndexOfValue(endlabel);
-            if (method_lines.size() < idx_start) { // for inner variable declaration
+            int idxStart = methodLineLabels.getIndexOfValue(startLabel);
+            int idxEnd = methodLineLabels.getIndexOfValue(endLabel);
+            if (methodLines.size() < idxStart) { // for inner variable declaration
               AbstractInsnNode node = lvn.start;
               while (!(node instanceof LineNumberNode)) {
                 node = node.getNext();
               }
-              idx_start = method_lines.getIndexOfValue(((LineNumberNode) node).line);
+              idxStart = methodLines.getIndexOfValue(((LineNumberNode) node).line);
             }
-            method_lines.getSubset(idx_start, idx_end, parr_canset);
+            methodLines.getSubset(idxStart, idxEnd, ArrayCanSet);
 
-            parr_recom = parr_canset; // temporary<<<
-            List<Object> parr_val = new ArrayList<>();
-            parr_val.add(parr_canset);
-            // parr_val.add(parr_recom);
-            pobj_method_ps.put(sl.name, parr_val);
+            ArrayRecom = ArrayCanSet; // temporary<<<
+            List<Object> ArrayVal = new ArrayList<>();
+            ArrayVal.add(ArrayCanSet);
+            // ArrayVal.add(ArrayRecom);
+            methodPs.put(sl.name, ArrayVal);
           }
         }
 
         /* for parr_method ************************************************/
 
-        String accmodif, rettype, linebeg, lineend;
-        ArrayList<String> argtype = new ArrayList<>();
-        ArrayList<String> argname = new ArrayList<>();
+        String accessModifier, returnType, lineBegin, lineEnd;
+        ArrayList<String> argType = new ArrayList<>();
+        ArrayList<String> argName = new ArrayList<>();
 
-        accmodif = "";
-        switch (mn.access) {
+        accessModifier = "";
+        switch (methodNode.access) {
           case 1:
-            accmodif = "public";
+            accessModifier = "public";
             break;
           case 2:
-            accmodif = "private";
+            accessModifier = "private";
             break;
           case 4:
-            accmodif = "protected";
+            accessModifier = "protected";
             break;
         }
-        parr_method_md.add(accmodif);
+        ArrayMethodCd.add(accessModifier);
 
-        rettype = "";
-        if (!mn.name.equals("<init>")) {
-          String mdesc = mn.desc;
-          int idx_delim = mdesc.indexOf(')');
-          String mretdesc = mdesc.substring(idx_delim + 1, mdesc.length());
-          SrtVal sv = new SrtVal("dummy", mretdesc, cns.keySet()); // noneed so much<<<
-          rettype = sv.typename;
+        returnType = "";
+        if (!methodNode.name.equals("<init>")) {
+          String methodDesc = methodNode.desc;
+          int idxDelimiter = methodDesc.indexOf(')');
+          String methodReturnDesc = methodDesc.substring(idxDelimiter + 1, methodDesc.length());
+          SrtVal sv = new SrtVal("dummy", methodReturnDesc, cns.keySet()); // noneed so much<<<
+          returnType = sv.typeName;
         }
-        parr_method_md.add(rettype);
+        ArrayMethodCd.add(returnType);
 
         // (this can be written in "for each val(2)"<<<)
-        if (localvallist != null) { // except when the method has no definition but only declaration
-          for (LocalVariableNode lvn : localvallist) {
+        if (localVarList != null) { // except when the method has no definition but only declaration
+          for (LocalVariableNode lvn : localVarList) {
             // if "this"
             if (lvn.name.equals("this")) {
               continue;
             }
 
-            String startlabel = lvn.start.getLabel().toString();
-            if (method_line_labels.getFirstValue().equals(startlabel)) {
+            String startLabel = lvn.start.getLabel().toString();
+            if (methodLineLabels.getFirstValue().equals(startLabel)) {
               SrtVal sl = new SrtVal(lvn.name, lvn.desc, cns.keySet());
-              argtype.add(sl.typename);
-              argname.add(sl.name);
+              argType.add(sl.typeName);
+              argName.add(sl.name);
             }
           }
         }
-        parr_method_md.add(argtype);
-        parr_method_md.add(argname);
+        ArrayMethodCd.add(argType);
+        ArrayMethodCd.add(argName);
 
-        linebeg = "1";
-        lineend = "1";
-        if (method_lines.size() > 0) {
-          linebeg = method_lines.getFirstValue().toString();
-          lineend = method_lines.getLastValue().toString();
+        lineBegin = "1";
+        lineEnd = "1";
+        if (methodLines.size() > 0) {
+          lineBegin = methodLines.getFirstValue().toString();
+          lineEnd = methodLines.getLastValue().toString();
         }
-        parr_method_md.add(linebeg);
-        parr_method_md.add(lineend);
+        ArrayMethodCd.add(lineBegin);
+        ArrayMethodCd.add(lineEnd);
 
-        String mname = mn.name;
-        if (mname.equals("<init>")) {
-          mname = onlyclassnames.get(cn.name); // constructor
+        String methodName = methodNode.name;
+        if (methodName.equals("<init>")) {
+          methodName = onlyClassNames.get(classNode.name); // constructor
         }
 
-        parr_method_md.add(mname);
+        ArrayMethodCd.add(methodName);
 
-        String mfullname = mname + "(" + String.join(", ", argtype) + ")";
-        pobj_class_ps.put(mfullname, pobj_method_ps);
-        pobj_methods_md.put(mfullname, parr_method_md);
+        String methodFullName = methodName + "(" + String.join(", ", argType) + ")";
+        classPs.put(methodFullName, methodPs);
+        methodsCd.put(methodFullName, ArrayMethodCd);
       }
       // for each fields
-      HashMap<String, Object> pobj_fields_md = new HashMap<>();
-      var fieldVals = fields.get(cn.name);
+      HashMap<String, Object> fieldsCd = new HashMap<>();
+      var fieldVals = fields.get(classNode.name);
       fieldVals.forEach(
           val -> {
-            pobj_fields_md.put(val.name, val.typename);
+            fieldsCd.put(val.name, val.typeName);
           });
 
-      HashMap<String, Object> pobj_class_md = new HashMap<>();
-      pobj_class_md.put("methods", pobj_methods_md);
-      pobj_class_md.put("fields", pobj_fields_md);
-      pobj_class_md.put("super", Name.toClassNameFromSourcePath(cn.superName));
+      HashMap<String, Object> classCd = new HashMap<>();
+      classCd.put("methods", methodsCd);
+      classCd.put("fields", fieldsCd);
+      classCd.put("super", Name.toClassNameFromSourcePath(classNode.superName));
       ArrayList<String> interfacesStr = new ArrayList<>();
-      cn.interfaces.forEach(
+      classNode.interfaces.forEach(
           in -> {
             interfacesStr.add(Name.toClassNameFromSourcePath(in));
           });
-      pobj_class_md.put("interfaces", interfacesStr);
+      classCd.put("interfaces", interfacesStr);
 
       // put pobj_class_xx to corresponding pobj_package_xx
-      String packagename = packagenames.get(cn.name);
-      String onlyclassname = onlyclassnames.get(cn.name);
+      String packageName = packageNames.get(classNode.name);
+      String onlyClassName = onlyClassNames.get(classNode.name);
 
-      map_pobj_package_ps.get(packagename).put(onlyclassname, pobj_class_ps);
-      map_pobj_package_md.get(packagename).put(onlyclassname, pobj_class_md);
-      map_pobj_package_df
-          .get(packagename)
-          .put(onlyclassname, getFullSourceFilePath(cn_entry.getKey(), cn.sourceFile));
+      packageNameAndStructure.get(packageName).put(onlyClassName, classPs);
+      packageNameAndClassData.get(packageName).put(onlyClassName, classCd);
+      packageNameAndDefinedFileNames
+          .get(packageName)
+          .put(onlyClassName, getFullSourceFilePath(cnEntry.getKey(), classNode.sourceFile));
     }
 
     /*
      * serialize and write to file
      **************************************************/
 
-    JSONObject result_ps = new JSONObject(pobj_all_ps);
-    JSONObject result_md = new JSONObject(pobj_all_md);
-    JSONObject result_df = new JSONObject(pobj_all_df);
+    JSONObject resultPs = new JSONObject(packageStructure);
+    JSONObject resultCd = new JSONObject(classData);
+    JSONObject resultDf = new JSONObject(definedFileNames);
 
-    String sresult_ps = result_ps.toString();
-    String sresult_md = result_md.toString();
-    String sresult_df = result_df.toString();
+    String resultPsStr = resultPs.toString();
+    String resultCdStr = resultCd.toString();
+    String resultDfStr = resultDf.toString();
 
-    String output_dir = "data"; // directory to output json files
+    String outputDir = "data"; // directory to output json files
     if (args.length > 0) {
-      output_dir = args[0];
+      outputDir = args[0];
     }
-    File output_dir_f = new File(output_dir);
-    if (!output_dir_f.exists()) {
-      output_dir_f.mkdirs();
+    File outputDirFile = new File(outputDir);
+    if (!outputDirFile.exists()) {
+      outputDirFile.mkdirs();
     }
 
     try {
       BufferedWriter bw;
-      bw = new BufferedWriter(new FileWriter(output_dir + "/program_structure.json", false));
-      bw.write(sresult_ps);
+      bw = new BufferedWriter(new FileWriter(outputDir + "/program_structure.json", false));
+      bw.write(resultPsStr);
       bw.close();
-      bw = new BufferedWriter(new FileWriter(output_dir + "/class_data.json", false));
-      bw.write(sresult_md);
+      bw = new BufferedWriter(new FileWriter(outputDir + "/class_data.json", false));
+      bw.write(resultCdStr);
       bw.close();
-      bw = new BufferedWriter(new FileWriter(output_dir + "/defined_filename.json", false));
-      bw.write(sresult_df);
+      bw = new BufferedWriter(new FileWriter(outputDir + "/defined_filename.json", false));
+      bw.write(resultDfStr);
       bw.close();
     } catch (IOException e) {
       e.printStackTrace();
@@ -349,29 +349,29 @@ public class LysMain {
   }
 
   /**
-   * Create the map of "cansetline Set and recomline Set". The key is sname. The sets are made from
-   * canset_lines and recom_lines. (eg. ssmap = {"sname", [["34", "35", "36", "37"], ["35", "37"]]})
+   * Create the map of "cansetline Set and recomline Set". The key is name. The sets are made from
+   * canSetLines and recomLines. (eg. base = {"name", [["34", "35", "36", "37"], ["35", "37"]]})
    * <br>
-   * When ssmap already contains sname as its key, the specified lines will be added to the existing
+   * When base already contains name as its key, the specified lines will be added to the existing
    * set.
    *
-   * @param ssmap map which will be created
-   * @param sname key of the map
-   * @param canset_lines set of cansetline
-   * @param recom_lines set of recomline
+   * @param base map which will be created
+   * @param name key of the map
+   * @param canSetLines set of cansetline
+   * @param recomLines set of recomline
    */
   @SuppressWarnings("unchecked")
   private static void addLines(
-      Map<String, Object> ssmap, String sname, Set<Object> canset_lines, Set<Object> recom_lines) {
-    List<Object> cur_vallist = (List<Object>) ssmap.get(sname);
-    if (cur_vallist == null) {
-      List<Object> vallist = new ArrayList<>();
-      vallist.add(canset_lines);
-      vallist.add(recom_lines);
-      ssmap.put(sname, vallist);
+      Map<String, Object> base, String name, Set<Object> canSetLines, Set<Object> recomLines) {
+    List<Object> curValList = (List<Object>) base.get(name);
+    if (curValList == null) {
+      List<Object> valList = new ArrayList<>();
+      valList.add(canSetLines);
+      valList.add(recomLines);
+      base.put(name, valList);
     } else {
-      ((Set<Object>) cur_vallist.get(0)).addAll(canset_lines);
-      ((Set<Object>) cur_vallist.get(1)).addAll(recom_lines);
+      ((Set<Object>) curValList.get(0)).addAll(canSetLines);
+      ((Set<Object>) curValList.get(1)).addAll(recomLines);
     }
   }
 

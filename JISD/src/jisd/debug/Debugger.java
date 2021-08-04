@@ -1,11 +1,14 @@
 package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
+import jisd.debug.value.ValueInfo;
+import jisd.vis.IExporter;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -26,6 +29,9 @@ public class Debugger {
   boolean isRemoteDebug;
   /** uses ProbeJ ? */
   boolean usesProbeJ;
+  /** observer(exporter) */
+  @Getter
+  List<IExporter> exporters = new ArrayList<IExporter>();
 
   @Getter int port;
 
@@ -73,7 +79,7 @@ public class Debugger {
     this.usesProbeJ = usesProbeJ;
     this.isRemoteDebug = isRemoteDebug;
     pm = new PointManager();
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
   }
 
@@ -85,6 +91,39 @@ public class Debugger {
     } else {
       this.port = port;
     }
+  }
+
+  /**
+   * Set an exporter
+   */
+  public void setExporter(IExporter exporter) {
+    exporters.add(exporter);
+  }
+
+  /**
+   * Notify all exporters to update debug data
+   */
+  public int notifyExporters(ValueInfo valueInfo) {
+    int sleepTimeMax = 0;
+    for (IExporter exporter : exporters) {
+      int sleepTime = exporter.update(valueInfo);
+      sleepTimeMax = (sleepTime < sleepTimeMax) ? sleepTimeMax : sleepTime;
+    }
+    return sleepTimeMax;
+  }
+
+  /**
+   * Clear all exporters
+   */
+  public void clearExporters() {
+    exporters.clear();
+  }
+
+  /**
+   * Remove an exporter
+   */
+  public void removeExporter(IExporter exporter) {
+    exporters.remove(exporter);
   }
 
   /** Set a breakpoint by a line number. */
@@ -313,7 +352,7 @@ public class Debugger {
   public void restart(int sleepTime) {
     exit();
     clearResults();
-    vmManager = VMManagerFactory.create(main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
     run(sleepTime);
   }

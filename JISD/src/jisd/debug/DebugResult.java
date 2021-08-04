@@ -3,12 +3,12 @@ package jisd.debug;
 import com.sun.jdi.Value;
 import jisd.debug.value.ValueInfo;
 import jisd.debug.value.ValueInfoFactory;
-import jisd.util.Stream;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * Debug results which contains observed values.
@@ -92,10 +92,10 @@ public class DebugResult {
   }
 
   /** Add value to deque */
-  void addValue(Value jValue) {
+  ValueInfo addValue(Value jValue, LocalDateTime date) {
     ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
     String name = location.getVarName();
-    ValueInfo value = ValueInfoFactory.create(name, 0, jValue, "", LocalDateTime.now());
+    ValueInfo value = ValueInfoFactory.create(name, 0, jValue, "", date);
     valueExpansionQue.add(value);
     while (true) {
       ValueInfo v = valueExpansionQue.pop();
@@ -112,6 +112,7 @@ public class DebugResult {
       }
     }
     addValue(value);
+    return value;
   }
 
   /**
@@ -120,7 +121,7 @@ public class DebugResult {
    * @return value
    */
   public ArrayList<ValueInfo> getValues() {
-    return (ArrayList<ValueInfo>) values.stream().collect(Stream.toArrayList());
+    return (ArrayList<ValueInfo>) values.stream().collect(Collectors.toList());
   }
 
   /** Get the max record number of values */

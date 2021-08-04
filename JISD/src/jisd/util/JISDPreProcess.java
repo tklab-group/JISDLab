@@ -3,12 +3,16 @@ package jisd.util;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.File;
+
 /**
  * A process which needs before JISDLab is available.
  *
  * @author sugiyama
  */
-public class JISDPreProcess {
+public final class JISDPreProcess {
+  private JISDPreProcess() {}
+
   public static void main(String[] args) {
     if (args.length != 3) {
       return;
@@ -29,7 +33,7 @@ public class JISDPreProcess {
       }
       argvObj.put(originalArgvObj.get(0)); // java
       argvObj.put("-cp"); // -cp
-      String allClasspath = originalArgvObj.get(2) + cpSeparator() + classpath;
+      String allClasspath = originalArgvObj.get(2) + File.pathSeparator + classpath;
       argvObj.put(allClasspath); // classpath
       argvObj.put("io.github.spencerpark.ijava.IJava"); // main class
       argvObj.put("{connection_file}"); // jupyter connection file
@@ -38,15 +42,6 @@ public class JISDPreProcess {
     } catch (JSONException e) {
       e.printStackTrace();
       return;
-    }
-  }
-
-  static String cpSeparator() {
-    var os = System.getProperty("os.name").toLowerCase();
-    if (os.startsWith("windows")) {
-      return ";";
-    } else {
-      return ":";
     }
   }
 }

@@ -1,5 +1,6 @@
 package jisd.analysis;
 
+import jisd.util.Print;
 import org.apache.commons.io.IOUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.tree.ClassNode;
@@ -14,10 +15,9 @@ import java.util.stream.Stream;
 /** @author sugiyama */
 class JarFileLoader {
   Map<String, ClassNode> loadClasses(Map<String, ClassNode> cns, File jarFile) throws IOException {
-    JarFile jar = new JarFile(jarFile);
-    Stream<JarEntry> str = jar.stream();
-    str.forEach(z -> readJar(jar, z, cns));
-    jar.close();
+    try (JarFile jar = new JarFile(jarFile)) {
+      jar.stream().forEach(z -> readJar(jar, z, cns));
+    }
     return cns;
   }
 
@@ -28,7 +28,7 @@ class JarFileLoader {
         byte[] bytes = IOUtils.toByteArray(jis);
         String cafebabe = String.format("%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3]);
         if (!cafebabe.toLowerCase().equals("cafebabe")) {
-          // This class doesn't have a valid magic
+          Print.err("This class doesn't have a valid magic");
           return cns;
         }
         try {
@@ -52,7 +52,6 @@ class JarFileLoader {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    cr = null;
     return cn;
   }
 }
