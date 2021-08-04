@@ -16,7 +16,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./elasticsearch_data/elasticsearch_data1:/usr/share/elasticsearch/data
+      - ./elasticsearch-data/elasticsearch-data1:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
     networks:
@@ -42,7 +42,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./elasticsearch_data/elasticsearch_data2:/usr/share/elasticsearch/data
+      - ./elasticsearch-data/elasticsearch-data2:/usr/share/elasticsearch/data
     networks:
       - jisdlab-network
   # 3rd node
@@ -61,7 +61,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./elasticsearch_data/elasticsearch_data3:/usr/share/elasticsearch/data
+      - ./elasticsearch-data/elasticsearch-data3:/usr/share/elasticsearch/data
     networks:
       - jisdlab-network
   kibana:
@@ -92,11 +92,11 @@ services:
     ports:
       - 3000:3000
 volumes:
-  elasticsearch_data1:
+  elasticsearch-data1:
     driver: local
-  elasticsearch_data2:
+  elasticsearch-data2:
     driver: local
-  elasticsearch_data3:
+  elasticsearch-data3:
     driver: local
 networks:
   jisdlab-network:

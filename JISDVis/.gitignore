@@ -1,6 +1,6 @@
-/elasticsearch_data/elasticsearch_data1/*
-/elasticsearch_data/elasticsearch_data2/*
-/elasticsearch_data/elasticsearch_data3/*
+/elasticsearch-data/elasticsearch-data1/*
+/elasticsearch-data/elasticsearch-data2/*
+/elasticsearch-data/elasticsearch-data3/*
 /grafana-data/*
 /prometheus-data/*
 
