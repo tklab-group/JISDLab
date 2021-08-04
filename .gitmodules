@@ -4,3 +4,6 @@
 [submodule "jdiscript"]
 	path = jdiscript
 	url = https://github.com/sakupo/jdiscript.git
+[submodule "javadoc"]
+	path = javadoc
+	url = https://github.com/sakupo/JISD-doc.git

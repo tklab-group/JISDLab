@@ -36,14 +36,14 @@ javadoc {
   source = sourceDirName
   exclude('jisd/demo/**')
   exclude('jisd/util/**')
-  destinationDir = file("../JISD-doc/docs")
+  destinationDir = file("../javadoc/docs")
   failOnError = true
   options.setMemberLevel(JavadocMemberLevel.PUBLIC)
   options.addStringOption('Xdoclint:none', '-quiet')
   doLast {
     copy {
-      from "../JISD-doc/.nojekyll"
-      into "../JISD-doc/docs"
+      from "../javadoc/.nojekyll"
+      into "../javadoc/docs"
     }
   }
 }
