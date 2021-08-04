@@ -23,7 +23,11 @@ task delombok(type: Exec, dependsOn: compileJava) {
     srcDir.deleteDir()
     srcDir.mkdir()
   }
-  commandLine "powershell", "-Command", "java", "-jar", "\"lib\\lombok-1.18.16.jar\"", "delombok", "src", "--classpath", "\"build\\libs\\jisd-all.jar\"", "-d", "build/delombok/src"
+  if (System.properties['os.name'].toLowerCase().contains('windows')) {
+    commandLine "powershell", "-Command", "java", "-jar", "\"lib\\lombok-1.18.16.jar\"", "delombok", "src", "--classpath", "\"build\\libs\\jisd-all.jar\"", "-d", "build/delombok/src"
+  } else {
+    commandLine "java", "-jar", "lib/lombok-1.18.16.jar", "delombok", "src", "--classpath", "build/libs/jisd-all.jar", "-d", "build/delombok/src"
+  }
 }
 
 javadoc {
@@ -32,21 +36,21 @@ javadoc {
   source = sourceDirName
   exclude('jisd/demo/**')
   exclude('jisd/util/**')
-  destinationDir = file("../JISD-doc/docs")
+  destinationDir = file("../javadoc/docs")
   failOnError = true
   options.setMemberLevel(JavadocMemberLevel.PUBLIC)
   options.addStringOption('Xdoclint:none', '-quiet')
   doLast {
     copy {
-      from "../JISD-doc/.nojekyll"
-      into "../JISD-doc/docs"
+      from "../javadoc/.nojekyll"
+      into "../javadoc/docs"
     }
   }
 }
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.1.0'
+  archiveVersion = '0.2.0'
   exclude('.jisd_static_data*')
 }
 

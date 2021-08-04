@@ -103,10 +103,13 @@ public class Debugger {
   /**
    * Notify all exporters to update debug data
    */
-  public void notifyExporters(ValueInfo valueInfo) {
-    exporters.forEach(exporter -> {
-      exporter.update(valueInfo);
-    });
+  public int notifyExporters(ValueInfo valueInfo) {
+    int sleepTimeMax = 0;
+    for (IExporter exporter : exporters) {
+      int sleepTime = exporter.update(valueInfo);
+      sleepTimeMax = (sleepTime < sleepTimeMax) ? sleepTimeMax : sleepTime;
+    }
+    return sleepTimeMax;
   }
 
   /**

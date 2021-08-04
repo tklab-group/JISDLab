@@ -10,12 +10,14 @@ import io.undertow.servlet.api.ServletContainerInitializerInfo;
 import io.undertow.servlet.api.ServletInfo;
 import io.undertow.servlet.util.DefaultClassIntrospector;
 import jisd.debug.value.ValueInfo;
+import jisd.util.Number;
 import org.jboss.resteasy.plugins.servlet.ResteasyServletInitializer;
 
 import javax.servlet.ServletException;
-import java.util.*;
-
-import jisd.util.Number;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 public class PrometheusExporter implements IExporter {
   String host;
@@ -104,7 +106,7 @@ public class PrometheusExporter implements IExporter {
   }
 
   @Override
-  public void update(ValueInfo valueInfo) {
+  public int update(ValueInfo valueInfo) {
     String varName = valueInfo.getName();
     String value = valueInfo.getValue();
     try {
@@ -115,5 +117,6 @@ public class PrometheusExporter implements IExporter {
     } catch (NumberFormatException e) {
       e.printStackTrace();
     }
+    return 0;
   }
 }

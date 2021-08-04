@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -141,6 +142,7 @@ public class BreakPoint extends Point {
           String bpClassName = Name.toClassNameFromSourcePath(be.location().sourcePath());
           String bpMethodName = be.location().method().name();
           var date = LocalDateTime.now();
+          AtomicInteger sleepTimeMax = new AtomicInteger();
           // get variable data from target VM
           List<LocalVariable> vars;
           StackFrame stackFrame = be.thread().frame(0);
@@ -155,7 +157,10 @@ public class BreakPoint extends Point {
                         bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
                     var valueInfo = addValue(loc, v, date);
                     // update metrics
-                    dbg.notifyExporters(valueInfo);
+                    int sleepTime = dbg.notifyExporters(valueInfo);
+                    if (sleepTime > sleepTimeMax.get()) {
+                      sleepTimeMax.set(sleepTime);
+                    }
                   });
             } else {
               rt.allFields().stream()
@@ -167,7 +172,10 @@ public class BreakPoint extends Point {
                         bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
                     var valueInfo = addValue(loc, rt.getValue(f), date);
                     // update metrics
-                    dbg.notifyExporters(valueInfo);
+                    int sleepTime = dbg.notifyExporters(valueInfo);
+                    if (sleepTime > sleepTimeMax.get()) {
+                      sleepTimeMax.set(sleepTime);
+                    }
                   });
             }
             vars = stackFrame.visibleVariables();
@@ -185,11 +193,17 @@ public class BreakPoint extends Point {
                         if (obj != null) {
                           var valueInfo = addValue(loc, obj.getValue(f), date);
                           // update metrics
-                          dbg.notifyExporters(valueInfo);
+                          int sleepTime = dbg.notifyExporters(valueInfo);
+                          if (sleepTime > sleepTimeMax.get()) {
+                            sleepTimeMax.set(sleepTime);
+                          }
                         } else if (rt.isStatic()) {
                           var valueInfo = addValue(loc, rt.getValue(f), date);
                           // update metrics
-                          dbg.notifyExporters(valueInfo);
+                          int sleepTime = dbg.notifyExporters(valueInfo);
+                          if (sleepTime > sleepTimeMax.get()) {
+                            sleepTimeMax.set(sleepTime);
+                          }
                         }
                       }
                       return stackFrame.visibleVariableByName(name);
@@ -208,8 +222,12 @@ public class BreakPoint extends Point {
             Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
             var valueInfo = addValue(loc, entry.getValue(), date);
             // update metrics
-            dbg.notifyExporters(valueInfo);
+            int sleepTime = dbg.notifyExporters(valueInfo);
+            if (sleepTime > sleepTimeMax.get()) {
+              sleepTimeMax.set(sleepTime);
+            }
           }
+          Utility.sleep(sleepTimeMax.get());
           // if isBreak is true
           if (isBreak()) {
             if (bpm.isProcessing()) {

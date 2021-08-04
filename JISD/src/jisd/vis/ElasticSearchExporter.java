@@ -2,8 +2,8 @@ package jisd.vis;
 
 import jisd.debug.Utility;
 import jisd.debug.value.ValueInfo;
-import jisd.util.Print;
 import jisd.util.Number;
+import jisd.util.Print;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,6 +29,7 @@ public class ElasticSearchExporter implements IExporter {
   @Getter @Setter
   private volatile boolean isSuppressError = false;
   private Optional<LocalDateTime> previousUpdateTimeOpt = Optional.empty();
+  private String esBulkUrl;
 
   public ElasticSearchExporter(String host, int port, String name) {
     this(host, port, name, "09:00");
@@ -39,6 +40,7 @@ public class ElasticSearchExporter implements IExporter {
     this.port = port;
     this.name = name;
     this.timeLocale = timeLocale;
+    esBulkUrl = host+":"+port+"/_bulk?pretty";
   }
 
   public void run() {
@@ -64,12 +66,13 @@ public class ElasticSearchExporter implements IExporter {
   }
 
   @Override
-  public void update(ValueInfo valueInfo) {
+  public int update(ValueInfo valueInfo) {
     var jsonQuery = createJson(valueInfo);
     synchronized (jsonCache) {
       jsonCache.append(jsonQuery);
     }
     var currentTime = valueInfo.getCreatedAt();
+    var isSleep = false;
     if (previousUpdateTimeOpt.isPresent()) {
       var previousUpdateTime = previousUpdateTimeOpt.get();
       if (! previousUpdateTime.equals(currentTime)) {
@@ -81,13 +84,21 @@ public class ElasticSearchExporter implements IExporter {
             Print.err("Some values may not be displayed in the visualization tool because the time interval is too short(< 10ms).");
           }
         }
-        Utility.sleep(sleepTime);
+        isSleep = true;
       }
+    } else {
+      // the first time
+      isSleep = true;
     }
     previousUpdateTimeOpt = Optional.of(currentTime);
+    if (isSleep) {
+      return sleepTime;
+    } else {
+      return 0;
+    }
   }
 
-  String createJson(ValueInfo valueInfo) {
+  public String createJson(ValueInfo valueInfo) {
     var varName = valueInfo.getName();
     var value = valueInfo.getValue();
     var valueStr = value;
@@ -106,25 +117,28 @@ public class ElasticSearchExporter implements IExporter {
     return sb.toString();
   }
 
+  /**
+   * post json cache data to Elasticsearch
+   */
   public void postJson() {
     synchronized (jsonCache) {
-      postJson(jsonCache.toString());
-      if (isVerbose) {
-        Print.out("post json");
-      }
+      postJson(jsonCache.toString(), esBulkUrl);
       jsonCache.delete(0,jsonCache.length());
     }
   }
 
-  String postJson(String json) {
+  /**
+   * post json data
+   * @param json json data
+   * @return response
+   */
+  public String postJson(String json, String urlStr) {
     if (json.isEmpty()) {
       return "";
     }
     HttpURLConnection uc;
     try {
-      var separator = File.separator.charAt(0);
-      String query = host+":"+port+separator+"_bulk?pretty";
-      URL url = new URL(query);
+      URL url = new URL(urlStr);
       uc = (HttpURLConnection) url.openConnection();
       uc.setRequestMethod("POST");
       uc.setUseCaches(false);
@@ -143,6 +157,9 @@ public class ElasticSearchExporter implements IExporter {
         line = in.readLine();
       }
       uc.disconnect();
+      if (isVerbose) {
+        Print.out("post json");
+      }
       return body;
     } catch (IOException e) {
       e.printStackTrace();
