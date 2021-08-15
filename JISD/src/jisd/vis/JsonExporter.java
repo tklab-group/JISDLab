@@ -14,33 +14,48 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public class ElasticSearchExporter implements IExporter {
+public class JsonExporter implements IExporter{
   String host;
   int port;
   String name;
   private final StringBuilder jsonCache = new StringBuilder();
   Thread exporterThread;
   volatile boolean isStop = false;
-  long id = 0;
-  private String timeLocale;
   private int sleepTime = 0;
-  @Getter @Setter
+  @Getter
+  @Setter
   private volatile boolean isVerbose = false;
   @Getter @Setter
   private volatile boolean isSuppressError = false;
   private Optional<LocalDateTime> previousUpdateTimeOpt = Optional.empty();
-  private String esBulkUrl;
+  String timeLocale;
+  String exportUrl;
 
-  public ElasticSearchExporter(String host, int port, String name) {
-    this(host, port, name, "09:00");
-  }
-
-  public ElasticSearchExporter(String host, int port, String name, String timeLocale) {
+  public JsonExporter(String host, int port, String name, String timeLocale, String exportUrl) {
     this.host = host;
     this.port = port;
     this.name = name;
     this.timeLocale = timeLocale;
-    esBulkUrl = host+":"+port+"/_bulk?pretty";
+    this.exportUrl = exportUrl;
+  }
+
+  public String createJson(ValueInfo valueInfo) {
+    var varName = valueInfo.getName();
+    var value = valueInfo.getValue();
+    var valueStr = value;
+    if (!Number.isNumeric(value)) {
+      value = "0";
+    }
+    var timestamp = valueInfo.getCreatedAt().toString();
+    StringBuilder sb = new StringBuilder();
+    sb.append("{\"create\":{\"_index\":\"").append(name).append("\"}}\n")
+      .append("{")
+      .append("\"@timestamp\":").append("\"").append(timestamp+"+"+timeLocale).append("\",")
+      .append("\"name\":").append("\"").append(varName).append("\",")
+      .append("\"value\":").append(value).append(",")
+      .append("\"value_string\":").append("\"").append(valueStr).append("\"")
+      .append("}\n");
+    return sb.toString();
   }
 
   public void run() {
@@ -98,31 +113,12 @@ public class ElasticSearchExporter implements IExporter {
     }
   }
 
-  public String createJson(ValueInfo valueInfo) {
-    var varName = valueInfo.getName();
-    var value = valueInfo.getValue();
-    var valueStr = value;
-    if (!Number.isNumeric(value)) {
-      value = "0";
-    }
-    var timestamp = valueInfo.getCreatedAt().toString();
-    StringBuilder sb = new StringBuilder();
-    sb.append("{\"create\":{\"_index\":\"").append(name).append("\"}}\n")
-      .append("{")
-      .append("\"@timestamp\":").append("\"").append(timestamp+"+"+timeLocale).append("\",")
-      .append("\"name\":").append("\"").append(varName).append("\",")
-      .append("\"value\":").append(value).append(",")
-      .append("\"value_string\":").append("\"").append(valueStr).append("\"")
-      .append("}\n");
-    return sb.toString();
-  }
-
   /**
    * post json cache data to Elasticsearch
    */
   public void postJson() {
     synchronized (jsonCache) {
-      postJson(jsonCache.toString(), esBulkUrl);
+      postJson(jsonCache.toString(), exportUrl);
       jsonCache.delete(0,jsonCache.length());
     }
   }
