@@ -1,0 +1,107 @@
+version: "3"
+services:
+  elasticsearch01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
+    hostname: elastic01
+    container_name: es01
+    environment:
+      - node.name=es01
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es02,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./elasticsearch-data/elasticsearch-data1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - jisdlab-network
+    healthcheck:
+      interval: 20s
+      retries: 10
+      test: curl -s http://localhost:9200/_cluster/health | grep -vq '"status":"red"'
+
+  # 2nd node
+  elasticsearch02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
+    container_name: es02
+    environment:
+      - node.name=es02
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es03
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./elasticsearch-data/elasticsearch-data2:/usr/share/elasticsearch/data
+    networks:
+      - jisdlab-network
+  # 3rd node
+  elasticsearch03:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.3
+    container_name: es03
+    environment:
+      - node.name=es03
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./elasticsearch-data/elasticsearch-data3:/usr/share/elasticsearch/data
+    networks:
+      - jisdlab-network
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.13.3
+    environment:
+      SERVER_NAME: "kibana"
+      ELASTICSEARCH_HOSTS: "http://elastic01:9200"
+      ELASTICSEARCH_REQUESTTIMEOUT: "60000"
+    volumes:
+      - ./kibana.yaml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - 5601:5601
+    networks:
+      - jisdlab-network
+  prometheus:
+    image: prom/prometheus:v2.27.1
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+      - ./prometheus-data:/prometheus
+    ports:
+      - 9090:9090
+    networks:
+      - jisdlab-network
+  grafana:
+    image: grafana/grafana:7.5.7
+    container_name: grafana
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+    ports:
+      - 3000:3000
+    networks:
+      - jisdlab-network
+volumes:
+  elasticsearch-data1:
+    driver: local
+  elasticsearch-data2:
+    driver: local
+  elasticsearch-data3:
+    driver: local
+networks:
+  jisdlab-network:
+    external: true

@@ -55,7 +55,7 @@ Next, please set **the absolute path of JISDLab root directory** to your environ
 
 ---
 
-And then, install `IJava`, Jupyter kernel for Java.When installing IJava, please set classpaths and `startup.jshell` by param.There are sample classes in `sample` dir which contains `demo.HelloWorld` class(which source file is debugspace/HelloWorld.java).  
+And then, install `IJava`, Jupyter kernel for Java.When installing IJava, please set classpaths and `startup.jshell` by param.There are sample classes in `sample` dir which contains `jisd.demo.HelloWorld` class(which source file is debugspace/HelloWorld.java).  
 For Linux, MacOS:
 
 ```bash

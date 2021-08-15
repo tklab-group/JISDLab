@@ -1,0 +1,7 @@
+/elasticsearch-data/elasticsearch-data1/*
+/elasticsearch-data/elasticsearch-data2/*
+/elasticsearch-data/elasticsearch-data3/*
+/grafana-data/*
+/prometheus-data/*
+
+!README.md
