@@ -63,16 +63,16 @@ For Linux:
 JISD/setup/setup-linux.sh <your classpath>
 ```
 
-For Windows:
-
-```bash
-JISD\setup\setup-windows.ps1 <your classpath>
-```
-
 For MacOS:
 
 ```bash
 JISD/setup/setup-macos.sh <your classpath>
+```
+
+For Windows:
+
+```bash
+JISD\setup\setup-windows.ps1 <your classpath>
 ```
 
 ---

@@ -34,16 +34,16 @@ For Linux:
 JISD/setup/setup-linux.sh $JISDLAB_HOME/sample
 ```
 
-For Windows:
-
-```bash
-JISD\setup\setup-windows.ps1 %JISDLAB_HOME%\sample
-```
-
 For MacOS:
 
 ```bash
 JISD/setup/setup-macos.sh $JISDLAB_HOME/sample
+```
+
+For Windows:
+
+```bash
+JISD\setup\setup-windows.ps1 %JISDLAB_HOME%\sample
 ```
 
 4. 以下を実行してJupyterLabを起動する
