@@ -1,1 +1,5 @@
-theme: jekyll-theme-slate
+theme: jekyll-theme-minimal
+description: description here
+# logo : imgs/home.png
+# homepage_description: description here
+# google_analytics: token here

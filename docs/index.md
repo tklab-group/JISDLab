@@ -1,37 +1,31 @@
-## Welcome to GitHub Pages
+# JISDLab
+Java scriptable debugger on JupyterLab
 
-You can use the [editor on GitHub](https://github.com/tklab-group/JISDLab/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+**JISDLab**は記述したスクリプトに従って動作するJavaデバッグ環境です．Jupyter Notebookにデバッグ手順を文書やJavaコードの形で記述することで，デバッグ作業の再利用が容易になり，デバッグ作業の負担を軽減できます．
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+JISDLabはJavaデバッグライブラリの**JISD**を用いています．JISDはJupyterLab上での利用を想定していますが，ご自身の環境でJavaライブラリとして使用することも可能です．
 
-### Markdown
+詳しくは[JISDLabリポジトリ](https://github.com/tklab-group/JISDLab)をご覧ください．
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## 機能
+- ブレークポイントによるデバッグ
+- ステップ実行，メソッド実行，スタックトレースの表示等のデバッグ操作
+- Webからのスクリプトによる遠隔デバッグ
+- Text，HTML/Markdown形式での文書の挿入
+- グラフの描画・保存
+- 観測結果への非同期アクセス
+- 同一箇所の複数の観測結果の保持
+- 対象プログラムに与える影響を最小限にしたデバッグ
+- 静的情報の提供
+- 外部プログラムとの容易な連携
+- Elasticsearch等への変数データエクスポート及び可視化
 
-```markdown
-Syntax highlighted code block
+## JISDLabの特徴
+### スクリプタブルデバッグ
+スクリプタブルデバッグとは，記述したスクリプトに従って動作するデバッガを用いたデバッグ方法です．開発者はデバッグの工程においてブレークポイントの設置やステップ実行などの個々のデバッグ作業またはそれらを組み合わせた一連の作業を繰り返し行うことが頻繁にあり，このことは開発者にとって大きな負担になっていました．JISDLabではスクリプタブルデバッグという方法でそのようなデバッグ作業に伴う負担を軽減します．一度記述したスクリプトはいつでも実行でき，Notebook形式のためファイルを共有するだけでデバッグ作業を容易に共有，再現することができます．
 
-# Header 1
-## Header 2
-### Header 3
+### 文芸的デバッグ
+文芸的デバッグとは，文芸的プログラミングをデバッグ時に適用したデバッグ方法です．文芸的プログラミングは，Donald Knuthが提唱したコンピュータのプログラミングスタイルであり，フォーマットされた自然言語テキスト，実行可能なコードスニペット，計算結果を織り交ぜることでプログラムの理解を支援するものです.近年では，データサイエンス分野では，Jupyter Notebookに代表される対話型の文芸的プログラミングツールが広く利用されています.JISDLabはこの文芸的プログラミングをデバッグ時に実践することによって，デバッグ作業を容易に文書化，共有，再現することが可能です．
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/tklab-group/JISDLab/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+### プログラム可視化
+JISDLabは収集した観測値を可視化するため，Elasticsearch等のツールに対してデータをエクスポートすることができます．エクスポートされたデータを使って，GrafanaやKibanaといったツールでそのまま可視化することで，反復等によって大量の変数データがある中での異常値の検出や，値の定点観測等に使用できます．JISDLabを使用すればこれらはデバッグ対象のプログラムの外部から観測できるため，本番用のコードから切り離した運用が可能であり，本番時に不要なデバッグコードが残ってしまうようなミスを回避できます．

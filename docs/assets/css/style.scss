@@ -1,0 +1,25 @@
+---
+---
+
+@import "{{ site.theme }}";
+body {
+  color: #333;
+}
+ul,
+ol {
+  padding-inline-start: 20px;
+}
+code {
+  background-color: #f8f8f8;
+  border-radius: 6px;
+  font-size: 85%;
+  margin: 0;
+  padding: 0.2em 0.4em;
+}
+a {
+  color: #e65000;
+}
+section {
+  width: 600px;
+  word-break: break-all;
+}
