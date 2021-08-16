@@ -5,7 +5,3 @@ java -agentlib:jdwp=transport=dt_socket,server=y,address=25432,suspend=n -cp JIS
 $env:PROBEJ_PORT=39876; cmd.exe /c %CATALINA_HOME%/bin/catalina.bat probej start
 ## tomcat with jppa port 25432
 $env:JPDA_ADDRESS="localhost:25432"; cmd.exe /c %CATALINA_HOME%/bin/catalina.bat jpda start
-## tomcat with ImperSD
-```java
-
-```
