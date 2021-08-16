@@ -28,38 +28,29 @@ git clone --recursive https://github.com/tklab-group/JISDLab.git
 2. 環境変数`JISDLAB_HOME`にJISDLabディレクトリの絶対パスを設定する
 3. JISDLabディレクトリで以下を実行する
 
-For Linux, MacOS:
-```bash
-cd IJava && ./gradlew installKernel --param classpath:$JISDLAB_HOME/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:$JISDLAB_HOME/JISD/build/libs/jisd-all.jar:$JISDLAB_HOME/sample --param startup-scripts-path:$JISDLAB_HOME/JISD/startup.jshell && cd ..
-```
-
-For Windows:
-```bash
-cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;%JISDLAB_HOME%/sample" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
-```
-
-4. JISDLabディレクトリで以下を実行する
-
 For Linux:
+
 ```bash
-cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=$JISDLAB_HOME/sample && cd ..
+JISD/setup/setup-linux.sh $JISDLAB_HOME/sample
 ```
 
 For Windows:
+
 ```bash
-cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp="%JISDLAB_HOME%/sample"; cd ..
+JISD\setup\setup-windows.ps1 %JISDLAB_HOME%\sample
 ```
 
 For MacOS:
+
 ```bash
-cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=$JISDLAB_HOME/sample && cd ..
+JISD/setup/setup-macos.sh $JISDLAB_HOME/sample
 ```
 
-5. 以下を実行してJupyterLabを起動する
+4. 以下を実行してJupyterLabを起動する
 ```sh
 jupyter lab
 ```
 
-6. 起動したJupyterLab にアクセスする
+5. 起動したJupyterLab にアクセスする
 
 その他詳細は[README.md](README.md)を参照してください．
