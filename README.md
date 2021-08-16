@@ -55,39 +55,24 @@ Next, please set **the absolute path of JISDLab root directory** to your environ
 
 ---
 
-And then, install `IJava`, Jupyter kernel for Java.When installing IJava, please set classpaths and `startup.jshell` by param.There are sample classes in `sample` dir which contains `jisd.demo.HelloWorld` class(which source file is debugspace/HelloWorld.java).  
-For Linux, MacOS:
-
-```bash
-cd IJava && ./gradlew installKernel --param classpath:$JISDLAB_HOME/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:$JISDLAB_HOME/JISD/build/libs/jisd-all.jar:<your classpaths> --param startup-scripts-path:$JISDLAB_HOME/JISD/startup.jshell && cd ..
-```
-
-For Windows:
-
-```bash
-cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;<your classpaths>" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
-```
-
----
-
-And, you need to modify `kernel.json` for static analysis.If you want to know the location of `kernel.json`, please see https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs.
+And then, install `IJava`, Jupyter kernel for Java. When installing IJava, you need to set your application's classpath. Plaese run the shell script below(JupyterLab required).
 
 For Linux:
 
 ```bash
-cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
-```
-
-For Windows:
-
-```bash
-cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp=<your classpaths>; cd ..
+JISD/setup/setup-linux.sh <your classpath>
 ```
 
 For MacOS:
 
 ```bash
-cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=<your classpaths> && cd ..
+JISD/setup/setup-macos.sh <your classpath>
+```
+
+For Windows:
+
+```bash
+JISD\setup\setup-windows.ps1 <your classpath>
 ```
 
 ---
