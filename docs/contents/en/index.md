@@ -21,7 +21,7 @@ For more information, please see [JISDLab repository](https://github.com/tklab-g
 - Variable data export and visualization to Elasticsearch, Prometheus, etc
 
 ## Features of JISDLab
-## Scriptable debugging
+### Scriptable debugging
 Scriptable debugging is a debugging method using a debugger that operates according to the written script. JISDLab is a scriptable debugging method. JISDLab reduces the burden of such debugging work by using scriptable debugging. Once a script is written, it can be executed at any time, and because it is in Notebook format, debugging can be easily shared and reproduced by simply sharing the file.
 
 ### Literary Debugging
