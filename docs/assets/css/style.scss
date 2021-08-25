@@ -23,3 +23,16 @@ section {
   width: 600px;
   word-break: break-all;
 }
+footer {
+  width: 270px;
+  float: right;
+  position: relative;
+  bottom: 50px;
+  text-align: right;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+header {
+  .lang {
+    padding: 0 0 20px;
+  }
+}

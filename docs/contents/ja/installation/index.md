@@ -1,17 +1,15 @@
-# Installation
+# インストール
 ## Dockerを使う場合
 ### 必要なもの
 - docker
 - docker-compose
 
 1. `--recursive` オプションをつけて[JISDLabリポジトリ](https://github.com/tklab-group/JISDLab)をクローンする
-
-```bash
+```sh
 git clone --recursive https://github.com/tklab-group/JISDLab.git
 ```
 2. JISDLabディレクトリで以下を実行する．
-
-```bash
+```sh
 docker-compose up --build -d
 ```
 3. http://localhost:21510 にアクセスして初期パスワードを入力する(初期パスワードは `passwd`)
@@ -24,37 +22,44 @@ docker-compose up --build -d
 
 
 1. `--recursive` オプションをつけて[JISDLabリポジトリ](https://github.com/tklab-group/JISDLab)をクローンする
-
-```bash
+```sh
 git clone --recursive https://github.com/tklab-group/JISDLab.git
 ```
 2. 環境変数`JISDLAB_HOME`にJISDLabディレクトリの絶対パスを設定する
 3. JISDLabディレクトリで以下を実行する
 
-For Linux:
-
+For Linux, MacOS:
 ```bash
-JISD/setup/setup-linux.sh <your classpath>
-```
-
-For MacOS:
-
-```bash
-JISD/setup/setup-macos.sh <your classpath>
+cd IJava && ./gradlew installKernel --param classpath:$JISDLAB_HOME/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar:$JISDLAB_HOME/JISD/build/libs/jisd-all.jar:$JISDLAB_HOME/sample --param startup-scripts-path:$JISDLAB_HOME/JISD/startup.jshell && cd ..
 ```
 
 For Windows:
-
 ```bash
-JISD\setup\setup-windows.ps1 <your classpath>
+cd IJava ; ./gradlew.bat installKernel --param classpath:"%JISDLAB_HOME%/jdiscript/jdiscript/build/libs/jdiscript-0.9.0.jar;%JISDLAB_HOME%/JISD/build/libs/jisd-all.jar;%JISDLAB_HOME%/sample" --param startup-scripts-path:"%JISDLAB_HOME%/JISD/startup.jshell"; cd ..
 ```
 
-4. 以下を実行してJupyterLabを起動する
+4. JISDLabディレクトリで以下を実行する
 
+For Linux:
+```bash
+cd JISD && ./gradlew createKernelJson -Pjsonpath=~/.local/share/jupyter/kernels/java/kernel.json -Pcp=$JISDLAB_HOME/sample && cd ..
+```
+
+For Windows:
+```bash
+cd JISD ; ./gradlew.bat createKernelJson -Pjsonpath="%APPDATA%\jupyter\kernels\java\kernel.json" -Pcp="%JISDLAB_HOME%/sample"; cd ..
+```
+
+For MacOS:
+```bash
+cd JISD && ./gradlew createKernelJson -Pjsonpath=~/Library/Jupyter/kernels/java/kernel.json -Pcp=$JISDLAB_HOME/sample && cd ..
+```
+
+5. 以下を実行してJupyterLabを起動する
 ```sh
 jupyter lab
 ```
 
-5. 起動したJupyterLab にアクセスする
+6. 起動したJupyterLab にアクセスする
 
 その他詳細は[JISDLabリポジトリ](https://github.com/tklab-group/JISDLab)を参照してください．
