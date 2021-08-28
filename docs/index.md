@@ -21,7 +21,7 @@ For more information, please see [JISDLab repository](https://github.com/tklab-g
 - Variable data export and visualization to Elasticsearch, Prometheus, etc
 
 ### Scriptable debugging
-Scriptable debugging is a debugging method using a debugger that operates according to the written script. JISDLab is a scriptable debugging method. JISDLab reduces the burden of such debugging work by using scriptable debugging. Once a script is written, it can be executed at any time, and because it is in Notebook format, debugging can be easily shared and reproduced by simply sharing the file.
+**Scriptable debugging** is a debugging method using a debugger that operates according to the written script. JISDLab is a scriptable debugging method. JISDLab reduces the burden of such debugging work by using scriptable debugging. Once a script is written, it can be executed at any time, and because it is in Notebook format, debugging can be easily shared and reproduced by simply sharing the file.
 
 ### Literate Debugging
 **Literate debugging** is a debugging method that applies literate programming to debugging. **Literate programming** is a style of computer programming proposed by Donald Knuth, in which formatted natural language text, executable code snippets, and computational results are interwoven to support program comprehension. In recent years, interactive literate programming tools such as Jupyter Notebook have been widely used in the field of data science. JISDLab can easily document, share, and reproduce debugging work by practicing this literate programming style during debugging. JISDLab allows you to easily document, share, and reproduce your debugging work by practicing this literate programming.
