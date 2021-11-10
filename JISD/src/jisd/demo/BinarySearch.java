@@ -1,8 +1,5 @@
 package jisd.demo;
 
-import jisd.util.Print;
-
-import java.util.Arrays;
 import java.util.stream.IntStream;
 
 class BinarySearch {
@@ -14,7 +11,7 @@ class BinarySearch {
   int binarySearch(int[] a, int key) {
     int left = -1; // 条件を満たさない最大の値
     int right = a.length; // 条件を満たす最小の値
-    while(right - left > 1) {
+    while(right - left >= 1) {
       int mid = left + (right - left)/2;
       if (isOk(a, mid, key)) {
         right = mid;
