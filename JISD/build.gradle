@@ -38,6 +38,7 @@ javadoc {
   exclude('jisd/util/**')
   destinationDir = file("../javadoc/docs")
   failOnError = true
+  options.locale = "en_US"
   options.setMemberLevel(JavadocMemberLevel.PUBLIC)
   options.addStringOption('Xdoclint:none', '-quiet')
   doLast {
