@@ -2,6 +2,9 @@
 
 Java scriptable debugger on JupyterLab
 
+## Document
+Please see https://tklab-group.github.io/JISDLab/
+
 ## Installation using Docker
 
 ### Requirements
