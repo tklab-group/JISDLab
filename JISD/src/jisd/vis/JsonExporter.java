@@ -14,22 +14,19 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public class JsonExporter implements IExporter{
+public class JsonExporter implements IExporter {
+  private final StringBuilder jsonCache = new StringBuilder();
   String host;
   int port;
   String name;
-  private final StringBuilder jsonCache = new StringBuilder();
   Thread exporterThread;
   volatile boolean isStop = false;
-  private int sleepTime = 0;
-  @Getter
-  @Setter
-  private volatile boolean isVerbose = false;
-  @Getter @Setter
-  private volatile boolean isSuppressError = false;
-  private Optional<LocalDateTime> previousUpdateTimeOpt = Optional.empty();
   String timeLocale;
   String exportUrl;
+  private int sleepTime = 0;
+  @Getter @Setter private volatile boolean isVerbose = false;
+  @Getter @Setter private volatile boolean isSuppressError = false;
+  private Optional<LocalDateTime> previousUpdateTimeOpt = Optional.empty();
 
   public JsonExporter(String host, int port, String name, String timeLocale, String exportUrl) {
     this.host = host;
@@ -48,13 +45,26 @@ public class JsonExporter implements IExporter{
     }
     var timestamp = valueInfo.getCreatedAt().toString();
     StringBuilder sb = new StringBuilder();
-    sb.append("{\"create\":{\"_index\":\"").append(name).append("\"}}\n")
-      .append("{")
-      .append("\"@timestamp\":").append("\"").append(timestamp+"+"+timeLocale).append("\",")
-      .append("\"name\":").append("\"").append(varName).append("\",")
-      .append("\"value\":").append(value).append(",")
-      .append("\"value_string\":").append("\"").append(valueStr).append("\"")
-      .append("}\n");
+    sb.append("{\"create\":{\"_index\":\"")
+        .append(name)
+        .append("\"}}\n")
+        .append("{")
+        .append("\"@timestamp\":")
+        .append("\"")
+        .append(timestamp + "+" + timeLocale)
+        .append("\",")
+        .append("\"name\":")
+        .append("\"")
+        .append(varName)
+        .append("\",")
+        .append("\"value\":")
+        .append(value)
+        .append(",")
+        .append("\"value_string\":")
+        .append("\"")
+        .append(valueStr)
+        .append("\"")
+        .append("}\n");
     return sb.toString();
   }
 
@@ -65,14 +75,16 @@ public class JsonExporter implements IExporter{
   public void run(int sleepTime) {
     isStop = false;
     this.sleepTime = sleepTime;
-    exporterThread = new Thread(()->{
-      while (!isStop) {
-        // 1秒毎に送信
-        Utility.sleep(1000);
-        postJson();
-      }
-      postJson();
-    });
+    exporterThread =
+        new Thread(
+            () -> {
+              while (!isStop) {
+                // 1秒毎に送信
+                Utility.sleep(1000);
+                postJson();
+              }
+              postJson();
+            });
     exporterThread.start();
   }
 
@@ -90,13 +102,14 @@ public class JsonExporter implements IExporter{
     var isSleep = false;
     if (previousUpdateTimeOpt.isPresent()) {
       var previousUpdateTime = previousUpdateTimeOpt.get();
-      if (! previousUpdateTime.equals(currentTime)) {
+      if (!previousUpdateTime.equals(currentTime)) {
         // different observed point
         long timeDiff = previousUpdateTime.until(currentTime, ChronoUnit.MILLIS);
         if (timeDiff < 10) {
           // 前回時刻から10ms以上経過していないとき
           if (!isSuppressError) {
-            Print.err("Some values may not be displayed in the visualization tool because the time interval is too short(< 10ms).");
+            Print.err(
+                "Some values may not be displayed in the visualization tool because the time interval is too short(< 10ms).");
           }
         }
         isSleep = true;
@@ -113,18 +126,17 @@ public class JsonExporter implements IExporter{
     }
   }
 
-  /**
-   * post json cache data to Elasticsearch
-   */
+  /** post json cache data to exportURL */
   public void postJson() {
     synchronized (jsonCache) {
       postJson(jsonCache.toString(), exportUrl);
-      jsonCache.delete(0,jsonCache.length());
+      jsonCache.delete(0, jsonCache.length());
     }
   }
 
   /**
    * post json data
+   *
    * @param json json data
    * @return response
    */
@@ -140,8 +152,8 @@ public class JsonExporter implements IExporter{
       uc.setUseCaches(false);
       uc.setDoOutput(true);
       uc.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-      OutputStreamWriter out = new OutputStreamWriter(
-        new BufferedOutputStream(uc.getOutputStream()));
+      OutputStreamWriter out =
+          new OutputStreamWriter(new BufferedOutputStream(uc.getOutputStream()));
       out.write(json);
       out.close();
 

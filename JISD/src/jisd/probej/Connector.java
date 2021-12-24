@@ -3,9 +3,9 @@ package jisd.probej;
 
 import com.sun.jdi.VMDisconnectedException;
 import jisd.debug.Location;
+import jisd.debug.Utility;
 import jisd.debug.value.ValueInfo;
 import jisd.util.ClassName;
-import jisd.util.Name;
 import jisd.util.Print;
 
 import java.io.IOException;
@@ -126,6 +126,9 @@ class Connector {
                   }
                   for (int j = 0; j < noOfValue; j++) {
                     String valueStr = readLine(client, outBuf);
+                    // System.out.println(valueStr);
+                    // Todo: wait connection 
+                    Utility.sleep(10);
                     Optional<ValueInfo> value = parser.parseValue(loc.getVarName(), valueStr);
                     if (value.isPresent()) {
                       values.add(value.get());

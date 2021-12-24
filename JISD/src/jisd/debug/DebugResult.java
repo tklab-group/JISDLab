@@ -8,6 +8,7 @@ import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -65,7 +66,7 @@ public class DebugResult {
     }
   }
 
-  void addValues(ArrayList<ValueInfo> notRegesteredValues) {
+  void addValues(List<ValueInfo> notRegesteredValues) {
     int regSize = values.size();
     if (regSize == 0) {
       notRegesteredValues.forEach(
