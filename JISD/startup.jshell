@@ -16,11 +16,3 @@ import java.util.stream.*;
 
 // graph library
 import org.knowm.xchart.*;
-import org.jfree.chart.*;
-import org.jfree.chart.axis.*;
-import org.jfree.chart.labels.*;
-import org.jfree.chart.plot.*;
-import org.jfree.chart.renderer.category.*;
-import org.jfree.data.general.*;
-import org.jfree.data.statistics.*;
-import java.awt.Font;
