@@ -14,8 +14,9 @@ services:
       - ./debugspace:/workspaces/debugspace
       - ./sample:/workspaces/sample
     working_dir: /workspaces
-    networks:
-      - jisdlab-network
-networks:
-  jisdlab-network:
-    external: true
+### If you use JISDVis, please remove the comment out below
+#    networks:
+#      - jisdlab-network
+#networks:
+#  jisdlab-network:
+#    external: true
