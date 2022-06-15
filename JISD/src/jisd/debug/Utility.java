@@ -13,6 +13,7 @@ import java.util.Optional;
  * @author sugiyama
  */
 public class Utility {
+
   /**
    * Execute external command.
    *
@@ -32,8 +33,14 @@ public class Utility {
         StringBuffer out = new StringBuffer();
         br = new BufferedReader(new InputStreamReader(in));
         String line;
+        boolean isFirst = true;
         while ((line = br.readLine()) != null) {
-          out.append(line + lineSeparator);
+          if (isFirst) {
+            out.append(line);
+            isFirst=false;
+            continue;
+          }
+          out.append(lineSeparator + line);
         }
         results[0] = out.toString();
         br.close();
@@ -41,8 +48,14 @@ public class Utility {
         in = p.getErrorStream();
         StringBuffer err = new StringBuffer();
         br = new BufferedReader(new InputStreamReader(in));
+        isFirst = true;
         while ((line = br.readLine()) != null) {
-          err.append(line + lineSeparator);
+          if (isFirst) {
+            err.append(line);
+            isFirst=false;
+            continue;
+          }
+          err.append(lineSeparator + line);
         }
         results[1] = err.toString();
         results[2] = Integer.toString(p.waitFor());
