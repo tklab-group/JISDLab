@@ -59,8 +59,12 @@ public class Utility {
         }
         results[1] = err.toString();
         results[2] = Integer.toString(p.waitFor());
-        java.lang.System.out.println(results[0]);
-        java.lang.System.err.println(results[1]);
+        if (! results[0].isEmpty()) {
+          java.lang.System.out.println(results[0]);
+        }
+        if (! results[1].isEmpty()) {
+          java.lang.System.err.println(results[1]);
+        }
       } finally {
         if (br != null) {
           br.close();
