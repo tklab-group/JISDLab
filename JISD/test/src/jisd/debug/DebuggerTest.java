@@ -256,11 +256,11 @@ public class DebuggerTest {
     String[] varNames = {"a"};
     dbg.stopAt(bpln1, varNames).get();
     dbg.stopAt(bpln2, varNames).get();
+    dbg.stopAt(bpln3, varNames).get();
     dbg.run(1000);
     dbg.step();
     dbg.finish();
-    dbg.next();
-    dbg.next();
+    dbg.next(15);
     dbg.locals();
     dbg.getResults()
         .forEach(

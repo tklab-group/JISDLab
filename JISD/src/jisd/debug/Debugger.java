@@ -233,20 +233,62 @@ public class Debugger {
 
   /** Execute "step in"/"step into" */
   public void step() {
-    pm.requestStepInto(vmManager);
-    sleep();
+    step(1);
+  }
+
+  /** Execute "step in"/"step into" */
+  public void step(int times) {
+    pm.requestStepInto(vmManager, times);
+  }
+
+  /** Execute "step in"/"step into" (alias of step()) */
+  public void stepIn() {
+    step();
+  }
+
+  /** Execute "step in"/"step into" (alias of step()) */
+  public void stepIn(int times) {
+    step(times);
   }
 
   /** Execute "step over" */
   public void next() {
-    pm.requestStepOver(vmManager);
-    sleep();
+    next(1);
+  }
+
+  /** Execute "step in"/"step into" (alias of next()) */
+  public void next(int times) {
+    pm.requestStepOver(vmManager, times);
+  }
+
+  /** Execute "step in"/"step into" (alias of next()) */
+  public void stepOver() {
+    next();
+  }
+
+  /** Execute "step in"/"step into" (alias of next()) */
+  public void stepOver(int times) {
+    next(times);
   }
 
   /** Execute "step out"/"step return" */
   public void finish() {
-    pm.requestStepOut(vmManager);
-    sleep();
+    finish(1);
+  }
+
+  /** Execute "step out"/"step return" */
+  public void finish(int times) {
+    pm.requestStepOut(vmManager, times);
+  }
+
+  /** Execute "step in"/"step into" (alias of finish()) */
+  public void stepOut() {
+    finish();
+  }
+
+  /** Execute "step in"/"step into" (alias of finish()) */
+  public void stepOut(int times) {
+    finish(times);
   }
 
   /** Continue execution from breakpoint */
@@ -314,17 +356,6 @@ public class Debugger {
       Utility.sleep(1000);
     }
     Utility.sleep(sleepTime);
-  }
-
-  /** Sleep main thread until current bpm process is done */
-  void sleep() {
-    try {
-      while (pm.isProcessing) {
-        Thread.sleep(100);
-      }
-    } catch (InterruptedException e) {
-      DebuggerInfo.print("Interrupted.");
-    }
   }
 
   /** Shutdown the debugger. */
