@@ -288,4 +288,15 @@ public class DebuggerTest {
     }
     dbg.exit();
   }
+
+  @Test
+  void printSrcTest() {
+    Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
+    dbg.setSrcDir("test/src", "a");
+    dbg.stopAt(bpln1);
+    dbg.run(1000);
+    dbg.list("src");
+    dbg.cont();
+    dbg.exit();
+  }
 }

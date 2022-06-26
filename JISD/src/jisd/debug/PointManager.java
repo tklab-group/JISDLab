@@ -13,6 +13,8 @@ import org.jdiscript.handlers.OnStep;
 import org.jdiscript.requests.ChainingStepRequest;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -366,10 +368,18 @@ class PointManager {
    * @param prefix print reason
    * @param srcDir source directory
    */
-  void printSrcAtCurrentLocation(String prefix, String srcDir) {
+
+  /**
+   * Print source code.
+   *
+   * @param prefix print reason
+   * @param srcDirs source directory
+   */
+  void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) {
     if (!checkCurrentTRef()) {
       return;
     }
+    srcDirs.add(".");
     try {
       com.sun.jdi.Location currentLocation = currentTRef.frame(0).location();
       int lineNumber = currentLocation.lineNumber();
@@ -377,10 +387,16 @@ class PointManager {
       String className = Name.toClassNameFromSourcePath(srcRelPath);
       String methodName = currentLocation.method().name();
       printCurrentLocation(prefix, lineNumber, className, methodName);
-      if (!srcDir.equals("")) {
-        String srcAbsPath = srcDir + File.separator.charAt(0) + srcRelPath;
-        DebuggerInfo.printSrc(srcAbsPath, lineNumber);
+      for (int i = 0; i < srcDirs.size(); i++) {
+        var srcDir = srcDirs.get(i);
+        var srcAbsPathStr = srcDir + File.separator.charAt(0) + srcRelPath;
+        var srcAbsPath = Paths.get(srcAbsPathStr);
+        if (Files.exists(srcAbsPath)) {
+          DebuggerInfo.printSrc(srcAbsPathStr, lineNumber);
+          return;
+        }
       }
+      DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by list(String srcDir) or Debugger.setSrcDir(String... srcDir))");
     } catch (IncompatibleThreadStateException | AbsentInformationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

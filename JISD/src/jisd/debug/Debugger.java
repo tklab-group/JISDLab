@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The JISDLab's main debugger.
@@ -36,6 +37,8 @@ public class Debugger {
   @Getter int port;
 
   @Getter @Setter String host;
+
+  @Getter List<String> srcDir = new ArrayList<String>();
 
   public Debugger(String main, String options) {
     this(main, options, false);
@@ -91,6 +94,10 @@ public class Debugger {
     } else {
       this.port = port;
     }
+  }
+
+  public void setSrcDir(String... paths) {
+    srcDir = Arrays.stream(paths).collect(Collectors.toList());
   }
 
   /**
@@ -299,6 +306,11 @@ public class Debugger {
 
   /** Print source code */
   public void list(String srcDir) {
+    pm.printSrcAtCurrentLocation("Current location,", new ArrayList<>(Arrays.asList(srcDir)));
+  }
+
+  /** Print source code */
+  public void list() {
     pm.printSrcAtCurrentLocation("Current location,", srcDir);
   }
 
