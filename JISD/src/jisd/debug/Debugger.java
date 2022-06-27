@@ -68,6 +68,15 @@ public class Debugger {
     init("", "", host, port, true, usesProbeJ);
   }
 
+  Debugger(String main,
+           String options,
+           String host,
+           int port,
+           boolean isRemoteDebug,
+           boolean usesProbeJ) {
+    init(main, options, host, port, isRemoteDebug, usesProbeJ);
+  }
+
   void init(
       String main,
       String options,
@@ -398,6 +407,14 @@ public class Debugger {
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
     run(sleepTime);
+  }
+
+  /** Redefine the debugger so that the parameters are the same */
+  public Debugger redef() {
+    var dbg = new Debugger(main, options, host, port, isRemoteDebug, usesProbeJ);
+    dbg.setSrcDir(srcDir.toArray(new String[0]));
+    exporters.stream().peek(e->dbg.setExporter(e)).collect(Collectors.toList());
+    return dbg;
   }
 
   /** Clear debug results all. */

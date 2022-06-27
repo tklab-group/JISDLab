@@ -290,6 +290,17 @@ public class DebuggerTest {
   }
 
   @Test
+  void redefTest() {
+    Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
+    dbg.setSrcDir("test/src", "a");
+    var dbg2 = dbg.redef();
+    Assertions.assertEquals("test/src", dbg.getSrcDir().get(0));
+    Assertions.assertEquals("test/src", dbg2.getSrcDir().get(0));
+    Assertions.assertEquals("a", dbg.getSrcDir().get(1));
+    Assertions.assertEquals("a", dbg2.getSrcDir().get(1));
+  }
+
+  @Test
   void printSrcTest() {
     Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
     dbg.setSrcDir("test/src", "a");
