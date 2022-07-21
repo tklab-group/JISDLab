@@ -298,6 +298,8 @@ public class DebuggerTest {
     Assertions.assertEquals("test/src", dbg2.getSrcDir().get(0));
     Assertions.assertEquals("a", dbg.getSrcDir().get(1));
     Assertions.assertEquals("a", dbg2.getSrcDir().get(1));
+    dbg2.run(1000);
+    dbg2.exit();
   }
 
   @Test
