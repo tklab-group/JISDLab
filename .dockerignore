@@ -12,3 +12,5 @@ easy-setup.md
 LICENSE
 README.md
 JISDVis/
+Dockerfile
+docker-compose.yaml

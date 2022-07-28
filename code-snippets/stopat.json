@@ -1,0 +1,17 @@
+{
+    "name": "stopat",
+    "display_name": "stopAt(): Set a breakpoint",
+    "metadata": {
+        "tags": [
+            "Debugger"
+        ],
+        "description": "Set a breakpoint",
+        "display_name": "stopAt(): Set a breakpoint",
+        "code": [
+            "dbg.stopAt();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/stopat.json"
+}

@@ -1,0 +1,19 @@
+{
+    "name": "step_into",
+    "display_name": "stepIn(): Step in",
+    "metadata": {
+        "tags": [
+            "Debugger",
+            "Operations at break",
+            "Step"
+        ],
+        "description": "Step in",
+        "display_name": "stepIn(): Step in",
+        "code": [
+            "dbg.stepIn();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/step_into.json"
+}

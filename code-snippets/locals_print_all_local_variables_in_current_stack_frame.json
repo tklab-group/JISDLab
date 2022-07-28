@@ -1,0 +1,18 @@
+{
+    "name": "locals_print_all_local_variables_in_current_stack_frame",
+    "display_name": "locals(): Print all local variables in current stack frame",
+    "metadata": {
+        "tags": [
+            "Debugger",
+            "Operations at break"
+        ],
+        "description": "Print all local variables in current stack frame",
+        "display_name": "locals(): Print all local variables in current stack frame",
+        "code": [
+            "dbg.locals();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/locals_print_all_local_variables_in_current_stack_frame.json"
+}

@@ -1,0 +1,15 @@
+{
+    "name": "redef_redefine_the_debugger",
+    "display_name": "redef(): Redefine the debugger",
+    "metadata": {
+        "tags": [],
+        "description": "Redefine the debugger",
+        "display_name": "redef(): Redefine the debugger",
+        "code": [
+            "dbg.redef();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/redef_redefine_the_debugger.json"
+}
