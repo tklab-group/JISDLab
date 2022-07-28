@@ -4,6 +4,7 @@ import com.sun.jdi.*;
 import com.sun.jdi.request.DuplicateRequestException;
 import com.sun.jdi.request.StepRequest;
 import jisd.util.Name;
+import jisd.util.Print;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,6 +13,8 @@ import org.jdiscript.handlers.OnStep;
 import org.jdiscript.requests.ChainingStepRequest;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,6 +41,10 @@ class PointManager {
   volatile boolean isProcessing;
   /** is breaked now? */
   @Setter volatile boolean isBreaked;
+
+  /** break or step request count */
+  @Getter @Setter(AccessLevel.PACKAGE)
+  volatile int count;
 
   Optional<ChainingStepRequest> stepReq = Optional.empty();
 
@@ -101,12 +108,12 @@ class PointManager {
 
   /** resume current thread */
   void resumeThread() {
+    isBreaked = false;
     if (!checkCurrentTRef()) {
       return;
     }
     currentTRef.resume();
     currentTRef = null;
-    isBreaked = false;
   }
 
   void completeStep() {
@@ -122,8 +129,9 @@ class PointManager {
    *
    * @param depth depth of step
    */
-  void requestStep(VMManager vmMgr, int depth) {
-    if (!checkCurrentTRef()) {
+  void requestStep(VMManager vmMgr, int depth, int times) {
+    if (times <= 0) {
+      Print.err("Negative number");
       return;
     }
     /** A procedure on step. */
@@ -131,52 +139,82 @@ class PointManager {
       /* do nothing */
       return;
     }
-    if (isProcessing) {
-      completeStep();
-    }
-    JDIScript j = ((JDIManager) vmMgr).getJDI();
-    OnStep onStep =
+    for (; times > 0; times--) {
+      if (!checkCurrentTRef()) {
+        setCount(0);
+        return;
+      }
+      setCount(times);
+      if (isProcessing) {
+        completeStep();
+      }
+
+      JDIScript j = ((JDIManager) vmMgr).getJDI();
+      int finalTimes = count;
+      OnStep onStep =
         j.once(
-            (s) -> {
-              completeStep();
-              if (isBreaked) {
+          (s) -> {
+            completeStep();
+            if (isBreaked) {
+              if (finalTimes == 1) {
                 DebuggerInfo.print("Step completed");
-                return;
               }
-              int lineNumber = s.location().lineNumber();
-              String methodName = s.location().method().name();
+              return;
+            }
+            int lineNumber = s.location().lineNumber();
+            String methodName = s.location().method().name();
+            if (finalTimes == 1) {
               try {
                 String className = Name.toClassNameFromSourcePath(s.location().sourcePath());
                 printCurrentLocation("Step completed", lineNumber, className, methodName);
               } catch (AbsentInformationException e) {
                 printCurrentLocation("Step completed", lineNumber, "Not attached", methodName);
               }
-              currentTRef = s.thread();
-              currentTRef.suspend();
-            });
-    try {
-      stepReq =
+            }
+            currentTRef = s.thread();
+            currentTRef.suspend();
+          });
+      try {
+        stepReq =
           Optional.of(j.stepRequest(currentTRef, StepRequest.STEP_LINE, depth, onStep).enable());
-    } catch (DuplicateRequestException e) {
-      e.printStackTrace();
+      } catch (DuplicateRequestException e) {
+        e.printStackTrace();
+      }
+      resumeThread();
+      isProcessing = true;
+      boolean isBreakLoop = sleep(j);
+      if (isBreakLoop) {
+        break;
+      }
     }
-    resumeThread();
-    isProcessing = true;
+  }
+
+  /** Sleep main thread until current bpm process is done */
+  boolean sleep(JDIScript j) {
+    try {
+      while (isProcessing) {
+        Thread.sleep(100);
+      }
+    } catch (InterruptedException e) {
+      DebuggerInfo.print("Interrupted.");
+      return true;
+    }
+    return false;
   }
 
   /** request step into execution */
-  void requestStepInto(VMManager vm) {
-    requestStep(vm, StepRequest.STEP_INTO);
+  void requestStepInto(VMManager vm, int times) {
+    requestStep(vm, StepRequest.STEP_INTO, times);
   }
 
   /** request step over execution */
-  void requestStepOver(VMManager vm) {
-    requestStep(vm, StepRequest.STEP_OVER);
+  void requestStepOver(VMManager vm, int times) {
+    requestStep(vm, StepRequest.STEP_OVER, times);
   }
 
   /** request step out execution */
-  void requestStepOut(VMManager vm) {
-    requestStep(vm, StepRequest.STEP_OUT);
+  void requestStepOut(VMManager vm, int times) {
+    requestStep(vm, StepRequest.STEP_OUT, times);
   }
 
   /** Request VM to set a point */
@@ -330,10 +368,18 @@ class PointManager {
    * @param prefix print reason
    * @param srcDir source directory
    */
-  void printSrcAtCurrentLocation(String prefix, String srcDir) {
+
+  /**
+   * Print source code.
+   *
+   * @param prefix print reason
+   * @param srcDirs source directory
+   */
+  void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) {
     if (!checkCurrentTRef()) {
       return;
     }
+    srcDirs.add(".");
     try {
       com.sun.jdi.Location currentLocation = currentTRef.frame(0).location();
       int lineNumber = currentLocation.lineNumber();
@@ -341,10 +387,16 @@ class PointManager {
       String className = Name.toClassNameFromSourcePath(srcRelPath);
       String methodName = currentLocation.method().name();
       printCurrentLocation(prefix, lineNumber, className, methodName);
-      if (!srcDir.equals("")) {
-        String srcAbsPath = srcDir + File.separator.charAt(0) + srcRelPath;
-        DebuggerInfo.printSrc(srcAbsPath, lineNumber);
+      for (int i = 0; i < srcDirs.size(); i++) {
+        var srcDir = srcDirs.get(i);
+        var srcAbsPathStr = srcDir + File.separator.charAt(0) + srcRelPath;
+        var srcAbsPath = Paths.get(srcAbsPathStr);
+        if (Files.exists(srcAbsPath)) {
+          DebuggerInfo.printSrc(srcAbsPathStr, lineNumber);
+          return;
+        }
       }
+      DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by list(String srcDir) or Debugger.setSrcDir(String... srcDir))");
     } catch (IncompatibleThreadStateException | AbsentInformationException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();

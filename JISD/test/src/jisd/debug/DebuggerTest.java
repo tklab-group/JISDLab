@@ -256,11 +256,11 @@ public class DebuggerTest {
     String[] varNames = {"a"};
     dbg.stopAt(bpln1, varNames).get();
     dbg.stopAt(bpln2, varNames).get();
+    dbg.stopAt(bpln3, varNames).get();
     dbg.run(1000);
     dbg.step();
     dbg.finish();
-    dbg.next();
-    dbg.next();
+    dbg.next(15);
     dbg.locals();
     dbg.getResults()
         .forEach(
@@ -286,6 +286,30 @@ public class DebuggerTest {
       var loc = res.getLocation();
       Assertions.assertEquals(loc.getLineNumber(), bpln2);
     }
+    dbg.exit();
+  }
+
+  @Test
+  void redefTest() {
+    Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
+    dbg.setSrcDir("test/src", "a");
+    var dbg2 = dbg.redef();
+    Assertions.assertEquals("test/src", dbg.getSrcDir().get(0));
+    Assertions.assertEquals("test/src", dbg2.getSrcDir().get(0));
+    Assertions.assertEquals("a", dbg.getSrcDir().get(1));
+    Assertions.assertEquals("a", dbg2.getSrcDir().get(1));
+    dbg2.run(1000);
+    dbg2.exit();
+  }
+
+  @Test
+  void printSrcTest() {
+    Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
+    dbg.setSrcDir("test/src", "a");
+    dbg.stopAt(bpln1);
+    dbg.run(1000);
+    dbg.list("src");
+    dbg.cont();
     dbg.exit();
   }
 }

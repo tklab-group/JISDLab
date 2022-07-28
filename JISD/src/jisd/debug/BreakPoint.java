@@ -232,9 +232,13 @@ public class BreakPoint extends Point {
           if (isBreak()) {
             if (bpm.isProcessing()) {
               bpm.completeStep();
-              DebuggerInfo.print("Step completed");
+              if (bpm.count == 1) {
+                DebuggerInfo.print("Step completed");
+              }
             }
-            bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
+            if (bpm.count == 1) {
+              bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
+            }
             bpm.setBreaked(true);
             if (isNotSuspended) {
               ThreadReference currentTRef = bpm.getCurrentTRef();
