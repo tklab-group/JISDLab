@@ -252,7 +252,7 @@ public class Debugger {
     step(1);
   }
 
-  /** Execute "step in"/"step into" */
+  /** Execute "step in"/"step into" multiple times */
   public void step(int times) {
     pm.requestStepInto(vmManager, times);
   }
@@ -262,8 +262,18 @@ public class Debugger {
     step();
   }
 
-  /** Execute "step in"/"step into" (alias of step()) */
+  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
   public void stepIn(int times) {
+    step(times);
+  }
+
+  /** Execute "step in"/"step into" (alias of step()) */
+  public void stepInto() {
+    step();
+  }
+
+  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
+  public void stepInto(int times) {
     step(times);
   }
 
@@ -272,17 +282,17 @@ public class Debugger {
     next(1);
   }
 
-  /** Execute "step in"/"step into" (alias of next()) */
+  /** Execute "step over" multiple times */
   public void next(int times) {
     pm.requestStepOver(vmManager, times);
   }
 
-  /** Execute "step in"/"step into" (alias of next()) */
+  /** Execute "step over" (alias of next()) */
   public void stepOver() {
     next();
   }
 
-  /** Execute "step in"/"step into" (alias of next()) */
+  /** Execute "step over" multiple times (alias of next(times)) */
   public void stepOver(int times) {
     next(times);
   }
@@ -292,18 +302,28 @@ public class Debugger {
     finish(1);
   }
 
-  /** Execute "step out"/"step return" */
+  /** Execute "step out"/"step return" multiple times */
   public void finish(int times) {
     pm.requestStepOut(vmManager, times);
   }
 
-  /** Execute "step in"/"step into" (alias of finish()) */
+  /** Execute "step out"/"step return" (alias of finish()) */
   public void stepOut() {
     finish();
   }
 
-  /** Execute "step in"/"step into" (alias of finish()) */
+  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
   public void stepOut(int times) {
+    finish(times);
+  }
+
+  /** Execute "step out"/"step return" (alias of finish()) */
+  public void stepReturn() {
+    finish();
+  }
+
+  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
+  public void stepReturn(int times) {
     finish(times);
   }
 
@@ -409,7 +429,20 @@ public class Debugger {
     run(sleepTime);
   }
 
-  /** Redefine the debugger so that the parameters are the same */
+  /** <div>Redefine the debugger so that the parameters are the same.</div>
+   *  <br>
+   * <div>Inherited parameters:
+   *   <ul>
+   *     <li> main </li>
+   *     <li> options </li>
+   *     <li> host </li>
+   *     <li> port </li>
+   *     <li> break or probe </li>
+   *     <li> srcDir </li>
+   *     <li> exporters </li>
+   *   </ul>
+   * </div>
+   * */
   public Debugger redef() {
     var dbg = new Debugger(main, options, host, port, isRemoteDebug, usesProbeJ);
     dbg.setSrcDir(srcDir.toArray(new String[0]));
