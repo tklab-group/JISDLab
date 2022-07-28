@@ -1,0 +1,18 @@
+{
+    "name": "exit_shutdown_the_debugger",
+    "display_name": "exit(): Shutdown the debugger",
+    "metadata": {
+        "tags": [
+            "Debugger",
+            "Start & Stop"
+        ],
+        "description": "Shutdown the debugger",
+        "display_name": "exit(): Shutdown the debugger",
+        "code": [
+            "dbg.exit();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/exit_shutdown_the_debugger.json"
+}

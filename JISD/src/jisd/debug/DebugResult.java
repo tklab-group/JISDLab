@@ -146,6 +146,15 @@ public class DebugResult {
     return values.getLast();
   }
 
+  /**
+   * Get the latest observed value (alias of getLatestValue())
+   *
+   * @return latest value
+   */
+  public ValueInfo lv() {
+    return getLatestValue();
+  }
+
   /** Set the max number of the variable expantion strata */
   public void setMaxNoOfExpand(int number) {
     if (number < 0) {

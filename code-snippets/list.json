@@ -1,0 +1,18 @@
+{
+    "name": "list",
+    "display_name": "list(): Show the source code",
+    "metadata": {
+        "tags": [
+            "Debugger",
+            "Operations at break"
+        ],
+        "description": "Show the source code",
+        "display_name": "list(): Show the source code",
+        "code": [
+            "dbg.list();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/list.json"
+}

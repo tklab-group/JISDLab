@@ -51,7 +51,7 @@ javadoc {
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.2.2'
+  archiveVersion = '0.2.3'
   exclude('.jisd_static_data*')
 }
 

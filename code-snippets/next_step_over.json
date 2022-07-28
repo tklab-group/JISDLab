@@ -1,0 +1,19 @@
+{
+    "name": "next_step_over",
+    "display_name": "stepOver(): Step over",
+    "metadata": {
+        "tags": [
+            "Debugger",
+            "Operations at break",
+            "Step"
+        ],
+        "description": "Step over",
+        "display_name": "stepOver(): Step over",
+        "code": [
+            "dbg.stepOver();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/next_step_over.json"
+}

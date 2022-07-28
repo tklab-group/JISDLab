@@ -1,0 +1,19 @@
+{
+    "name": "finish_step_out",
+    "display_name": "stepOut(): Step out",
+    "metadata": {
+        "tags": [
+            "Debugger",
+            "Operations at break",
+            "Step"
+        ],
+        "description": "Step out",
+        "display_name": "stepOut(): Step out",
+        "code": [
+            "dbg.stepOut();"
+        ],
+        "language": "Java"
+    },
+    "schema_name": "code-snippet",
+    "resource": "/root/.local/share/jupyter/metadata/code-snippets/finish_step_out.json"
+}

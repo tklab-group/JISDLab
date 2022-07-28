@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The JISDLab's main debugger.
@@ -36,6 +37,8 @@ public class Debugger {
   @Getter int port;
 
   @Getter @Setter String host;
+
+  @Getter List<String> srcDir = new ArrayList<String>();
 
   public Debugger(String main, String options) {
     this(main, options, false);
@@ -65,6 +68,15 @@ public class Debugger {
     init("", "", host, port, true, usesProbeJ);
   }
 
+  Debugger(String main,
+           String options,
+           String host,
+           int port,
+           boolean isRemoteDebug,
+           boolean usesProbeJ) {
+    init(main, options, host, port, isRemoteDebug, usesProbeJ);
+  }
+
   void init(
       String main,
       String options,
@@ -91,6 +103,10 @@ public class Debugger {
     } else {
       this.port = port;
     }
+  }
+
+  public void setSrcDir(String... paths) {
+    srcDir = Arrays.stream(paths).collect(Collectors.toList());
   }
 
   /**
@@ -233,20 +249,82 @@ public class Debugger {
 
   /** Execute "step in"/"step into" */
   public void step() {
-    pm.requestStepInto(vmManager);
-    sleep();
+    step(1);
+  }
+
+  /** Execute "step in"/"step into" multiple times */
+  public void step(int times) {
+    pm.requestStepInto(vmManager, times);
+  }
+
+  /** Execute "step in"/"step into" (alias of step()) */
+  public void stepIn() {
+    step();
+  }
+
+  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
+  public void stepIn(int times) {
+    step(times);
+  }
+
+  /** Execute "step in"/"step into" (alias of step()) */
+  public void stepInto() {
+    step();
+  }
+
+  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
+  public void stepInto(int times) {
+    step(times);
   }
 
   /** Execute "step over" */
   public void next() {
-    pm.requestStepOver(vmManager);
-    sleep();
+    next(1);
+  }
+
+  /** Execute "step over" multiple times */
+  public void next(int times) {
+    pm.requestStepOver(vmManager, times);
+  }
+
+  /** Execute "step over" (alias of next()) */
+  public void stepOver() {
+    next();
+  }
+
+  /** Execute "step over" multiple times (alias of next(times)) */
+  public void stepOver(int times) {
+    next(times);
   }
 
   /** Execute "step out"/"step return" */
   public void finish() {
-    pm.requestStepOut(vmManager);
-    sleep();
+    finish(1);
+  }
+
+  /** Execute "step out"/"step return" multiple times */
+  public void finish(int times) {
+    pm.requestStepOut(vmManager, times);
+  }
+
+  /** Execute "step out"/"step return" (alias of finish()) */
+  public void stepOut() {
+    finish();
+  }
+
+  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
+  public void stepOut(int times) {
+    finish(times);
+  }
+
+  /** Execute "step out"/"step return" (alias of finish()) */
+  public void stepReturn() {
+    finish();
+  }
+
+  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
+  public void stepReturn(int times) {
+    finish(times);
   }
 
   /** Continue execution from breakpoint */
@@ -257,6 +335,11 @@ public class Debugger {
 
   /** Print source code */
   public void list(String srcDir) {
+    pm.printSrcAtCurrentLocation("Current location,", new ArrayList<>(Arrays.asList(srcDir)));
+  }
+
+  /** Print source code */
+  public void list() {
     pm.printSrcAtCurrentLocation("Current location,", srcDir);
   }
 
@@ -316,17 +399,6 @@ public class Debugger {
     Utility.sleep(sleepTime);
   }
 
-  /** Sleep main thread until current bpm process is done */
-  void sleep() {
-    try {
-      while (pm.isProcessing) {
-        Thread.sleep(100);
-      }
-    } catch (InterruptedException e) {
-      DebuggerInfo.print("Interrupted.");
-    }
-  }
-
   /** Shutdown the debugger. */
   public void exit() {
     pm.completeStep();
@@ -355,6 +427,27 @@ public class Debugger {
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
     run(sleepTime);
+  }
+
+  /** <div>Redefine the debugger so that the parameters are the same.</div>
+   *  <br>
+   * <div>Inherited parameters:
+   *   <ul>
+   *     <li> main </li>
+   *     <li> options </li>
+   *     <li> host </li>
+   *     <li> port </li>
+   *     <li> break or probe </li>
+   *     <li> srcDir </li>
+   *     <li> exporters </li>
+   *   </ul>
+   * </div>
+   * */
+  public Debugger redef() {
+    var dbg = new Debugger(main, options, host, port, isRemoteDebug, usesProbeJ);
+    dbg.setSrcDir(srcDir.toArray(new String[0]));
+    exporters.stream().peek(e->dbg.setExporter(e)).collect(Collectors.toList());
+    return dbg;
   }
 
   /** Clear debug results all. */
