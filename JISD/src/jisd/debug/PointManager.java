@@ -508,6 +508,25 @@ class PointManager {
     }
   }
 
+  Location getCurrentLocation() {
+    if (!checkCurrentTRef()) {
+      return null;
+    }
+    try {
+      var currentLocation = currentTRef.frame(0).location();
+      int lineNumber = currentLocation.lineNumber();
+      String srcRelPath = currentLocation.sourcePath();
+      String className = Name.toClassNameFromSourcePath(srcRelPath);
+      String methodName = currentLocation.method().name();
+      Location loc = new Location(className, methodName, lineNumber, "");
+      return loc;
+    } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+  }
+
   /** Print stacktrace */
   void printStackTrace() {
     if (!checkCurrentTRef()) {
@@ -561,7 +580,7 @@ class PointManager {
     if (currentDebugResults == null) {
       currentDebugResults = createDebugResults();
     }
-    Utility.printDebugResults(currentDebugResults);
+    Utility.prints(currentDebugResults);
     return currentDebugResults;
   }
 }

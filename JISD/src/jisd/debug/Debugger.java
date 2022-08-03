@@ -422,6 +422,25 @@ public class Debugger {
     pm.printStackTrace();
   }
 
+  public Location loc() {
+    return pm.getCurrentLocation();
+  }
+
+  public String uri() {
+    var loc = loc();
+    var lineNumber = loc.lineNumber;
+    return uri(loc, lineNumber);
+  }
+
+  public String uri(Location loc, int lineNumber) {
+    return Utility.uri(loc, srcDir, lineNumber);
+  }
+
+  public String uri(int lineNumber) {
+    var loc = loc();
+    return Utility.uri(loc, srcDir, lineNumber);
+  }
+
   /** Remove breakpoint with a line number. */
   public void clear(int lineNumber) {
     clear(main, lineNumber);

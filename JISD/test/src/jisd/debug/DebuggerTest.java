@@ -259,7 +259,7 @@ public class DebuggerTest {
     dbg.stopAt(bpln3, varNames).get();
     dbg.run(1000);
     var drs = dbg.step();
-    Utility.printDebugResults(drs);
+    Utility.prints(drs);
     var drs2 = dbg.vars();
     dbg.finish();
     drs = dbg.next(15);
