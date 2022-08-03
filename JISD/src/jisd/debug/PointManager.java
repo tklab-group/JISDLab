@@ -28,10 +28,6 @@ class PointManager {
   /** points */
   private final Set<Point> ps = new HashSet<>();
 
-  private final Comparator<? super DebugResult> compDR =
-      Comparator.comparing(dr -> ((DebugResult) dr).getLocation().className)
-          .thenComparing(dr -> ((DebugResult) dr).getLocation().lineNumber)
-          .thenComparing(dr -> ((DebugResult) dr).getLocation().varName);
   /** Current Thread Reference */
   @Getter(AccessLevel.PACKAGE)
   @Setter(AccessLevel.PACKAGE)
@@ -535,7 +531,7 @@ class PointManager {
                     drs.add(value);
                   });
         });
-    drs.sort(compDR);
+    drs.sort(Utility.compDR);
     return drs;
   }
 
@@ -546,7 +542,7 @@ class PointManager {
                 .map(bp -> bp.getResults(varName))
                 .filter(res -> res.isPresent())
                 .map(res -> res.get())
-                .sorted(compDR)
+                .sorted(Utility.compDR)
                 .collect(Collectors.toList());
     return drs;
   }

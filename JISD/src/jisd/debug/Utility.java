@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -17,6 +18,11 @@ import java.util.stream.Collectors;
  * @author sugiyama
  */
 public class Utility {
+
+  static final Comparator<? super DebugResult> compDR =
+    Comparator.comparing(dr -> ((DebugResult) dr).getLocation().className)
+      .thenComparing(dr -> ((DebugResult) dr).getLocation().lineNumber)
+      .thenComparing(dr -> ((DebugResult) dr).getLocation().varName);
 
   /**
    * Execute external command.
@@ -108,6 +114,6 @@ public class Utility {
   }
 
   public static void printDebugResults(HashMap<String, DebugResult> drs) {
-    drs.entrySet().stream().peek(dr -> Print.out(dr.getValue().lv())).collect(Collectors.toList());
+    drs.entrySet().stream().map(strDrs -> strDrs.getValue()).sorted(compDR).peek(dr -> Print.out(dr.lv())).collect(Collectors.toList());
   }
 }
