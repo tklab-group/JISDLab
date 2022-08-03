@@ -6,10 +6,7 @@ import jisd.vis.IExporter;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -247,90 +244,160 @@ public class Debugger {
         usesProbeJ);
   }
 
-  /** Execute "step in"/"step into" */
-  public void step() {
-    step(1);
+  /**
+   * Execute "step in"/"step into"
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> step() {
+    return step(1);
   }
 
-  /** Execute "step in"/"step into" multiple times */
-  public void step(int times) {
-    pm.requestStepInto(vmManager, times);
+  /**
+   * Execute "step in"/"step into" multiple times
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> step(int times) {
+    return pm.requestStepInto(vmManager, times);
   }
 
-  /** Execute "step in"/"step into" (alias of step()) */
-  public void stepIn() {
-    step();
+  /**
+   * Execute "step in"/"step into" (alias of step())
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepIn() {
+    return step();
   }
 
-  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
-  public void stepIn(int times) {
-    step(times);
+  /**
+   * Execute "step in"/"step into" multiple times (alias of step(times))
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepIn(int times) {
+    return step(times);
   }
 
-  /** Execute "step in"/"step into" (alias of step()) */
-  public void stepInto() {
-    step();
+  /**
+   * Execute "step in"/"step into" (alias of step())
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepInto() {
+    return step();
   }
 
-  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
-  public void stepInto(int times) {
-    step(times);
+  /**
+   * Execute "step in"/"step into" multiple times (alias of step(times))
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepInto(int times) {
+    return step(times);
   }
 
-  /** Execute "step over" */
-  public void next() {
-    next(1);
+  /**
+   * Execute "step over"
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> next() {
+    return next(1);
   }
 
-  /** Execute "step over" multiple times */
-  public void next(int times) {
-    pm.requestStepOver(vmManager, times);
+  /**
+   * Execute "step over" multiple times
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> next(int times) {
+    return pm.requestStepOver(vmManager, times);
   }
 
-  /** Execute "step over" (alias of next()) */
-  public void stepOver() {
-    next();
+  /**
+   * Execute "step over" (alias of next())
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepOver() {
+    return next();
   }
 
-  /** Execute "step over" multiple times (alias of next(times)) */
-  public void stepOver(int times) {
-    next(times);
+  /**
+   * Execute "step over" multiple times (alias of next(times))
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepOver(int times) {
+    return next(times);
   }
 
-  /** Execute "step out"/"step return" */
-  public void finish() {
-    finish(1);
+  /**
+   * Execute "step out"/"step return"
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> finish() {
+    return finish(1);
   }
 
-  /** Execute "step out"/"step return" multiple times */
-  public void finish(int times) {
-    pm.requestStepOut(vmManager, times);
+  /**
+   * Execute "step out"/"step return" multiple times
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> finish(int times) {
+    return pm.requestStepOut(vmManager, times);
   }
 
-  /** Execute "step out"/"step return" (alias of finish()) */
-  public void stepOut() {
-    finish();
+  /**
+   * Execute "step out"/"step return" (alias of finish())
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepOut() {
+    return finish();
   }
 
-  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
-  public void stepOut(int times) {
-    finish(times);
+  /**
+   * Execute "step out"/"step return" multiple times (alias of finish(times))
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepOut(int times) {
+    return finish(times);
   }
 
-  /** Execute "step out"/"step return" (alias of finish()) */
-  public void stepReturn() {
-    finish();
+  /**
+   * Execute "step out"/"step return" (alias of finish())
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepReturn() {
+    return finish();
   }
 
-  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
-  public void stepReturn(int times) {
-    finish(times);
+  /**
+   * Execute "step out"/"step return" multiple times (alias of finish(times))
+   *
+   * @return
+   */
+  public HashMap<String, DebugResult> stepReturn(int times) {
+    return finish(times);
   }
 
   /** Continue execution from breakpoint */
   public void cont() {
+    cont(0);
+  }
+
+  /** Continue execution from breakpoint */
+  public void cont(int sleepTime) {
     pm.resumeThread();
     pm.setBreaked(false);
+    Utility.sleep(sleepTime);
   }
 
   /** Print source code */
@@ -347,6 +414,8 @@ public class Debugger {
   public void locals() {
     pm.printLocals();
   }
+
+  public HashMap<String, DebugResult> vars() {return pm.printDebugResults();}
 
   /** Print stacktrace in current stack frame. */
   public void where() {

@@ -15,6 +15,7 @@ import org.jdiscript.requests.ChainingStepRequest;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,8 @@ class PointManager {
   @Getter(AccessLevel.PACKAGE)
   @Setter(AccessLevel.PACKAGE)
   ThreadReference currentTRef;
+
+  HashMap<String, DebugResult> currentDebugResults;
   /** is processing now? */
   @Getter
   @Setter(AccessLevel.PACKAGE)
@@ -114,6 +117,7 @@ class PointManager {
     }
     currentTRef.resume();
     currentTRef = null;
+    currentDebugResults = null;
   }
 
   void completeStep() {
@@ -124,41 +128,101 @@ class PointManager {
     setProcessing(false);
   }
 
+  /** varNames and debug result */
+  HashMap<String, DebugResult> createDebugResults() {
+    HashMap<String, DebugResult> drs = new HashMap<>();
+    try {
+      var stackFrame = currentTRef.frame(0);
+      // search the breakpoint which caused this event.
+      var jLoc = stackFrame.location();
+      int bpLineNumber = jLoc.lineNumber();
+      String bpClassName = Name.toClassNameFromSourcePath(jLoc.sourcePath());
+      String bpMethodName = jLoc.method().name();
+      List<ReferenceType> rts = currentTRef.virtualMachine().classesByName(bpClassName);
+      var rt = rts.get(0);
+      var date = LocalDateTime.now();
+      // get variable data from target VM
+      List<LocalVariable> vars;
+      var obj = stackFrame.thisObject();
+      if (obj != null) {
+        obj.getValues(rt.visibleFields())
+          .forEach(
+            (f, v) -> {
+              String varName = "this." + f.name();
+              Location loc =
+                new Location(
+                  bpClassName, bpMethodName, bpLineNumber, varName);
+              var dr = new DebugResult(loc);
+              dr.addValue(v, date);
+              drs.put(varName, dr);
+            });
+      } else {
+        rt.allFields().stream()
+          .filter(f -> f.isStatic())
+          .forEach(
+            f -> {
+              String varName = "this." + f.name();
+              Location loc =
+                new Location(
+                  bpClassName, bpMethodName, bpLineNumber, varName);
+              var dr = new DebugResult(loc);
+              dr.addValue(rt.getValue(f), date);
+              drs.put(varName, dr);
+            });
+      }
+      vars = stackFrame.visibleVariables();
+      Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
+      // add debug result
+      for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
+        String varName = entry.getKey().name();
+        Value jValue = entry.getValue();
+        Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
+        var dr = new DebugResult(loc);
+        dr.addValue(jValue, date);
+        drs.put(varName, dr);
+      }
+    } catch (IncompatibleThreadStateException e) {
+      throw new RuntimeException(e);
+    } catch (AbsentInformationException e) {
+      throw new RuntimeException(e);
+    }
+    return drs;
+  }
+
   /**
    * request step execution
    *
    * @param depth depth of step
    */
-  void requestStep(VMManager vmMgr, int depth, int times) {
+  HashMap<String, DebugResult> requestStep(VMManager vmMgr, int depth, int times) {
     if (times <= 0) {
       Print.err("Negative number");
-      return;
+      return null;
     }
     /** A procedure on step. */
     if (!(vmMgr instanceof JDIManager)) {
       /* do nothing */
-      return;
+      return null;
     }
     for (; times > 0; times--) {
       if (!checkCurrentTRef()) {
         setCount(0);
-        return;
+        return null;
       }
       setCount(times);
       if (isProcessing) {
         completeStep();
       }
-
       JDIScript j = ((JDIManager) vmMgr).getJDI();
       int finalTimes = count;
       OnStep onStep =
         j.once(
           (s) -> {
-            completeStep();
             if (isBreaked) {
               if (finalTimes == 1) {
                 DebuggerInfo.print("Step completed");
               }
+              completeStep();
               return;
             }
             int lineNumber = s.location().lineNumber();
@@ -173,6 +237,7 @@ class PointManager {
             }
             currentTRef = s.thread();
             currentTRef.suspend();
+            completeStep();
           });
       try {
         stepReq =
@@ -184,9 +249,12 @@ class PointManager {
       isProcessing = true;
       boolean isBreakLoop = sleep(j);
       if (isBreakLoop) {
-        break;
+        return null;
       }
     }
+    var drs = createDebugResults();
+    currentDebugResults = drs;
+    return drs;
   }
 
   /** Sleep main thread until current bpm process is done */
@@ -202,19 +270,31 @@ class PointManager {
     return false;
   }
 
-  /** request step into execution */
-  void requestStepInto(VMManager vm, int times) {
-    requestStep(vm, StepRequest.STEP_INTO, times);
+  /**
+   * request step into execution
+   *
+   * @return
+   */
+  HashMap<String, DebugResult> requestStepInto(VMManager vm, int times) {
+    return requestStep(vm, StepRequest.STEP_INTO, times);
   }
 
-  /** request step over execution */
-  void requestStepOver(VMManager vm, int times) {
-    requestStep(vm, StepRequest.STEP_OVER, times);
+  /**
+   * request step over execution
+   *
+   * @return
+   */
+  HashMap<String, DebugResult> requestStepOver(VMManager vm, int times) {
+    return requestStep(vm, StepRequest.STEP_OVER, times);
   }
 
-  /** request step out execution */
-  void requestStepOut(VMManager vm, int times) {
-    requestStep(vm, StepRequest.STEP_OUT, times);
+  /**
+   * request step out execution
+   *
+   * @return
+   */
+  HashMap<String, DebugResult> requestStepOut(VMManager vm, int times) {
+    return requestStep(vm, StepRequest.STEP_OUT, times);
   }
 
   /** Request VM to set a point */
@@ -476,5 +556,16 @@ class PointManager {
       return null;
     }
     return currentTRef;
+  }
+
+  HashMap<String, DebugResult> printDebugResults() {
+    if (!checkCurrentTRef()) {
+      return new HashMap<>();
+    }
+    if (currentDebugResults == null) {
+      currentDebugResults = createDebugResults();
+    }
+    Utility.printDebugResults(currentDebugResults);
+    return currentDebugResults;
   }
 }

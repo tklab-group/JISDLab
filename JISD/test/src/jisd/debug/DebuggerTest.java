@@ -258,15 +258,17 @@ public class DebuggerTest {
     dbg.stopAt(bpln2, varNames).get();
     dbg.stopAt(bpln3, varNames).get();
     dbg.run(1000);
-    dbg.step();
+    var drs = dbg.step();
+    Utility.printDebugResults(drs);
+    var drs2 = dbg.vars();
     dbg.finish();
-    dbg.next(15);
+    drs = dbg.next(15);
     dbg.locals();
     dbg.getResults()
         .forEach(
             (r) -> {
               var loc = r.getLocation();
-              System.out.println(loc.getLineNumber() + ": " + loc.getVarName());
+              Print.out(loc.getLineNumber() + ": " + loc.getVarName());
             });
     dbg.exit();
   }

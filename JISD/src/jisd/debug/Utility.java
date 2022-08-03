@@ -1,11 +1,15 @@
 package jisd.debug;
 
+import jisd.util.Print;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Provides debug utility.
@@ -101,5 +105,9 @@ public class Utility {
     } catch (InterruptedException e) {
       DebuggerInfo.print("Interrupted.");
     }
+  }
+
+  public static void printDebugResults(HashMap<String, DebugResult> drs) {
+    drs.entrySet().stream().peek(dr -> Print.out(dr.getValue().lv())).collect(Collectors.toList());
   }
 }
