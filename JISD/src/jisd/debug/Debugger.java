@@ -401,13 +401,15 @@ public class Debugger {
   }
 
   /** Print source code */
-  public void list(String srcDir) {
+  public String list(String srcDir) {
     pm.printSrcAtCurrentLocation("Current location,", new ArrayList<>(Arrays.asList(srcDir)));
+    return uri();
   }
 
   /** Print source code */
-  public void list() {
+  public String list() {
     pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    return uri();
   }
 
   /** Print all local variables in current stack frame */
