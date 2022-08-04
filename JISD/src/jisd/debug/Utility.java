@@ -142,7 +142,7 @@ public class Utility {
       var srcAbsPath = Paths.get(srcAbsPathStr);
       if (Files.exists(srcAbsPath)) {
         String text = srcAbsPathStr+"#L"+lineNumber;
-        String path = srcAbsPathStr.replaceFirst(vscodeWorkspaceDir, "./")+"#L"+lineNumber;
+        String path = srcAbsPathStr.replaceFirst(vscodeWorkspaceDir, "/")+"#L"+lineNumber;
         return uri(text, path);
       }
     }
