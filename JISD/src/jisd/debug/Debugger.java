@@ -1,6 +1,7 @@
 package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
+import com.sun.jdi.VMDisconnectedException;
 import jisd.debug.value.ValueInfo;
 import jisd.vis.IExporter;
 import lombok.Getter;
@@ -89,7 +90,6 @@ public class Debugger {
     this.isRemoteDebug = isRemoteDebug;
     pm = new PointManager();
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
-    vmManager.prepareStart(pm);
   }
 
   public void setPort(int port) {
@@ -249,7 +249,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> step() {
+  public String step() {
     return step(1);
   }
 
@@ -258,8 +258,9 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> step(int times) {
-    return pm.requestStepInto(vmManager, times);
+  public String step(int times) {
+    pm.requestStepInto(vmManager, times);
+    return list();
   }
 
   /**
@@ -267,7 +268,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepIn() {
+  public String stepIn() {
     return step();
   }
 
@@ -276,7 +277,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepIn(int times) {
+  public String stepIn(int times) {
     return step(times);
   }
 
@@ -285,7 +286,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepInto() {
+  public String stepInto() {
     return step();
   }
 
@@ -294,7 +295,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepInto(int times) {
+  public String stepInto(int times) {
     return step(times);
   }
 
@@ -303,7 +304,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> next() {
+  public String next() {
     return next(1);
   }
 
@@ -312,8 +313,9 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> next(int times) {
-    return pm.requestStepOver(vmManager, times);
+  public String next(int times) {
+    pm.requestStepOver(vmManager, times);
+    return list();
   }
 
   /**
@@ -321,7 +323,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepOver() {
+  public String stepOver() {
     return next();
   }
 
@@ -330,7 +332,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepOver(int times) {
+  public String stepOver(int times) {
     return next(times);
   }
 
@@ -339,7 +341,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> finish() {
+  public String finish() {
     return finish(1);
   }
 
@@ -348,8 +350,9 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> finish(int times) {
-    return pm.requestStepOut(vmManager, times);
+  public String finish(int times) {
+    pm.requestStepOut(vmManager, times);
+    return list();
   }
 
   /**
@@ -357,7 +360,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepOut() {
+  public String stepOut() {
     return finish();
   }
 
@@ -366,7 +369,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepOut(int times) {
+  public String stepOut(int times) {
     return finish(times);
   }
 
@@ -375,7 +378,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepReturn() {
+  public String stepReturn() {
     return finish();
   }
 
@@ -384,7 +387,7 @@ public class Debugger {
    *
    * @return
    */
-  public HashMap<String, DebugResult> stepReturn(int times) {
+  public String stepReturn(int times) {
     return finish(times);
   }
 
@@ -394,10 +397,19 @@ public class Debugger {
   }
 
   /** Continue execution from breakpoint */
-  public void cont(int sleepTime) {
+  public String cont(int sleepTime) {
     pm.resumeThread();
     pm.setBreaked(false);
+    if (sleepTime == 0) {
+      return "";
+    }
     Utility.sleep(sleepTime);
+    try {
+      pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    } catch (VMNotSuspendedException e) {
+      return "";
+    }
+    return uri();
   }
 
   /** Print source code */
@@ -408,7 +420,12 @@ public class Debugger {
 
   /** Print source code */
   public String list() {
-    pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    try {
+      pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    } catch (VMNotSuspendedException e) {
+      DebuggerInfo.printError("Debugger not suspended");
+      return "";
+    }
     return uri();
   }
 
@@ -417,27 +434,40 @@ public class Debugger {
     pm.printLocals();
   }
 
-  public HashMap<String, DebugResult> vars() {return pm.printDebugResults();}
+  /** Print all variables in current stack frame */
+  public void vars() { pm.printDebugResults(); }
+
+  /** Get DebugResults at the current location (alias of getCurrentDebugResults()) */
+  public HashMap<String, DebugResult> drs() {
+    return getCurrentDebugResults();
+  }
+
+  /** Get DebugResults at the current location */
+  public HashMap<String, DebugResult> getCurrentDebugResults() {return pm.printDebugResults();}
 
   /** Print stacktrace in current stack frame. */
   public void where() {
     pm.printStackTrace();
   }
 
+  /** Return a current file location. */
   public Location loc() {
     return pm.getCurrentLocation();
   }
 
+  /** Return a string which represents the current file location by VSCode-like format. */
   public String uri() {
     var loc = loc();
     var lineNumber = loc.lineNumber;
     return uri(loc, lineNumber);
   }
 
+  /** Return a string which represents the current file location by VSCode-like format. */
   public String uri(Location loc, int lineNumber) {
     return Utility.uri(loc, srcDir, lineNumber);
   }
 
+  /** Return current file location by VSCode-like format. */
   public String uri(int lineNumber) {
     var loc = loc();
     return Utility.uri(loc, srcDir, lineNumber);
@@ -477,7 +507,7 @@ public class Debugger {
    *
    * @param sleepTime Wait time after the debugger starts running
    */
-  public void run(int sleepTime) {
+  public String run(int sleepTime) {
     if (vmThread != null) {
       throw new VMAlreadyStartedException("VM has already started once.");
     }
@@ -486,13 +516,26 @@ public class Debugger {
     if (!isRemoteDebug && usesProbeJ) {
       Utility.sleep(1000);
     }
+    if (sleepTime == 0) {
+      return "";
+    }
     Utility.sleep(sleepTime);
+    try {
+      pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    } catch (VMNotSuspendedException e) {
+      return "";
+    }
+    return uri();
   }
 
   /** Shutdown the debugger. */
   public void exit() {
     pm.completeStep();
-    vmManager.shutdown();
+    try {
+      vmManager.shutdown();
+    } catch (VMDisconnectedException e) {
+      // do nothing
+    }
     vmThread = null;
   }
 
@@ -507,19 +550,19 @@ public class Debugger {
   }
 
   /**
-   * Restart the debugger.
+   * Restart the debugger (breakpoints inherited).
    *
    * @param sleepTime Wait time after the debugger starts running
    */
-  public void restart(int sleepTime) {
+  public String restart(int sleepTime) {
     exit();
     clearResults();
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
-    run(sleepTime);
+    return run(sleepTime);
   }
 
-  /** <div>Redefine the debugger so that the parameters are the same.</div>
+  /** <div>Redefine the debugger so that the parameters are the same (breakpoints <strong>NOT</strong> inherited).</div>
    *  <br>
    * <div>Inherited parameters:
    *   <ul>

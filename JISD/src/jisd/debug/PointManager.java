@@ -190,20 +190,20 @@ class PointManager {
    *
    * @param depth depth of step
    */
-  HashMap<String, DebugResult> requestStep(VMManager vmMgr, int depth, int times) {
+ void requestStep(VMManager vmMgr, int depth, int times) {
     if (times <= 0) {
       Print.err("Negative number");
-      return null;
+      return;
     }
     /** A procedure on step. */
     if (!(vmMgr instanceof JDIManager)) {
       /* do nothing */
-      return null;
+      return;
     }
     for (; times > 0; times--) {
       if (!checkCurrentTRef()) {
         setCount(0);
-        return null;
+        return;
       }
       setCount(times);
       if (isProcessing) {
@@ -245,12 +245,9 @@ class PointManager {
       isProcessing = true;
       boolean isBreakLoop = sleep(j);
       if (isBreakLoop) {
-        return null;
+        return;
       }
     }
-    var drs = createDebugResults();
-    currentDebugResults = drs;
-    return drs;
   }
 
   /** Sleep main thread until current bpm process is done */
@@ -271,8 +268,8 @@ class PointManager {
    *
    * @return
    */
-  HashMap<String, DebugResult> requestStepInto(VMManager vm, int times) {
-    return requestStep(vm, StepRequest.STEP_INTO, times);
+  void requestStepInto(VMManager vm, int times) {
+    requestStep(vm, StepRequest.STEP_INTO, times);
   }
 
   /**
@@ -280,8 +277,8 @@ class PointManager {
    *
    * @return
    */
-  HashMap<String, DebugResult> requestStepOver(VMManager vm, int times) {
-    return requestStep(vm, StepRequest.STEP_OVER, times);
+  void requestStepOver(VMManager vm, int times) {
+    requestStep(vm, StepRequest.STEP_OVER, times);
   }
 
   /**
@@ -289,8 +286,8 @@ class PointManager {
    *
    * @return
    */
-  HashMap<String, DebugResult> requestStepOut(VMManager vm, int times) {
-    return requestStep(vm, StepRequest.STEP_OUT, times);
+  void requestStepOut(VMManager vm, int times) {
+    requestStep(vm, StepRequest.STEP_OUT, times);
   }
 
   /** Request VM to set a point */
@@ -451,9 +448,9 @@ class PointManager {
    * @param prefix print reason
    * @param srcDirs source directory
    */
-  void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) {
+  void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) throws VMNotSuspendedException {
     if (!checkCurrentTRef()) {
-      return;
+      throw new VMNotSuspendedException("");
     }
     srcDirs.add(".");
     try {
@@ -473,7 +470,7 @@ class PointManager {
         }
       }
       DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by list(String srcDir) or Debugger.setSrcDir(String... srcDir))");
-    } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+    } catch (IncompatibleThreadStateException | AbsentInformationException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }

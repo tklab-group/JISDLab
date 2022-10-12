@@ -107,24 +107,7 @@ public class DebuggerTest {
     }
   }
 
-  @Test
-  void debuggerRestartTest() {
-    Debugger dbg = makeDebugger();
-    int sleepTime = 1000;
-    dbg.run(sleepTime);
-    ArrayList<DebugResult> results = dbg.getResults();
-    assertEquals(results.size(), 8);
-    for (int i = 0; i < results.size(); i++) {
-      DebugResult res = results.get(i);
-      assertEquals(res.getLocation().getLineNumber(), bps.get(i / 4));
-    }
-    dbg.clear(bpln2);
-    assertEquals(dbg.getPoints().size(), 1);
-    dbg.restart(sleepTime);
-    results = dbg.getResults();
-    assertEquals(results.size(), 4);
-    dbg.exit();
-  }
+
 
   @Test
   void vmConnectionTest() {
@@ -258,11 +241,14 @@ public class DebuggerTest {
     dbg.stopAt(bpln2, varNames).get();
     dbg.stopAt(bpln3, varNames).get();
     dbg.run(1000);
-    var drs = dbg.step();
+    dbg.step();
+    var drs = dbg.drs();
     Utility.prints(drs);
-    var drs2 = dbg.vars();
+    dbg.vars();
+    var drs2 = dbg.drs();
     dbg.finish();
-    drs = dbg.next(15);
+    dbg.next(15);
+    drs = dbg.drs();
     dbg.locals();
     dbg.getResults()
         .forEach(
@@ -292,9 +278,24 @@ public class DebuggerTest {
   }
 
   @Test
+  void restartTest() {
+    Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
+    dbg.stopAt(bpln1);
+    dbg.run(1000);
+    dbg.exit();
+    // restart() after exit()
+    dbg.restart(1000);
+    dbg.stopAt(bpln2);
+    // restart() after run()
+    dbg.restart(1000);
+    dbg.stopAt(bpln3);
+    dbg.exit();
+  }
+
+  @Test
   void redefTest() {
     Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
-    dbg.setSrcDir("test/src", "a");
+    dbg.setSrcDir("test/src");
     var dbg2 = dbg.redef();
     Assertions.assertEquals("test/src", dbg.getSrcDir().get(0));
     Assertions.assertEquals("test/src", dbg2.getSrcDir().get(0));
