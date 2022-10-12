@@ -19,6 +19,9 @@ public class Debugger {
   /** Manage points */
   PointManager pm;
 
+  /** Default sleep time when executes run()/cont()/restart() */
+  @Getter @Setter public static int defaultSleepTime = 0;
+
   @Getter @Setter String main, options;
   /** VM thread */
   Thread vmThread;
@@ -392,8 +395,8 @@ public class Debugger {
   }
 
   /** Continue execution from breakpoint */
-  public void cont() {
-    cont(0);
+  public String cont() {
+    return cont(defaultSleepTime);
   }
 
   /** Continue execution from breakpoint */
@@ -498,8 +501,8 @@ public class Debugger {
   }
 
   /** Start up the debugger.(equals to run(0)) */
-  public void run() {
-    run(0);
+  public String run() {
+    return run(defaultSleepTime);
   }
 
   /**
@@ -545,8 +548,8 @@ public class Debugger {
   }
 
   /** Restart the debugger at once.(equals to restart(0)) */
-  public void restart() {
-    restart(0);
+  public String restart() {
+    return restart(defaultSleepTime);
   }
 
   /**

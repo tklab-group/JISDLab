@@ -332,4 +332,14 @@ public class DebuggerTest {
     dbg.cont();
     dbg.exit();
   }
+
+  @Test
+  void defaultSleepTimeTest() {
+    Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
+    dbg.setSrcDir("src");
+    dbg.stopAt(bpln1);
+    Debugger.setDefaultSleepTime(1000);
+    Assertions.assertNotEquals("", dbg.run());
+  }
+
 }
