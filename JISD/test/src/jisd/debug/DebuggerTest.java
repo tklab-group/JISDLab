@@ -306,6 +306,23 @@ public class DebuggerTest {
   }
 
   @Test
+  void resetTest() {
+    Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
+    dbg.stopAt(bpln1);
+    dbg.run(1000);
+    dbg.exit();
+    // reset() after exit()
+    dbg.reset();
+    dbg.stopAt(bpln2);
+    dbg.run(1000);
+    // reset() after run()
+    dbg.reset();
+    dbg.stopAt(bpln3);
+    dbg.run(1000);
+    dbg.exit();
+  }
+
+  @Test
   void printSrcTest() {
     Debugger dbg = new Debugger("jisd.demo.HelloWorld", "-cp bin");
     dbg.setSrcDir("test/src", "a");
