@@ -236,7 +236,7 @@ public class BreakPoint extends Point {
                 DebuggerInfo.print("Step completed");
               }
             }
-            if (bpm.count == 1) {
+            if (bpm.count == 1 || bpm.count == 0) {
               bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
             }
             bpm.setBreaked(true);
