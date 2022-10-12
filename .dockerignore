@@ -1,16 +1,12 @@
-.git/
-debugspace/
 docs/
 javadoc/
 out/
 .gitattributes
 .gitignore
-.gitmodules
 CODE_OF_CONDUCT.md
 CONTRIBUTING.md
 easy-setup.md
 LICENSE
 README.md
-JISDVis/
 Dockerfile
 docker-compose.yaml

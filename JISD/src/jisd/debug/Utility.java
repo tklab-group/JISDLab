@@ -1,11 +1,15 @@
 package jisd.debug;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Optional;
+import jisd.util.Name;
+import jisd.util.Print;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides debug utility.
@@ -13,6 +17,13 @@ import java.util.Optional;
  * @author sugiyama
  */
 public class Utility {
+
+  @Getter @Setter
+  public static String vscodeWorkspaceDir = "";
+  static final Comparator<? super DebugResult> compDR =
+    Comparator.comparing(dr -> ((DebugResult) dr).getLocation().className)
+      .thenComparing(dr -> ((DebugResult) dr).getLocation().lineNumber)
+      .thenComparing(dr -> ((DebugResult) dr).getLocation().varName);
 
   /**
    * Execute external command.
@@ -86,6 +97,11 @@ public class Utility {
   }
 
   /** Alias of System.out.println(). */
+  public static void print(Object o) {
+    System.out.print(o);
+  }
+
+  /** Alias of System.out.println(). */
   public static void println(Object o) {
     System.out.println(o);
   }
@@ -101,5 +117,36 @@ public class Utility {
     } catch (InterruptedException e) {
       DebuggerInfo.print("Interrupted.");
     }
+  }
+
+  public static void prints(HashMap<String, DebugResult> drs) {
+    drs.entrySet().stream().map(strDrs -> strDrs.getValue()).sorted(compDR).peek(dr -> Print.out(dr.lv())).collect(Collectors.toList());
+  }
+
+  public static String uri(String text, String path) {
+    return "["+text+"]("+path+")";
+  }
+
+  public static String uri(Location loc, List<String> srcDirs) {
+    var lineNumber = loc.lineNumber;
+    return uri(loc, srcDirs, lineNumber);
+  }
+
+  public static String uri(Location loc, List<String> srcDirs, int lineNumber) {
+
+    var srcRelPath = Name.toSourcePathFromClassName(loc.className);
+    srcDirs.add(".");
+    for (int i = 0; i < srcDirs.size(); i++) {
+      var srcDir = srcDirs.get(i);
+      var srcAbsPathStr = srcDir + File.separator.charAt(0) + srcRelPath;
+      var srcAbsPath = Paths.get(srcAbsPathStr);
+      if (Files.exists(srcAbsPath)) {
+        String text = srcAbsPathStr+"#L"+lineNumber;
+        String path = srcAbsPathStr.replaceFirst(vscodeWorkspaceDir, "/")+"#L"+lineNumber;
+        return uri(text, path);
+      }
+    }
+    DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by Debugger.setSrcDir(String... srcDir))");
+    return null;
   }
 }

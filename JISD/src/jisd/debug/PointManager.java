@@ -15,6 +15,7 @@ import org.jdiscript.requests.ChainingStepRequest;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,14 +28,12 @@ class PointManager {
   /** points */
   private final Set<Point> ps = new HashSet<>();
 
-  private final Comparator<? super DebugResult> compDR =
-      Comparator.comparing(dr -> ((DebugResult) dr).getLocation().className)
-          .thenComparing(dr -> ((DebugResult) dr).getLocation().lineNumber)
-          .thenComparing(dr -> ((DebugResult) dr).getLocation().varName);
   /** Current Thread Reference */
   @Getter(AccessLevel.PACKAGE)
   @Setter(AccessLevel.PACKAGE)
   ThreadReference currentTRef;
+
+  HashMap<String, DebugResult> currentDebugResults;
   /** is processing now? */
   @Getter
   @Setter(AccessLevel.PACKAGE)
@@ -114,6 +113,7 @@ class PointManager {
     }
     currentTRef.resume();
     currentTRef = null;
+    currentDebugResults = null;
   }
 
   void completeStep() {
@@ -124,12 +124,73 @@ class PointManager {
     setProcessing(false);
   }
 
+  /** varNames and debug result */
+  HashMap<String, DebugResult> createDebugResults() {
+    HashMap<String, DebugResult> drs = new HashMap<>();
+    try {
+      var stackFrame = currentTRef.frame(0);
+      // search the breakpoint which caused this event.
+      var jLoc = stackFrame.location();
+      int bpLineNumber = jLoc.lineNumber();
+      String bpClassName = Name.toClassNameFromSourcePath(jLoc.sourcePath());
+      String bpMethodName = jLoc.method().name();
+      List<ReferenceType> rts = currentTRef.virtualMachine().classesByName(bpClassName);
+      var rt = rts.get(0);
+      var date = LocalDateTime.now();
+      // get variable data from target VM
+      List<LocalVariable> vars;
+      var obj = stackFrame.thisObject();
+      if (obj != null) {
+        obj.getValues(rt.visibleFields())
+          .forEach(
+            (f, v) -> {
+              String varName = "this." + f.name();
+              Location loc =
+                new Location(
+                  bpClassName, bpMethodName, bpLineNumber, varName);
+              var dr = new DebugResult(loc);
+              dr.addValue(v, date);
+              drs.put(varName, dr);
+            });
+      } else {
+        rt.allFields().stream()
+          .filter(f -> f.isStatic())
+          .forEach(
+            f -> {
+              String varName = "this." + f.name();
+              Location loc =
+                new Location(
+                  bpClassName, bpMethodName, bpLineNumber, varName);
+              var dr = new DebugResult(loc);
+              dr.addValue(rt.getValue(f), date);
+              drs.put(varName, dr);
+            });
+      }
+      vars = stackFrame.visibleVariables();
+      Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
+      // add debug result
+      for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
+        String varName = entry.getKey().name();
+        Value jValue = entry.getValue();
+        Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
+        var dr = new DebugResult(loc);
+        dr.addValue(jValue, date);
+        drs.put(varName, dr);
+      }
+    } catch (IncompatibleThreadStateException e) {
+      throw new RuntimeException(e);
+    } catch (AbsentInformationException e) {
+      throw new RuntimeException(e);
+    }
+    return drs;
+  }
+
   /**
    * request step execution
    *
    * @param depth depth of step
    */
-  void requestStep(VMManager vmMgr, int depth, int times) {
+ void requestStep(VMManager vmMgr, int depth, int times) {
     if (times <= 0) {
       Print.err("Negative number");
       return;
@@ -148,17 +209,16 @@ class PointManager {
       if (isProcessing) {
         completeStep();
       }
-
       JDIScript j = ((JDIManager) vmMgr).getJDI();
       int finalTimes = count;
       OnStep onStep =
         j.once(
           (s) -> {
-            completeStep();
             if (isBreaked) {
               if (finalTimes == 1) {
                 DebuggerInfo.print("Step completed");
               }
+              completeStep();
               return;
             }
             int lineNumber = s.location().lineNumber();
@@ -173,6 +233,7 @@ class PointManager {
             }
             currentTRef = s.thread();
             currentTRef.suspend();
+            completeStep();
           });
       try {
         stepReq =
@@ -184,7 +245,7 @@ class PointManager {
       isProcessing = true;
       boolean isBreakLoop = sleep(j);
       if (isBreakLoop) {
-        break;
+        return;
       }
     }
   }
@@ -202,17 +263,29 @@ class PointManager {
     return false;
   }
 
-  /** request step into execution */
+  /**
+   * request step into execution
+   *
+   * @return
+   */
   void requestStepInto(VMManager vm, int times) {
     requestStep(vm, StepRequest.STEP_INTO, times);
   }
 
-  /** request step over execution */
+  /**
+   * request step over execution
+   *
+   * @return
+   */
   void requestStepOver(VMManager vm, int times) {
     requestStep(vm, StepRequest.STEP_OVER, times);
   }
 
-  /** request step out execution */
+  /**
+   * request step out execution
+   *
+   * @return
+   */
   void requestStepOut(VMManager vm, int times) {
     requestStep(vm, StepRequest.STEP_OUT, times);
   }
@@ -375,9 +448,9 @@ class PointManager {
    * @param prefix print reason
    * @param srcDirs source directory
    */
-  void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) {
+  void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) throws VMNotSuspendedException {
     if (!checkCurrentTRef()) {
-      return;
+      throw new VMNotSuspendedException("");
     }
     srcDirs.add(".");
     try {
@@ -397,7 +470,7 @@ class PointManager {
         }
       }
       DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by list(String srcDir) or Debugger.setSrcDir(String... srcDir))");
-    } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+    } catch (IncompatibleThreadStateException | AbsentInformationException e ) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
@@ -432,6 +505,25 @@ class PointManager {
     }
   }
 
+  Location getCurrentLocation() {
+    if (!checkCurrentTRef()) {
+      return null;
+    }
+    try {
+      var currentLocation = currentTRef.frame(0).location();
+      int lineNumber = currentLocation.lineNumber();
+      String srcRelPath = currentLocation.sourcePath();
+      String className = Name.toClassNameFromSourcePath(srcRelPath);
+      String methodName = currentLocation.method().name();
+      Location loc = new Location(className, methodName, lineNumber, "");
+      return loc;
+    } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return null;
+  }
+
   /** Print stacktrace */
   void printStackTrace() {
     if (!checkCurrentTRef()) {
@@ -455,7 +547,7 @@ class PointManager {
                     drs.add(value);
                   });
         });
-    drs.sort(compDR);
+    drs.sort(Utility.compDR);
     return drs;
   }
 
@@ -466,7 +558,7 @@ class PointManager {
                 .map(bp -> bp.getResults(varName))
                 .filter(res -> res.isPresent())
                 .map(res -> res.get())
-                .sorted(compDR)
+                .sorted(Utility.compDR)
                 .collect(Collectors.toList());
     return drs;
   }
@@ -476,5 +568,16 @@ class PointManager {
       return null;
     }
     return currentTRef;
+  }
+
+  HashMap<String, DebugResult> printDebugResults() {
+    if (!checkCurrentTRef()) {
+      return new HashMap<>();
+    }
+    if (currentDebugResults == null) {
+      currentDebugResults = createDebugResults();
+    }
+    Utility.prints(currentDebugResults);
+    return currentDebugResults;
   }
 }

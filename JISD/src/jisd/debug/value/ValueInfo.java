@@ -116,7 +116,7 @@ public abstract class ValueInfo {
 
   @Override
   public String toString() {
-    return name + "=" + value + "\n";
+    return name + "=" + value;
   }
 
   /**

@@ -1,15 +1,13 @@
 package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
+import com.sun.jdi.VMDisconnectedException;
 import jisd.debug.value.ValueInfo;
 import jisd.vis.IExporter;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +18,9 @@ import java.util.stream.Collectors;
 public class Debugger {
   /** Manage points */
   PointManager pm;
+
+  /** Default sleep time when executes run()/cont()/restart() */
+  @Getter @Setter public static int defaultSleepTime = 0;
 
   @Getter @Setter String main, options;
   /** VM thread */
@@ -92,7 +93,6 @@ public class Debugger {
     this.isRemoteDebug = isRemoteDebug;
     pm = new PointManager();
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
-    vmManager.prepareStart(pm);
   }
 
   public void setPort(int port) {
@@ -247,100 +247,189 @@ public class Debugger {
         usesProbeJ);
   }
 
-  /** Execute "step in"/"step into" */
-  public void step() {
-    step(1);
+  /**
+   * Execute "step in"/"step into"
+   *
+   * @return
+   */
+  public String step() {
+    return step(1);
   }
 
-  /** Execute "step in"/"step into" multiple times */
-  public void step(int times) {
+  /**
+   * Execute "step in"/"step into" multiple times
+   *
+   * @return
+   */
+  public String step(int times) {
     pm.requestStepInto(vmManager, times);
+    return list();
   }
 
-  /** Execute "step in"/"step into" (alias of step()) */
-  public void stepIn() {
-    step();
+  /**
+   * Execute "step in"/"step into" (alias of step())
+   *
+   * @return
+   */
+  public String stepIn() {
+    return step();
   }
 
-  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
-  public void stepIn(int times) {
-    step(times);
+  /**
+   * Execute "step in"/"step into" multiple times (alias of step(times))
+   *
+   * @return
+   */
+  public String stepIn(int times) {
+    return step(times);
   }
 
-  /** Execute "step in"/"step into" (alias of step()) */
-  public void stepInto() {
-    step();
+  /**
+   * Execute "step in"/"step into" (alias of step())
+   *
+   * @return
+   */
+  public String stepInto() {
+    return step();
   }
 
-  /** Execute "step in"/"step into" multiple times (alias of step(times)) */
-  public void stepInto(int times) {
-    step(times);
+  /**
+   * Execute "step in"/"step into" multiple times (alias of step(times))
+   *
+   * @return
+   */
+  public String stepInto(int times) {
+    return step(times);
   }
 
-  /** Execute "step over" */
-  public void next() {
-    next(1);
+  /**
+   * Execute "step over"
+   *
+   * @return
+   */
+  public String next() {
+    return next(1);
   }
 
-  /** Execute "step over" multiple times */
-  public void next(int times) {
+  /**
+   * Execute "step over" multiple times
+   *
+   * @return
+   */
+  public String next(int times) {
     pm.requestStepOver(vmManager, times);
+    return list();
   }
 
-  /** Execute "step over" (alias of next()) */
-  public void stepOver() {
-    next();
+  /**
+   * Execute "step over" (alias of next())
+   *
+   * @return
+   */
+  public String stepOver() {
+    return next();
   }
 
-  /** Execute "step over" multiple times (alias of next(times)) */
-  public void stepOver(int times) {
-    next(times);
+  /**
+   * Execute "step over" multiple times (alias of next(times))
+   *
+   * @return
+   */
+  public String stepOver(int times) {
+    return next(times);
   }
 
-  /** Execute "step out"/"step return" */
-  public void finish() {
-    finish(1);
+  /**
+   * Execute "step out"/"step return"
+   *
+   * @return
+   */
+  public String finish() {
+    return finish(1);
   }
 
-  /** Execute "step out"/"step return" multiple times */
-  public void finish(int times) {
+  /**
+   * Execute "step out"/"step return" multiple times
+   *
+   * @return
+   */
+  public String finish(int times) {
     pm.requestStepOut(vmManager, times);
+    return list();
   }
 
-  /** Execute "step out"/"step return" (alias of finish()) */
-  public void stepOut() {
-    finish();
+  /**
+   * Execute "step out"/"step return" (alias of finish())
+   *
+   * @return
+   */
+  public String stepOut() {
+    return finish();
   }
 
-  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
-  public void stepOut(int times) {
-    finish(times);
+  /**
+   * Execute "step out"/"step return" multiple times (alias of finish(times))
+   *
+   * @return
+   */
+  public String stepOut(int times) {
+    return finish(times);
   }
 
-  /** Execute "step out"/"step return" (alias of finish()) */
-  public void stepReturn() {
-    finish();
+  /**
+   * Execute "step out"/"step return" (alias of finish())
+   *
+   * @return
+   */
+  public String stepReturn() {
+    return finish();
   }
 
-  /** Execute "step out"/"step return" multiple times (alias of finish(times)) */
-  public void stepReturn(int times) {
-    finish(times);
+  /**
+   * Execute "step out"/"step return" multiple times (alias of finish(times))
+   *
+   * @return
+   */
+  public String stepReturn(int times) {
+    return finish(times);
   }
 
   /** Continue execution from breakpoint */
-  public void cont() {
+  public String cont() {
+    return cont(defaultSleepTime);
+  }
+
+  /** Continue execution from breakpoint */
+  public String cont(int sleepTime) {
     pm.resumeThread();
     pm.setBreaked(false);
+    if (sleepTime == 0) {
+      return "";
+    }
+    Utility.sleep(sleepTime);
+    try {
+      pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    } catch (VMNotSuspendedException e) {
+      return "";
+    }
+    return uri();
   }
 
   /** Print source code */
-  public void list(String srcDir) {
+  public String list(String srcDir) {
     pm.printSrcAtCurrentLocation("Current location,", new ArrayList<>(Arrays.asList(srcDir)));
+    return uri();
   }
 
   /** Print source code */
-  public void list() {
-    pm.printSrcAtCurrentLocation("Current location,", srcDir);
+  public String list() {
+    try {
+      pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    } catch (VMNotSuspendedException e) {
+      DebuggerInfo.printError("Debugger not suspended");
+      return "";
+    }
+    return uri();
   }
 
   /** Print all local variables in current stack frame */
@@ -348,9 +437,43 @@ public class Debugger {
     pm.printLocals();
   }
 
+  /** Print all variables in current stack frame */
+  public void vars() { pm.printDebugResults(); }
+
+  /** Get DebugResults at the current location (alias of getCurrentDebugResults()) */
+  public HashMap<String, DebugResult> drs() {
+    return getCurrentDebugResults();
+  }
+
+  /** Get DebugResults at the current location */
+  public HashMap<String, DebugResult> getCurrentDebugResults() {return pm.printDebugResults();}
+
   /** Print stacktrace in current stack frame. */
   public void where() {
     pm.printStackTrace();
+  }
+
+  /** Return a current file location. */
+  public Location loc() {
+    return pm.getCurrentLocation();
+  }
+
+  /** Return a string which represents the current file location by VSCode-like format. */
+  public String uri() {
+    var loc = loc();
+    var lineNumber = loc.lineNumber;
+    return uri(loc, lineNumber);
+  }
+
+  /** Return a string which represents the current file location by VSCode-like format. */
+  public String uri(Location loc, int lineNumber) {
+    return Utility.uri(loc, srcDir, lineNumber);
+  }
+
+  /** Return current file location by VSCode-like format. */
+  public String uri(int lineNumber) {
+    var loc = loc();
+    return Utility.uri(loc, srcDir, lineNumber);
   }
 
   /** Remove breakpoint with a line number. */
@@ -378,8 +501,8 @@ public class Debugger {
   }
 
   /** Start up the debugger.(equals to run(0)) */
-  public void run() {
-    run(0);
+  public String run() {
+    return run(defaultSleepTime);
   }
 
   /**
@@ -387,7 +510,7 @@ public class Debugger {
    *
    * @param sleepTime Wait time after the debugger starts running
    */
-  public void run(int sleepTime) {
+  public String run(int sleepTime) {
     if (vmThread != null) {
       throw new VMAlreadyStartedException("VM has already started once.");
     }
@@ -396,13 +519,26 @@ public class Debugger {
     if (!isRemoteDebug && usesProbeJ) {
       Utility.sleep(1000);
     }
+    if (sleepTime == 0) {
+      return "";
+    }
     Utility.sleep(sleepTime);
+    try {
+      pm.printSrcAtCurrentLocation("Current location,", srcDir);
+    } catch (VMNotSuspendedException e) {
+      return "";
+    }
+    return uri();
   }
 
   /** Shutdown the debugger. */
   public void exit() {
     pm.completeStep();
-    vmManager.shutdown();
+    try {
+      vmManager.shutdown();
+    } catch (VMDisconnectedException e) {
+      // do nothing
+    }
     vmThread = null;
   }
 
@@ -412,24 +548,24 @@ public class Debugger {
   }
 
   /** Restart the debugger at once.(equals to restart(0)) */
-  public void restart() {
-    restart(0);
+  public String restart() {
+    return restart(defaultSleepTime);
   }
 
   /**
-   * Restart the debugger.
+   * Restart the debugger (breakpoints inherited).
    *
    * @param sleepTime Wait time after the debugger starts running
    */
-  public void restart(int sleepTime) {
+  public String restart(int sleepTime) {
     exit();
     clearResults();
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
     vmManager.prepareStart(pm);
-    run(sleepTime);
+    return run(sleepTime);
   }
 
-  /** <div>Redefine the debugger so that the parameters are the same.</div>
+  /** <div>Redefine the debugger so that the parameters are the same (breakpoints <strong>NOT</strong> inherited).</div>
    *  <br>
    * <div>Inherited parameters:
    *   <ul>
@@ -448,6 +584,15 @@ public class Debugger {
     dbg.setSrcDir(srcDir.toArray(new String[0]));
     exporters.stream().peek(e->dbg.setExporter(e)).collect(Collectors.toList());
     return dbg;
+  }
+
+  /**
+   * Reset this debugger own (breakpoints <strong>NOT</strong> inherited).
+   */
+  public void reset() {
+    exit();
+    pm = new PointManager();
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
   }
 
   /** Clear debug results all. */
