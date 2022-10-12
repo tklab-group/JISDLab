@@ -583,6 +583,15 @@ public class Debugger {
     return dbg;
   }
 
+  /**
+   * Reset this debugger own (breakpoints <strong>NOT</strong> inherited).
+   */
+  public void reset() {
+    exit();
+    pm = new PointManager();
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
+  }
+
   /** Clear debug results all. */
   public void clearResults() {
     ArrayList<Point> bps = getPoints();
