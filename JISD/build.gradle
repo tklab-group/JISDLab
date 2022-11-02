@@ -51,7 +51,7 @@ javadoc {
 
 jar {
   archiveBaseName = 'jisd'
-  archiveVersion = '0.2.4'
+  archiveVersion = '0.2.5'
   exclude('.jisd_static_data*')
 }
 
@@ -86,6 +86,9 @@ dependencies {
 
   // https://mvnrepository.com/artifact/commons-io/commons-io
   implementation 'commons-io:commons-io:2.8.0'
+
+  // flacoco
+  implementation 'com.github.spoonlabs:flacoco:1.0.5'
 
   // jisdvis
   implementation 'io.prometheus:simpleclient:0.11.0'

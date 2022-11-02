@@ -123,7 +123,7 @@ public class Utility {
     drs.entrySet().stream().map(strDrs -> strDrs.getValue()).sorted(compDR).peek(dr -> Print.out(dr.lv())).collect(Collectors.toList());
   }
 
-  public static String uri(String text, String path) {
+  public static String createUri(String text, String path) {
     return "["+text+"]("+path+")";
   }
 
@@ -133,7 +133,6 @@ public class Utility {
   }
 
   public static String uri(Location loc, List<String> srcDirs, int lineNumber) {
-
     var srcRelPath = Name.toSourcePathFromClassName(loc.className);
     srcDirs.add(".");
     for (int i = 0; i < srcDirs.size(); i++) {
@@ -142,8 +141,13 @@ public class Utility {
       var srcAbsPath = Paths.get(srcAbsPathStr);
       if (Files.exists(srcAbsPath)) {
         String text = srcAbsPathStr+"#L"+lineNumber;
-        String path = srcAbsPathStr.replaceFirst(vscodeWorkspaceDir, "/")+"#L"+lineNumber;
-        return uri(text, path);
+        String path;
+        if (vscodeWorkspaceDir.length() > 0) {
+          path = srcAbsPathStr.replaceFirst(vscodeWorkspaceDir, "/") + "#L" + lineNumber;
+        } else {
+          path = srcAbsPathStr + "#L" + lineNumber;
+        }
+        return createUri(text, path);
       }
     }
     DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by Debugger.setSrcDir(String... srcDir))");
