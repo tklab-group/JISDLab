@@ -20,9 +20,9 @@ public class FaultFinder {
   @Getter @Setter
   static String jisdCmdPath = "";
   @Getter @Setter int topN = 10;
-  @Getter @Setter(AccessLevel.PACKAGE) String projectDir;
-  @Getter @Setter(AccessLevel.PACKAGE) String projectName;
-  @Getter @Setter(AccessLevel.PACKAGE) String projectId;
+  @Getter @Setter String projectDir;
+  @Getter @Setter String projectName;
+  @Getter @Setter String projectId;
   @Getter @Setter(AccessLevel.PACKAGE) List<FlResult> flResults=new ArrayList<>();
   @Setter(AccessLevel.PACKAGE) List<String> flResultLines=new ArrayList<>();
   @Getter @Setter(AccessLevel.PACKAGE) Integer generation = 0;
