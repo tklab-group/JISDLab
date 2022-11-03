@@ -1,0 +1,5 @@
+[0] INFO Flacoco - Running Flacoco...
+[1203] WARN CoverageRunner - Test [Manual]TestMethod=fr.FLtest1.CalculatorTest#testIgnore result was not reported by test-runner.
+[1241] WARN CoverageRunner - Test [Manual]TestMethod=fr.spoonlabs.FLtest1.CalculatorTest#testIgnore result was not reported by test-runner.
+[1241] INFO CoverageRunner - Tests found: 10
+[1241] INFO CoverageRunner - Tests executed: 8

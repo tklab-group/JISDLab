@@ -2,6 +2,7 @@ package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMDisconnectedException;
+import jisd.analysis.FaultFinder;
 import jisd.debug.value.ValueInfo;
 import jisd.vis.IExporter;
 import lombok.Getter;
@@ -9,6 +10,9 @@ import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static jisd.debug.Utility.exec;
+import static jisd.debug.Utility.sleep;
 
 /**
  * The JISDLab's main debugger.
@@ -25,6 +29,8 @@ public class Debugger {
   @Getter @Setter String main, options;
   /** VM thread */
   Thread vmThread;
+  /** target VM Thread*/
+  Thread targetVmThread;
   /** VM manager */
   @Getter VMManager vmManager;
   /** use attaching connector or not */
@@ -38,6 +44,9 @@ public class Debugger {
   @Getter int port;
 
   @Getter @Setter String host;
+
+  @Getter @Setter String projectName;
+  @Getter @Setter String projectId;
 
   @Getter List<String> srcDir = new ArrayList<String>();
 
@@ -514,6 +523,13 @@ public class Debugger {
     if (vmThread != null) {
       throw new VMAlreadyStartedException("VM has already started once.");
     }
+
+    if (projectName != "" && projectId != "") {
+      String cmd = FaultFinder.jisdCmdPath + " debug " + projectName + " " + projectId;
+      targetVmThread = new Thread(()->{exec(cmd);});;
+      targetVmThread.start();
+      sleep(Debugger.defaultSleepTime);
+    }
     vmThread = new Thread(vmManager);
     vmThread.start();
     if (!isRemoteDebug && usesProbeJ) {
@@ -558,6 +574,10 @@ public class Debugger {
    * @param sleepTime Wait time after the debugger starts running
    */
   public String restart(int sleepTime) {
+    if (targetVmThread != null) {
+      targetVmThread.stop();
+      targetVmThread = null;
+    }
     exit();
     clearResults();
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
@@ -590,6 +610,10 @@ public class Debugger {
    * Reset this debugger own (breakpoints <strong>NOT</strong> inherited).
    */
   public void reset() {
+    if (targetVmThread != null) {
+      targetVmThread.stop();
+      targetVmThread = null;
+    }
     exit();
     pm = new PointManager();
     vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);

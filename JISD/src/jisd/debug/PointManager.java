@@ -116,6 +116,12 @@ class PointManager {
     currentDebugResults = null;
   }
 
+  void clearThread() {
+    isBreaked = false;
+    currentTRef = null;
+    currentDebugResults = null;
+  }
+
   void completeStep() {
     if (stepReq.isPresent()) {
       stepReq.get().disable();
@@ -449,7 +455,7 @@ class PointManager {
    * @param srcDirs source directory
    */
   void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) throws VMNotSuspendedException {
-    if (!checkCurrentTRef()) {
+    if (!checkCurrentTRef(false)) {
       throw new VMNotSuspendedException("");
     }
     srcDirs.add(".");

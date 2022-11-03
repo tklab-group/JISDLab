@@ -21,7 +21,7 @@ public class HelloWorld {
     a++;
     hello.setHelloTo(me);
     System.out.println(hello.sayHello());
-    while (true) {
+    while (true) { 
       a += 10000;
     }
   }

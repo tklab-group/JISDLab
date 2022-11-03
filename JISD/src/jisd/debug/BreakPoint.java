@@ -229,20 +229,22 @@ public class BreakPoint extends Point {
           }
           Utility.sleep(sleepTimeMax.get());
           // if isBreak is true
-          if (isBreak()) {
-            if (bpm.isProcessing()) {
-              bpm.completeStep();
-              if (bpm.count == 1) {
-                DebuggerInfo.print("Step completed");
-              }
+          if (bpm.isProcessing()) {
+            bpm.completeStep();
+            if (bpm.count == 1) {
+              DebuggerInfo.print("Step completed");
             }
-            if (bpm.count == 1 || bpm.count == 0) {
-              bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
-            }
-            bpm.setBreaked(true);
-            if (isNotSuspended) {
+          }
+          if (bpm.count == 1 || bpm.count == 0) {
+            bpm.printCurrentLocation("Breakpoint hit", bpLineNumber, bpClassName, bpMethodName);
+          }
+          bpm.setBreaked(true);
+          if (isNotSuspended) {
+            if (isBreak) {
               ThreadReference currentTRef = bpm.getCurrentTRef();
               currentTRef.suspend();
+            } else {
+              bpm.clearThread();
             }
           }
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {

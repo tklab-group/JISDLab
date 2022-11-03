@@ -25,13 +25,16 @@ public class Utility {
       .thenComparing(dr -> ((DebugResult) dr).getLocation().lineNumber)
       .thenComparing(dr -> ((DebugResult) dr).getLocation().varName);
 
+  public static Optional<String[]> exec(String command) {
+    return exec(command, true);
+  }
   /**
    * Execute external command.
    *
    * @param command command (wildcard * is unavailable)
    * @return [stdout, stderr, exit code] (optional)
    */
-  public static Optional<String[]> exec(String command) {
+  public static Optional<String[]> exec(String command, boolean isVerbose) {
     String lineSeparator = java.lang.System.getProperty("line.separator");
     String[] results = new String[3];
     Arrays.fill(results, "");
@@ -70,10 +73,10 @@ public class Utility {
         }
         results[1] = err.toString();
         results[2] = Integer.toString(p.waitFor());
-        if (! results[0].isEmpty()) {
+        if (isVerbose && ! results[0].isEmpty()) {
           java.lang.System.out.println(results[0]);
         }
-        if (! results[1].isEmpty()) {
+        if (isVerbose && ! results[1].isEmpty()) {
           java.lang.System.err.println(results[1]);
         }
       } finally {

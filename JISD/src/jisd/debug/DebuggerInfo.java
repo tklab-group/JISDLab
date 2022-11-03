@@ -1,5 +1,8 @@
 package jisd.debug;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,14 +13,19 @@ import java.util.List;
  *
  * @author sugiyama
  */
-class DebuggerInfo {
+public class DebuggerInfo {
+  @Getter @Setter
+  public static boolean isVerbose = true;
+
   /**
    * Prints debugger infomation to stdout.
    *
    * @param message debugger infomation
    */
   static void print(String message) {
-    System.out.println(">> Debugger Info: " + message);
+    if (isVerbose) {
+      System.out.println(">> Debugger Info: " + message);
+    }
   }
 
   /**
@@ -26,7 +34,9 @@ class DebuggerInfo {
    * @param message debugger infomation
    */
   static void printError(String message) {
-    System.err.println(">> Debugger Info: " + message);
+    if (isVerbose) {
+      System.err.println(">> Debugger Info: " + message);
+    }
   }
 
   /**
