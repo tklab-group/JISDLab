@@ -1,7 +1,6 @@
 package jisd.analysis;
 
-import jisd.debug.Location;
-import jisd.debug.Utility;
+import jisd.debug.*;
 import jisd.util.Print;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -15,10 +14,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static jisd.debug.Utility.exec;
+import static jisd.debug.Utility.sleep;
 
 public class FaultFinder {
   @Getter @Setter
-  static String jisdCmdPath = "";
+  public static String jisdCmdPath = "";
   @Getter @Setter int topN = 10;
   @Getter @Setter String projectDir;
   @Getter @Setter String projectName;
@@ -61,6 +61,23 @@ public class FaultFinder {
     return flResults;
   }
 
+  public List<FlResult> susp(int rank) {
+    if (!checkFlRankValidation(rank)) {
+      return null;
+    }
+    var removedClassName = flResults.get(rank-1).className;
+    for (int i = 0; i < flResults.size(); i++) {
+      var res = flResults.get(i);
+      if (res.className.equals(removedClassName)) {
+         res.score += 0.5;
+      }
+    }
+    reRanking();
+    updateGeneration();
+    showFlResults();
+    return flResults;
+  }
+
   public List<FlResult> remove(int rank) {
     if (!checkFlRankValidation(rank)) {
       return null;
@@ -73,6 +90,46 @@ public class FaultFinder {
     updateGeneration();
     showFlResults();
     return flResults;
+  }
+
+  void reRanking() {
+    flResults.sort(Comparator.comparing(flResult -> -flResult.score));
+    setRank();
+  }
+
+  void probe() {
+    var flResultsTopN = flResults.stream().limit(topN).collect(Collectors.toList());
+    String cmd;
+    Thread targetVmThread;
+    if (projectName != "" && projectId != "") {
+      cmd = jisdCmdPath + " debug " + projectName + " " + projectId;
+    } else {
+      cmd = jisdCmdPath + " debug " + projectDir;
+    }
+    DebuggerInfo.setVerbose(false);
+    targetVmThread = new Thread(()->{exec(cmd);});
+    targetVmThread.start();
+    sleep(Debugger.defaultSleepTime);
+    var dbg = new Debugger(25432);
+    var points = flResultsTopN.stream()
+      .map(res->dbg.watch(res.className, res.line))
+
+      .collect(Collectors.toList());
+    var dbgThread = new Thread(()->{dbg.run();});
+    dbgThread.start();
+    try {
+      dbgThread.join();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+    DebuggerInfo.setVerbose(true);
+    points.forEach(pOpt->{
+      var p = pOpt.get();
+      Print.out(p.getClassName()+":"+p.getLineNumber());
+      p.getResults().forEach((name, r)->{
+        Print.out(name+": "+r.lv());
+      });
+    });
   }
 
   void updateGeneration() {

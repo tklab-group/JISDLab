@@ -7,7 +7,7 @@ import lombok.Setter;
 public class FlResult {
   @Getter String className;
   @Getter int line;
-  @Getter double score;
+  @Getter @Setter double score;
   @Getter @Setter(AccessLevel.PACKAGE) int rank;
   public FlResult(String className, int line, double score) {
     this.className = className;
