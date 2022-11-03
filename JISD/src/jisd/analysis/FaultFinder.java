@@ -40,6 +40,13 @@ public class FaultFinder {
     srcDirs = Arrays.stream(paths).collect(Collectors.toList());
   }
 
+  public FlResult get(int rank) {
+    if (!checkFlRankValidation(rank)) {
+      return null;
+    }
+    return flResults.get(rank-1);
+  }
+
   public void run() {
     if (flResultLines.isEmpty()) {
       Optional<String[]> resultOpt;
