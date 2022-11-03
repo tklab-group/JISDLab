@@ -10,7 +10,7 @@ public class FlacocoTest {
     FaultFinder.setJisdCmdPath("./test/src/jisd/analysis/jisd-test");
     var ff = new FaultFinder("./test/src/jisd/analysis/FLtest1");
     ff.setSrcDirs("./test/src/jisd/analysis/FLtest1/src/main/java");
-    var res = ff.run();
+    ff.run();
     Print.out(ff.uri(1));
     ff.remove(1);
     ff.susp(1);
@@ -21,7 +21,7 @@ public class FlacocoTest {
     FaultFinder.setJisdCmdPath("./test/src/jisd/analysis/jisd-test");
     var ff = new FaultFinder("./test/src/jisd/analysis/FLtest1");
     //ff.setSrcDirs("");
-    var res = ff.run();
+    ff.run();
     Debugger.setDefaultSleepTime(1000);
     ff.probe();
   }

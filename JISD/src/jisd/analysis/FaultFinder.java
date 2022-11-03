@@ -1,6 +1,9 @@
 package jisd.analysis;
 
-import jisd.debug.*;
+import jisd.debug.Debugger;
+import jisd.debug.DebuggerInfo;
+import jisd.debug.Location;
+import jisd.debug.Utility;
 import jisd.util.Print;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -21,8 +24,8 @@ public class FaultFinder {
   public static String jisdCmdPath = "";
   @Getter @Setter int topN = 10;
   @Getter @Setter String projectDir;
-  @Getter @Setter String projectName;
-  @Getter @Setter String projectId;
+  @Getter @Setter String projectName = "";
+  @Getter @Setter String projectId = "";
   @Getter @Setter(AccessLevel.PACKAGE) List<FlResult> flResults=new ArrayList<>();
   @Setter(AccessLevel.PACKAGE) List<String> flResultLines=new ArrayList<>();
   @Getter @Setter(AccessLevel.PACKAGE) Integer generation = 0;
@@ -43,7 +46,7 @@ public class FaultFinder {
       if (projectName != "" && projectId != "") {
         resultOpt = exec(jisdCmdPath + " fl " + projectName + " " + projectId);
       } else {
-        resultOpt = exec(jisdCmdPath + " " + projectDir);
+        resultOpt = exec(jisdCmdPath + " fl " + projectDir);
       }
       if (!resultOpt.isPresent()) {
         return;
@@ -101,19 +104,20 @@ public class FaultFinder {
     var flResultsTopN = flResults.stream().limit(topN).collect(Collectors.toList());
     String cmd;
     Thread targetVmThread;
+    Debugger dbg;
+    DebuggerInfo.setVerbose(false);
     if (projectName != "" && projectId != "") {
       cmd = jisdCmdPath + " debug " + projectName + " " + projectId;
+      dbg = new Debugger(25432, projectName, projectId);
     } else {
       cmd = jisdCmdPath + " debug " + projectDir;
+      targetVmThread = new Thread(()->{exec(cmd);});
+      targetVmThread.start();
+      sleep(Debugger.defaultSleepTime);
+      dbg = new Debugger(25432);
     }
-    DebuggerInfo.setVerbose(false);
-    targetVmThread = new Thread(()->{exec(cmd);});
-    targetVmThread.start();
-    sleep(Debugger.defaultSleepTime);
-    var dbg = new Debugger(25432);
     var points = flResultsTopN.stream()
       .map(res->dbg.watch(res.className, res.line))
-
       .collect(Collectors.toList());
     var dbgThread = new Thread(()->{dbg.run();});
     dbgThread.start();
