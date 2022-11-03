@@ -2,7 +2,6 @@ package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMDisconnectedException;
-import jisd.analysis.FaultFinder;
 import jisd.debug.value.ValueInfo;
 import jisd.vis.IExporter;
 import lombok.Getter;
@@ -10,9 +9,6 @@ import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static jisd.debug.Utility.exec;
-import static jisd.debug.Utility.sleep;
 
 /**
  * The JISDLab's main debugger.
@@ -29,8 +25,6 @@ public class Debugger {
   @Getter @Setter String main, options;
   /** VM thread */
   Thread vmThread;
-  /** target VM Thread*/
-  Thread targetVmThread;
   /** VM manager */
   @Getter VMManager vmManager;
   /** use attaching connector or not */
@@ -59,11 +53,15 @@ public class Debugger {
   }
 
   public Debugger(String main, String options, int port, boolean usesProbeJ) {
-    init(main, options, "localhost", port, false, usesProbeJ);
+    init(main, options, "localhost", port, false, usesProbeJ, "", "");
   }
 
   public Debugger(int port) {
     this(port, false);
+  }
+
+  public Debugger(int port, String projectName, String projectId) {
+    init("", "", "localhost", port, true, false, projectName, projectId);
   }
 
   public Debugger(String host, int port) {
@@ -75,7 +73,7 @@ public class Debugger {
   }
 
   public Debugger(String host, int port, boolean usesProbeJ) {
-    init("", "", host, port, true, usesProbeJ);
+    init("", "", host, port, true, usesProbeJ, "", "");
   }
 
   Debugger(String main,
@@ -84,7 +82,7 @@ public class Debugger {
            int port,
            boolean isRemoteDebug,
            boolean usesProbeJ) {
-    init(main, options, host, port, isRemoteDebug, usesProbeJ);
+    init(main, options, host, port, isRemoteDebug, usesProbeJ, "", "");
   }
 
   void init(
@@ -93,15 +91,19 @@ public class Debugger {
       String host,
       int port,
       boolean isRemoteDebug,
-      boolean usesProbeJ) {
+      boolean usesProbeJ,
+      String projectName,
+      String projectId) {
     setMain(main);
     setOptions(options);
     setHost(host);
     setPort(port);
+    setProjectName(projectName);
+    setProjectId(projectId);
     this.usesProbeJ = usesProbeJ;
     this.isRemoteDebug = isRemoteDebug;
     pm = new PointManager();
-    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ, projectName, projectId);
   }
 
   public void setPort(int port) {
@@ -524,12 +526,6 @@ public class Debugger {
       throw new VMAlreadyStartedException("VM has already started once.");
     }
 
-    if (projectName != "" && projectId != "") {
-      String cmd = FaultFinder.jisdCmdPath + " debug " + projectName + " " + projectId;
-      targetVmThread = new Thread(()->{exec(cmd);});;
-      targetVmThread.start();
-      sleep(Debugger.defaultSleepTime);
-    }
     vmThread = new Thread(vmManager);
     vmThread.start();
     if (!isRemoteDebug && usesProbeJ) {
@@ -574,13 +570,9 @@ public class Debugger {
    * @param sleepTime Wait time after the debugger starts running
    */
   public String restart(int sleepTime) {
-    if (targetVmThread != null) {
-      targetVmThread.stop();
-      targetVmThread = null;
-    }
     exit();
     clearResults();
-    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ, projectName,projectId);
     vmManager.prepareStart(pm);
     return run(sleepTime);
   }
@@ -610,13 +602,9 @@ public class Debugger {
    * Reset this debugger own (breakpoints <strong>NOT</strong> inherited).
    */
   public void reset() {
-    if (targetVmThread != null) {
-      targetVmThread.stop();
-      targetVmThread = null;
-    }
     exit();
     pm = new PointManager();
-    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ);
+    vmManager = VMManagerFactory.create(this, main, options, host, port, isRemoteDebug, usesProbeJ, projectName, projectId);
   }
 
   /** Clear debug results all. */

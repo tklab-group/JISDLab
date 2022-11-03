@@ -17,6 +17,8 @@ public class JDIManager extends VMManager {
   OnVMStart start;
   /** remote debug? */
   boolean isRemoteDebug;
+  /** target VM Thread*/
+  Thread targetVmThread;
 
   /**
    * Constructor
@@ -24,15 +26,16 @@ public class JDIManager extends VMManager {
    * @param j JDI
    * @param start A procedure before the debugger runs
    */
-  JDIManager(Debugger debugger, JDIScript j, OnVMStart start, boolean isRemoteDebug) {
+  JDIManager(Debugger debugger, JDIScript j, OnVMStart start, boolean isRemoteDebug, Thread targetVmThread) {
     super(debugger);
     this.j = j;
     this.start = start;
     this.isRemoteDebug = isRemoteDebug;
+    this.targetVmThread = targetVmThread;
   }
 
-  JDIManager(Debugger debugger, JDIScript j, boolean isRemoteDebug) {
-    this(debugger, j, (s) -> {}, isRemoteDebug);
+  JDIManager(Debugger debugger, JDIScript j, boolean isRemoteDebug, Thread targetVmThread) {
+    this(debugger, j, (s) -> {}, isRemoteDebug, targetVmThread);
   }
 
   void addStart(OnVMStart start) {
@@ -61,6 +64,10 @@ public class JDIManager extends VMManager {
   }
 
   public void dispose() {
+    if (targetVmThread != null) {
+      targetVmThread.stop();
+      targetVmThread = null;
+    }
     try {
       j.vm().dispose();
       DebuggerInfo.print("Debugger exited.");
