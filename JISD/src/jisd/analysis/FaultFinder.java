@@ -37,7 +37,7 @@ public class FaultFinder {
     srcDirs = Arrays.stream(paths).collect(Collectors.toList());
   }
 
-  public List<FlResult> run() {
+  public void run() {
     if (flResultLines.isEmpty()) {
       Optional<String[]> resultOpt;
       if (projectName != "" && projectId != "") {
@@ -46,7 +46,7 @@ public class FaultFinder {
         resultOpt = exec(jisdCmdPath + " " + projectDir);
       }
       if (!resultOpt.isPresent()) {
-        return flResults;
+        return;
       }
       var result = resultOpt.get();
       if (result[1].length() > 0) {
@@ -58,12 +58,12 @@ public class FaultFinder {
     }
 
     showFlResults();
-    return flResults;
+    return;
   }
 
-  public List<FlResult> susp(int rank) {
+  public void susp(int rank) {
     if (!checkFlRankValidation(rank)) {
-      return null;
+      return;
     }
     var removedClassName = flResults.get(rank-1).className;
     for (int i = 0; i < flResults.size(); i++) {
@@ -75,12 +75,12 @@ public class FaultFinder {
     reRanking();
     updateGeneration();
     showFlResults();
-    return flResults;
+    return;
   }
 
-  public List<FlResult> remove(int rank) {
+  public void remove(int rank) {
     if (!checkFlRankValidation(rank)) {
-      return null;
+      return;
     }
     var removedClassName = flResults.get(rank-1).className;
     flResults = flResults.stream()
@@ -89,7 +89,7 @@ public class FaultFinder {
     setRank();
     updateGeneration();
     showFlResults();
-    return flResults;
+    return;
   }
 
   void reRanking() {
@@ -97,7 +97,7 @@ public class FaultFinder {
     setRank();
   }
 
-  void probe() {
+  public void probe() {
     var flResultsTopN = flResults.stream().limit(topN).collect(Collectors.toList());
     String cmd;
     Thread targetVmThread;

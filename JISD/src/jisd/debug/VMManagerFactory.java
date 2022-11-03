@@ -51,7 +51,7 @@ class VMManagerFactory {
     if (isRemoteDebug) {
       if (projectName.length() > 0 && projectId.length() > 0) {
         String cmd = FaultFinder.jisdCmdPath + " debug " + projectName + " " + projectId;
-        targetVmThread = new Thread(()->{exec(cmd);});;
+        targetVmThread = new Thread(()->{exec(cmd, false);});;
         targetVmThread.start();
         sleep(Debugger.defaultSleepTime+5000);
       }
