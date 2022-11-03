@@ -53,7 +53,7 @@ class VMManagerFactory {
         String cmd = FaultFinder.jisdCmdPath + " debug " + projectName + " " + projectId;
         targetVmThread = new Thread(()->{exec(cmd);});;
         targetVmThread.start();
-        sleep(Debugger.defaultSleepTime);
+        sleep(Debugger.defaultSleepTime+5000);
       }
       DebuggerInfo.print("Try to connect to " + host + ":" + port);
       vm = new VMSocketAttacher(host, port).attach();
