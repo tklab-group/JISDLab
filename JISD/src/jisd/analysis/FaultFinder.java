@@ -69,13 +69,18 @@ public class FaultFinder {
       return;
     }
     var removedClassName = flResults.get(rank-1).className;
+    var newFlResults = new ArrayList<FlResult>();
     for (int i = 0; i < flResults.size(); i++) {
       var res = flResults.get(i);
+      FlResult newRes;
       if (res.className.equals(removedClassName)) {
-         res.score += 0.5;
+        newRes = new FlResult(res.className, res.line, res.score+0.5);
+      } else {
+        newRes = res;
       }
+      newFlResults.add(newRes);
     }
-    reRanking();
+    reRanking(newFlResults);
     updateGeneration();
     showFlResults();
     return;
@@ -95,8 +100,9 @@ public class FaultFinder {
     return;
   }
 
-  void reRanking() {
-    flResults.sort(Comparator.comparing(flResult -> -flResult.score));
+  void reRanking(List<FlResult> newFlResults) {
+    newFlResults.sort(Comparator.comparing(flResult -> -flResult.score));
+    flResults = newFlResults;
     setRank();
   }
 
@@ -200,6 +206,7 @@ public class FaultFinder {
     }
     flResults = flResultsMap.get(generation.toString());
     this.generation = generation;
+    showFlResults();
   }
 
   public void clear() {

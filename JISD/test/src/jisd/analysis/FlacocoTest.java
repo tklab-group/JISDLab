@@ -14,6 +14,7 @@ public class FlacocoTest {
     Print.out(ff.uri(1));
     ff.remove(1);
     ff.susp(1);
+    ff.reset(2);
   }
 
   @Test

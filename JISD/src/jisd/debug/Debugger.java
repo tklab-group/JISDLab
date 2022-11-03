@@ -2,6 +2,7 @@ package jisd.debug;
 
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMDisconnectedException;
+import jisd.analysis.FlResult;
 import jisd.debug.value.ValueInfo;
 import jisd.vis.IExporter;
 import lombok.Getter;
@@ -165,6 +166,13 @@ public class Debugger {
   public Optional<Point> stopAt(String className, int lineNumber) {
     return stopAt(className, lineNumber, new String[0]);
   }
+
+  public Optional<Point> stopAt(FlResult flResult) {
+    return stopAt(flResult.getClassName(), flResult.getLine(), new String[0]);
+  }
+  public Optional<Point> stopAt(FlResult flResult, String[] varNames) {
+    return stopAt(flResult.getClassName(), flResult.getLine(), varNames);
+  }
   /** Set a breakpoint by a line number. */
   public Optional<Point> stopAt(String className, int lineNumber, String[] varNames) {
     if (usesProbeJ) {
@@ -242,6 +250,13 @@ public class Debugger {
   /** Set a watchpoint by a method name. */
   public Optional<Point> watch(String className, String methodName) {
     return watch(className, methodName, new String[0]);
+  }
+
+  public Optional<Point> watch(FlResult flResult) {
+    return watch(flResult.getClassName(), flResult.getLine(), new String[0]);
+  }
+  public Optional<Point> watch(FlResult flResult, String[] varNames) {
+    return watch(flResult.getClassName(), flResult.getLine(), varNames);
   }
   /** Set a watchpoint by a method name. */
   public Optional<Point> watch(String className, String methodName, String[] varNames) {
