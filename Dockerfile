@@ -58,4 +58,5 @@ RUN \
 
 RUN \
   ls && pip install --upgrade elyra-code-snippet-extension &&\
-  elyra-metadata import code-snippets --directory "${jisdlab_dir}/code-snippets/"
+  elyra-metadata import code-snippets --directory "${jisdlab_dir}/code-snippets/" &&\
+  pip uninstall jupyterlab-lsp

@@ -7,3 +7,6 @@
 [submodule "javadoc"]
 	path = javadoc
 	url = https://github.com/sakupo/JISD-doc.git
+[submodule "flacoco"]
+	path = flacoco
+	url = https://github.com/sakupo/flacoco

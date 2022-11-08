@@ -1,5 +1,6 @@
 package jisd.debug;
 
+import jisd.analysis.FlResult;
 import jisd.util.Name;
 import jisd.util.Print;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -155,5 +157,46 @@ public class Utility {
     }
     DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by Debugger.setSrcDir(String... srcDir))");
     return null;
+  }
+
+  /**
+   * Prints source code.
+   *
+   * @param path source path
+   * @param currentLineNumber line number the breakpoint is set at
+   */
+  public static void printSrc(String path, int currentLineNumber) {
+    Path srcFile = Path.of(path);
+    try {
+      List<String> lines = Files.readAllLines(srcFile);
+      int offset = 5;
+      int start = (currentLineNumber - offset >= 0) ? currentLineNumber - offset + 1 : 1;
+      int end =
+          (currentLineNumber + offset <= lines.size()) ? currentLineNumber + offset : lines.size();
+      for (int i = start; i <= end; i++) {
+        String position = "";
+        if (i == currentLineNumber) {
+          position = "=>";
+        }
+        System.out.println(i + " " + position + "\t" + lines.get(i - 1));
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+  public static void printSrc(FlResult result, List<String> srcDirs) {
+    srcDirs.add(".");
+    for (int i = 0; i < srcDirs.size(); i++) {
+      var srcDir = srcDirs.get(i);
+      var srcRelPath = Name.toSourcePathFromClassName(result.getClassName());
+      var lineNumber = result.getLine();
+      var srcAbsPathStr = srcDir + File.separator.charAt(0) + srcRelPath;
+      var srcAbsPath = Paths.get(srcAbsPathStr);
+      if (Files.exists(srcAbsPath)) {
+        Utility.printSrc(srcAbsPathStr, lineNumber);
+        return;
+      }
+      DebuggerInfo.printError(srcRelPath+" not found. Please set srcDir.");
+    }
   }
 }

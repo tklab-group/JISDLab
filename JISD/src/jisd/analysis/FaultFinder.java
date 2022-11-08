@@ -16,8 +16,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static jisd.debug.Utility.exec;
-import static jisd.debug.Utility.sleep;
+import static jisd.debug.Utility.*;
 
 public class FaultFinder {
   @Getter @Setter
@@ -91,6 +90,17 @@ public class FaultFinder {
     updateGeneration();
     showFlResults();
     return;
+  }
+
+  public void list(int rank) {
+    if (!checkFlRankValidation(rank)) {
+      return;
+    }
+    printSrc(flResults.get(rank-1), srcDirs);
+  }
+
+  public void list(FlResult result) {
+    printSrc(result, srcDirs);
   }
 
   public void remove(int rank) {

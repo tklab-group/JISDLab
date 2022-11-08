@@ -471,7 +471,7 @@ class PointManager {
         var srcAbsPathStr = srcDir + File.separator.charAt(0) + srcRelPath;
         var srcAbsPath = Paths.get(srcAbsPathStr);
         if (Files.exists(srcAbsPath)) {
-          DebuggerInfo.printSrc(srcAbsPathStr, lineNumber);
+          Utility.printSrc(srcAbsPathStr, lineNumber);
           return;
         }
       }
