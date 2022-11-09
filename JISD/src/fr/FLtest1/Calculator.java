@@ -10,6 +10,24 @@ public class Calculator {
 		return field;
 	}
 
+	void f(){
+
+	}
+
+	void g() {
+
+	}
+
+	void sample2(boolean flag) {
+		if (flag) {
+			for (int i = 0; i < 10; i++) {
+				f(); // <- buggy
+			}
+		} else {
+			g(); //
+		}
+	}
+
 	public Calculator() {
 	}
 

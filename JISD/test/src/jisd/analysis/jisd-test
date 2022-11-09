@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PROJECT_DIR=/Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/FLtest1
+PROJECT_PATH=/Users/saku/Workspace/2020/JISDLab/flacoco/examples/exampleFL1/FLtest1
 _output="${PROJECT_DIR}.csv"
 
 debug_cmd() {
@@ -11,13 +12,20 @@ debug_cmd() {
 }
 
 fl_cmd() {
-  java -jar /Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/flacoco-1.0.5-jar-with-dependencies.jar \
-   --projectpath $PROJECT_DIR --format CSV -o $_output  > /Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/out
+  java -jar /Users/saku/Workspace/2020/JISDLab/flacoco/target/flacoco-1.0.6-SNAPSHOT-jar-with-dependencies.jar \
+   --projectpath $PROJECT_PATH --methodBased --format CSV -o $_output  > /Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/out
+  echo $_output
+}
+
+z_cmd() {
+  java -cp /Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/com.gzoltar.cli-1.7.3.jar \
+   com.gzoltar.cli.Main --help #--outputFile $_output
   echo $_output
 }
 
 case $1 in
   debug) debug_cmd;;
   fl) fl_cmd;;
+  z) z_cmd;;
   *) echo "$USAGE" 1>&2; exit 1;;
 esac

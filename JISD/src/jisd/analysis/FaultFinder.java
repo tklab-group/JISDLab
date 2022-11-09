@@ -25,6 +25,7 @@ public class FaultFinder {
   @Getter @Setter String projectDir;
   @Getter @Setter String projectName = "";
   @Getter @Setter String projectId = "";
+  @Getter @Setter boolean isLineBased = true;
   @Getter @Setter(AccessLevel.PACKAGE) List<FlResult> flResults=new ArrayList<>();
   @Setter(AccessLevel.PACKAGE) List<String> flResultLines=new ArrayList<>();
   @Getter @Setter(AccessLevel.PACKAGE) Integer generation = 0;
@@ -184,10 +185,22 @@ public class FaultFinder {
   }
 
   void setFlResultsFromCsv(List<String> flResultLines) {
-    flResults =  flResultLines.stream()
-      .map(flResultLine->flResultLine.split(","))
-      .map(flResultStr->new FlResult(flResultStr[0], Integer.parseInt(flResultStr[1]), Double.parseDouble(flResultStr[2])))
-      .collect(Collectors.toList());
+    if (isLineBased) {
+      flResults = flResultLines.stream()
+        .map(flResultLine -> flResultLine.split(","))
+        .map(flResultStr -> new FlResult(flResultStr[0], Integer.parseInt(flResultStr[1]), Double.parseDouble(flResultStr[2])))
+        .collect(Collectors.toList());
+    } else {
+      flResults = flResultLines.stream()
+        .map(flResultLine -> flResultLine.split("\","))
+        .map(flResultStr -> {
+          String[] classNameRaws = flResultStr[0].split("\\(")[0].split("\\.");
+          classNameRaws[classNameRaws.length-1] = "";
+          String classNameRaw = String.join(".", classNameRaws);
+          return new FlResult(classNameRaw.substring(1, classNameRaw.length()-1), flResultStr[0].substring(1), Double.parseDouble(flResultStr[1]));
+        })
+        .collect(Collectors.toList());
+    }
     setRank();
   }
 
@@ -206,7 +219,11 @@ public class FaultFinder {
       return;
     }
     flResults.stream().limit(topN).forEach(flResult-> {
-      Print.out(flResult.rank + ". " + flResult.className+":"+flResult.line+" (score="+flResult.score+")");
+      if (flResult.line > 0) {
+        Print.out(flResult.rank + ". " + flResult.methodName + ":" + flResult.line + " (score=" + flResult.score + ")");
+      } else {
+        Print.out(flResult.rank + ". " + flResult.methodName + " (score=" + flResult.score + ")");
+      }
     });
   }
 
