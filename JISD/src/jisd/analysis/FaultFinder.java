@@ -22,18 +22,31 @@ public class FaultFinder {
   @Getter @Setter
   public static String jisdCmdPath = "";
   @Getter @Setter int topN = 10;
+  @Getter @Setter double contextConstValue ;
   @Getter @Setter String projectDir;
   @Getter @Setter String projectName = "";
   @Getter @Setter String projectId = "";
-  @Getter @Setter boolean isLineBased = true;
+  @Getter @Setter String flCmdName = "fl";
+  @Getter @Setter Granularity contextGranularity = Granularity.CLASS;
+  @Getter @Setter String flRankingPath;
   @Getter @Setter(AccessLevel.PACKAGE) List<FlResult> flResults=new ArrayList<>();
   @Setter(AccessLevel.PACKAGE) List<String> flResultLines=new ArrayList<>();
   @Getter @Setter(AccessLevel.PACKAGE) Integer generation = 0;
   @Getter @Setter(AccessLevel.PACKAGE) HashMap<String, List<FlResult>> flResultsMap = new HashMap<>();
   @Getter List<String> srcDirs = new ArrayList<>();
 
+  public enum Granularity {
+    LINE,
+    METHOD,
+    CLASS
+  }
+
   public FaultFinder(String projectDir) {
     this.projectDir = projectDir;
+  }
+  public FaultFinder(String projectName, String projectId) {
+    this.projectName = projectName;
+    this.projectId = projectId;
   }
 
   public void setSrcDirs(String... paths) {
@@ -49,20 +62,25 @@ public class FaultFinder {
 
   public void run() {
     if (flResultLines.isEmpty()) {
-      Optional<String[]> resultOpt;
-      if (projectName != "" && projectId != "") {
-        resultOpt = exec(jisdCmdPath + " fl " + projectName + " " + projectId);
+      String flResultFilePathStr;
+      if (!flRankingPath.isEmpty()) {
+        flResultFilePathStr = flRankingPath;
       } else {
-        resultOpt = exec(jisdCmdPath + " fl " + projectDir);
+        Optional<String[]> resultOpt;
+        if (!projectName.isEmpty() && !projectId.isEmpty()) {
+          resultOpt = exec(jisdCmdPath + " "+flCmdName+" " + projectName + " " + projectId);
+        } else {
+          resultOpt = exec(jisdCmdPath + " "+flCmdName+" " + projectDir);
+        }
+        if (!resultOpt.isPresent()) {
+          return;
+        }
+        var result = resultOpt.get();
+        if (result[1].length() > 0) {
+          Print.out(result[1]);
+        }
+        flResultFilePathStr = result[0];
       }
-      if (!resultOpt.isPresent()) {
-        return;
-      }
-      var result = resultOpt.get();
-      if (result[1].length() > 0) {
-        Print.out(result[1]);
-      }
-      var flResultFilePathStr = result[0];
       setFlResultsFromCsv(flResultFilePathStr);
       updateGeneration();
     }
@@ -75,15 +93,29 @@ public class FaultFinder {
     if (!checkFlRankValidation(rank)) {
       return;
     }
-    var removedClassName = flResults.get(rank-1).className;
+    var removedItem = flResults.get(rank-1);
     var newFlResults = new ArrayList<FlResult>();
     for (int i = 0; i < flResults.size(); i++) {
       var res = flResults.get(i);
       FlResult newRes;
-      if (res.className.equals(removedClassName)) {
-        newRes = new FlResult(res.className, res.line, res.score+0.5);
+      var isClassNameSame = res.className.equals(removedItem.className);
+      var isMethodNameSame = res.methodName.equals(removedItem.methodName);
+      var isLineNumberSame = res.line == removedItem.line;
+      if (contextGranularity == Granularity.LINE || (isClassNameSame && isMethodNameSame && isLineNumberSame)) {
+        continue;
+      }
+      if (contextGranularity == Granularity.METHOD) {
+        if (isClassNameSame && isMethodNameSame) {
+          newRes = new FlResult(res.className, res.methodName, res.line, res.score+0.5);
+        } else {
+          newRes = new FlResult(res.className, res.methodName, res.line, res.score);
+        }
       } else {
-        newRes = res;
+        if (isClassNameSame) {
+          newRes = new FlResult(res.className, res.methodName, res.line, res.score+0.5);
+        } else {
+          newRes = new FlResult(res.className, res.methodName, res.line, res.score);
+        }
       }
       newFlResults.add(newRes);
     }
@@ -108,9 +140,20 @@ public class FaultFinder {
     if (!checkFlRankValidation(rank)) {
       return;
     }
-    var removedClassName = flResults.get(rank-1).className;
+    var removedItem = flResults.get(rank-1);
     flResults = flResults.stream()
-      .filter(res->!res.className.equals(removedClassName))
+      .filter(res->{
+        var isClassNameSame = res.className.equals(removedItem.className);
+        var isMethodNameSame = res.methodName.equals(removedItem.methodName);
+        var isLineNumberSame = res.line == removedItem.line;
+        if (contextGranularity == Granularity.LINE) {
+          return !(isClassNameSame && isMethodNameSame && isLineNumberSame);
+        } else if (contextGranularity == Granularity.METHOD) {
+          return !(isClassNameSame && isMethodNameSame);
+        } else {
+          return !isClassNameSame;
+        }
+      })
       .collect(Collectors.toList());
     setRank();
     updateGeneration();
@@ -185,22 +228,17 @@ public class FaultFinder {
   }
 
   void setFlResultsFromCsv(List<String> flResultLines) {
-    if (isLineBased) {
-      flResults = flResultLines.stream()
-        .map(flResultLine -> flResultLine.split(","))
-        .map(flResultStr -> new FlResult(flResultStr[0], Integer.parseInt(flResultStr[1]), Double.parseDouble(flResultStr[2])))
-        .collect(Collectors.toList());
-    } else {
-      flResults = flResultLines.stream()
-        .map(flResultLine -> flResultLine.split("\","))
-        .map(flResultStr -> {
-          String[] classNameRaws = flResultStr[0].split("\\(")[0].split("\\.");
-          classNameRaws[classNameRaws.length-1] = "";
-          String classNameRaw = String.join(".", classNameRaws);
-          return new FlResult(classNameRaw.substring(1, classNameRaw.length()-1), flResultStr[0].substring(1), Double.parseDouble(flResultStr[1]));
-        })
-        .collect(Collectors.toList());
-    }
+    flResults = flResultLines.stream().skip(1)
+      .map(flResultLine -> {
+        String[] classNameRaw = flResultLine.split("#");
+        String className = classNameRaw[0].replace("$", ".");
+        String[] methodNameRaw = classNameRaw[1].split(":");
+        String methodName = methodNameRaw[0];
+        String[] lineNumberRaw = methodNameRaw[1].split(";");
+        int lineNumber = Integer.parseInt(lineNumberRaw[0]);
+        double score = Double.parseDouble(lineNumberRaw[1]);
+        return new FlResult(className, methodName, lineNumber, score);
+      }).collect(Collectors.toList());
     setRank();
   }
 
@@ -219,11 +257,7 @@ public class FaultFinder {
       return;
     }
     flResults.stream().limit(topN).forEach(flResult-> {
-      if (flResult.line > 0) {
-        Print.out(flResult.rank + ". " + flResult.methodName + ":" + flResult.line + " (score=" + flResult.score + ")");
-      } else {
-        Print.out(flResult.rank + ". " + flResult.methodName + " (score=" + flResult.score + ")");
-      }
+      Print.out(flResult.rank + ". " + flResult.className+"#"+flResult.methodName + ":" + flResult.line + " (score=" + flResult.score + ")");
     });
   }
 

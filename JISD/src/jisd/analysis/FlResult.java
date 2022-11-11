@@ -10,14 +10,11 @@ public class FlResult {
   @Getter @Setter double score;
   @Getter @Setter String methodName = "";
   @Getter @Setter(AccessLevel.PACKAGE) int rank;
-  public FlResult(String className, int line, double score) {
-    this.className = className;
-    this.line = line;
-    this.score = score;
-  }
-  public FlResult(String className, String methodName, double score) {
+
+  public FlResult(String className, String methodName, int lineNumber, double score) {
     this.className = className;
     this.methodName = methodName;
+    this.line = lineNumber;
     this.score = score;
   }
 }
