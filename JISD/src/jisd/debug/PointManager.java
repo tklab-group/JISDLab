@@ -83,6 +83,14 @@ class PointManager {
     return sb.substring(0, sb.length() - 1);
   }
 
+  List<Location> getStackTraceList(ThreadReference t) throws IncompatibleThreadStateException {
+    List<Location> stackTraceList = t.frames().stream()
+      .map(f->f.location())
+      .map(loc->new Location(loc.declaringType().name(), loc.method().name(), loc.lineNumber(), ""))
+      .collect(Collectors.toList());
+    return stackTraceList;
+  }
+
   /**
    * Check current thread reference state
    *
@@ -536,10 +544,21 @@ class PointManager {
       return;
     }
     try {
-      System.out.println();
       System.out.println(stackTraceKey(currentTRef));
     } catch (IncompatibleThreadStateException e) {
       e.printStackTrace();
+    }
+  }
+
+  public List<Location> getStackTrace() {
+    if (!checkCurrentTRef()) {
+      return new ArrayList<>();
+    }
+    try {
+      return getStackTraceList(currentTRef);
+    } catch (IncompatibleThreadStateException e) {
+      e.printStackTrace();
+      return new ArrayList<>();
     }
   }
 

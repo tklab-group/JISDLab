@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class BreakPoint extends Point {
   Optional<ChainingBreakpointRequest> bpr = Optional.empty();
 
+
   /**
    * Constructor
    *
@@ -178,7 +179,7 @@ public class BreakPoint extends Point {
                     }
                   });
             }
-            vars = stackFrame.visibleVariables();
+              vars = stackFrame.visibleVariables();
           } else {
             vars =
               varNames.stream()
@@ -227,6 +228,7 @@ public class BreakPoint extends Point {
               sleepTimeMax.set(sleepTime);
             }
           }
+          stackTraceList = bpm.getStackTrace();
           Utility.sleep(sleepTimeMax.get());
           // if isBreak is true
           if (bpm.isProcessing()) {
@@ -248,7 +250,7 @@ public class BreakPoint extends Point {
             }
           }
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {
-          e.printStackTrace();
+          //e.printStackTrace();
         }
       };
     if (getLineNumber() == 0) { // breakpoints set by methodName

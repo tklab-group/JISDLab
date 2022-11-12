@@ -22,7 +22,7 @@ public class FaultFinder {
   @Getter @Setter
   public static String jisdCmdPath = "";
   @Getter @Setter int topN = 10;
-  @Getter @Setter double contextConstValue ;
+  @Getter @Setter double contextConstValue=0.3;
   @Getter @Setter String projectDir;
   @Getter @Setter String projectName = "";
   @Getter @Setter String projectId = "";
@@ -84,7 +84,6 @@ public class FaultFinder {
       setFlResultsFromCsv(flResultFilePathStr);
       updateGeneration();
     }
-
     showFlResults();
     return;
   }
@@ -106,20 +105,22 @@ public class FaultFinder {
       }
       if (contextGranularity == Granularity.METHOD) {
         if (isClassNameSame && isMethodNameSame) {
-          newRes = new FlResult(res.className, res.methodName, res.line, res.score+0.5);
+          newRes = new FlResult(res.className, res.methodName, res.line, res.score+contextConstValue);
         } else {
           newRes = new FlResult(res.className, res.methodName, res.line, res.score);
         }
       } else {
         if (isClassNameSame) {
-          newRes = new FlResult(res.className, res.methodName, res.line, res.score+0.5);
+          newRes = new FlResult(res.className, res.methodName, res.line, res.score+contextConstValue);
         } else {
           newRes = new FlResult(res.className, res.methodName, res.line, res.score);
         }
       }
       newFlResults.add(newRes);
     }
-    reRanking(newFlResults);
+    flResults = newFlResults;
+    probe();
+    reRanking();
     updateGeneration();
     showFlResults();
     return;
@@ -155,16 +156,27 @@ public class FaultFinder {
         }
       })
       .collect(Collectors.toList());
+    probe();
     setRank();
     updateGeneration();
     showFlResults();
     return;
   }
 
-  void reRanking(List<FlResult> newFlResults) {
-    newFlResults.sort(Comparator.comparing(flResult -> -flResult.score));
-    flResults = newFlResults;
+  void reRanking() {
+    flResults.sort(Comparator.comparing(flResult -> -flResult.score));
     setRank();
+  }
+
+  void updateScoreByStackTrace(Set<String> methodList) {
+    for (var method: methodList) {
+      println(method);
+      for (var flResult: flResults) {
+        if (method.equals(flResult.className+"."+flResult.methodName)) {
+          flResult.setScore(flResult.score+contextConstValue);
+        }
+      }
+    }
   }
 
   public void probe() {
@@ -180,7 +192,7 @@ public class FaultFinder {
       cmd = jisdCmdPath + " debug " + projectDir;
       targetVmThread = new Thread(()->{exec(cmd);});
       targetVmThread.start();
-      sleep(Debugger.defaultSleepTime);
+      sleep(3000);
       dbg = new Debugger(25432);
     }
     var points = flResultsTopN.stream()
@@ -194,13 +206,13 @@ public class FaultFinder {
       e.printStackTrace();
     }
     DebuggerInfo.setVerbose(true);
+    Set<String> methodList = new HashSet<>();
     points.forEach(pOpt->{
       var p = pOpt.get();
-      Print.out(p.getClassName()+":"+p.getLineNumber());
-      p.getResults().forEach((name, r)->{
-        Print.out(name+": "+r.lv());
-      });
+      var stackTraceList = p.getStackTraceList();
+      stackTraceList.stream().map(s->methodList.add(s.getClassName()+"."+s.getMethodName())).close();
     });
+    updateScoreByStackTrace(methodList);
   }
 
   void updateGeneration() {
