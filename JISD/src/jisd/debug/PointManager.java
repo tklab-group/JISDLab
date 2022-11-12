@@ -86,7 +86,11 @@ class PointManager {
   List<Location> getStackTraceList(ThreadReference t) throws IncompatibleThreadStateException {
     List<Location> stackTraceList = t.frames().stream()
       .map(f->f.location())
-      .map(loc->new Location(loc.declaringType().name(), loc.method().name(), loc.lineNumber(), ""))
+      .map(loc->{
+        var method =loc.method();
+        String methodName = Name.getMethodNameFromFullMethodName(method.toString().replace(" ", ""));//method.name() +"("+method.argumentTypeNames().stream().reduce((String l, String r)->l+","+r)+")";
+        return new Location(loc.declaringType().name(), methodName, loc.lineNumber(), "");
+      })
       .collect(Collectors.toList());
     return stackTraceList;
   }
@@ -257,7 +261,7 @@ class PointManager {
       }
       resumeThread();
       isProcessing = true;
-      boolean isBreakLoop = sleep(j);
+      boolean isBreakLoop = sleep();
       if (isBreakLoop) {
         return;
       }
@@ -265,7 +269,7 @@ class PointManager {
   }
 
   /** Sleep main thread until current bpm process is done */
-  boolean sleep(JDIScript j) {
+  boolean sleep() {
     try {
       while (isProcessing) {
         Thread.sleep(100);

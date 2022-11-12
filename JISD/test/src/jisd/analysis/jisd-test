@@ -6,9 +6,9 @@ _output="${PROJECT_DIR}.csv"
 
 debug_cmd() {
   local _agent_lib="-agentlib:jdwp=transport=dt_socket,server=y,address=25432,suspend=y"
-  local _cp=./test/src/jisd/analysis/FLtest1/target/classes:./test/src/jisd/analysis/FLtest1/target/test-classes:/Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/junit-4.13.2.jar:/Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/hamcrest-all-1.3.jar
-  local _test_class=fr.FLtest1.CalculatorTest
-  java $_agent_lib -cp $_cp org.junit.runner.JUnitCore $_test_class &> /dev/null
+  local _cp=/Users/saku/Workspace/2020/gzoltar/com.gzoltar.cli.examples/build:./test/src/jisd/analysis/FLtest1/target/test-classes:/Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/junit-4.13.2.jar:/Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/hamcrest-all-1.3.jar
+  local _test_class=org.gzoltar.examples.CharacterCounterTest
+  java $_agent_lib -cp $_cp org.junit.runner.JUnitCore $_test_class > /Users/saku/Workspace/2020/JISDLab/JISD/test/src/jisd/analysis/out #&> /dev/null
 }
 
 fl_cmd() {

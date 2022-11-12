@@ -38,6 +38,15 @@ public class JDIManager extends VMManager {
     this(debugger, j, (s) -> {}, isRemoteDebug, targetVmThread);
   }
 
+  boolean isProcessing() {
+    try {
+      var size = j.vm().allThreads().size();
+      return size > 0;
+    } catch (VMDisconnectedException e) {
+      return false;
+    }
+  }
+
   void addStart(OnVMStart start) {
     this.start = start;
   }

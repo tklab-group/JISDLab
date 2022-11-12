@@ -137,6 +137,7 @@ public class BreakPoint extends Point {
         if (isNotSuspended) {
           bpm.setCurrentTRef(be.thread());
         }
+        stackTraceList = bpm.getStackTrace();
         try {
           // search the breakpoint which caused this event.
           int bpLineNumber = be.location().lineNumber();
@@ -228,7 +229,6 @@ public class BreakPoint extends Point {
               sleepTimeMax.set(sleepTime);
             }
           }
-          stackTraceList = bpm.getStackTrace();
           Utility.sleep(sleepTimeMax.get());
           // if isBreak is true
           if (bpm.isProcessing()) {
@@ -250,7 +250,7 @@ public class BreakPoint extends Point {
             }
           }
         } catch (IncompatibleThreadStateException | AbsentInformationException e) {
-          //e.printStackTrace();
+          bpm.clearThread();
         }
       };
     if (getLineNumber() == 0) { // breakpoints set by methodName

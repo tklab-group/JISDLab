@@ -44,6 +44,7 @@ public class Debugger {
   @Getter @Setter String projectId;
 
   @Getter List<String> srcDir = new ArrayList<String>();
+  private volatile boolean isProcessing = false;
 
   public Debugger(String main, String options) {
     this(main, options, false);
@@ -531,6 +532,28 @@ public class Debugger {
     return run(defaultSleepTime);
   }
 
+  /** Start up the debugger.(equals to run(until the target VM will exit)) */
+  public void runAll() {
+    run(0);
+    sleep();
+  }
+
+  /** Sleep main thread until current bpm process is done */
+  boolean sleep() {
+    try {
+      var jdiManager = ((JDIManager)vmManager);
+      isProcessing = true;
+      while (isProcessing) {
+        Thread.sleep(500);
+        isProcessing = jdiManager.isProcessing();
+      }
+    } catch (InterruptedException e) {
+      DebuggerInfo.print("Interrupted.");
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Start up the debugger.
    *
@@ -540,7 +563,6 @@ public class Debugger {
     if (vmThread != null) {
       throw new VMAlreadyStartedException("VM has already started once.");
     }
-
     vmThread = new Thread(vmManager);
     vmThread.start();
     if (!isRemoteDebug && usesProbeJ) {

@@ -3,10 +3,12 @@ package fr.FLtest1;
 public class Calculator {
 
 	int field;
+	Object objB;
+	Object objD;
 
 	int sample() {
-		a(); // field unchanged
-		b(); // field changed
+		//ObjectA objA = objB.b(); // field unchanged
+		//ObjectC objC = objD.d(); // field changed
 		return field;
 	}
 

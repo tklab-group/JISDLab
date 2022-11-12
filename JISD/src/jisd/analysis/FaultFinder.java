@@ -92,6 +92,7 @@ public class FaultFinder {
     if (!checkFlRankValidation(rank)) {
       return;
     }
+    Set<String> methodList = probe(rank);
     var removedItem = flResults.get(rank-1);
     var newFlResults = new ArrayList<FlResult>();
     for (int i = 0; i < flResults.size(); i++) {
@@ -119,7 +120,7 @@ public class FaultFinder {
       newFlResults.add(newRes);
     }
     flResults = newFlResults;
-    probe();
+    updateScoreByStackTrace(methodList);
     reRanking();
     updateGeneration();
     showFlResults();
@@ -156,7 +157,6 @@ public class FaultFinder {
         }
       })
       .collect(Collectors.toList());
-    probe();
     setRank();
     updateGeneration();
     showFlResults();
@@ -170,7 +170,6 @@ public class FaultFinder {
 
   void updateScoreByStackTrace(Set<String> methodList) {
     for (var method: methodList) {
-      println(method);
       for (var flResult: flResults) {
         if (method.equals(flResult.className+"."+flResult.methodName)) {
           flResult.setScore(flResult.score+contextConstValue);
@@ -179,26 +178,25 @@ public class FaultFinder {
     }
   }
 
-  public void probe() {
-    var flResultsTopN = flResults.stream().limit(topN).collect(Collectors.toList());
-    String cmd;
-    Thread targetVmThread;
+  public Set<String> probe(int rank) {
+    if (!checkFlRankValidation(rank)) {
+      return null;
+    }
+    var flResult = flResults.get(rank-1);
     Debugger dbg;
     DebuggerInfo.setVerbose(false);
     if (projectName != "" && projectId != "") {
-      cmd = jisdCmdPath + " debug " + projectName + " " + projectId;
       dbg = new Debugger(25432, projectName, projectId);
     } else {
-      cmd = jisdCmdPath + " debug " + projectDir;
-      targetVmThread = new Thread(()->{exec(cmd);});
+      // for debug
+      String cmd = jisdCmdPath + " debug " + projectDir;
+      var targetVmThread = new Thread(()->{exec(cmd);});
       targetVmThread.start();
       sleep(3000);
       dbg = new Debugger(25432);
     }
-    var points = flResultsTopN.stream()
-      .map(res->dbg.watch(res.className, res.line))
-      .collect(Collectors.toList());
-    var dbgThread = new Thread(()->{dbg.run();});
+    var pOpt = dbg.watch(flResult.className, flResult.line);
+    var dbgThread = new Thread(()->{dbg.runAll();});
     dbgThread.start();
     try {
       dbgThread.join();
@@ -207,12 +205,10 @@ public class FaultFinder {
     }
     DebuggerInfo.setVerbose(true);
     Set<String> methodList = new HashSet<>();
-    points.forEach(pOpt->{
-      var p = pOpt.get();
-      var stackTraceList = p.getStackTraceList();
-      stackTraceList.stream().map(s->methodList.add(s.getClassName()+"."+s.getMethodName())).close();
-    });
-    updateScoreByStackTrace(methodList);
+    var p = pOpt.get();
+    var stackTraceList = p.getStackTraceList();
+    stackTraceList.stream().map(s->methodList.add(s.getClassName()+"."+s.getMethodName())).collect(Collectors.toList());
+    return methodList;
   }
 
   void updateGeneration() {

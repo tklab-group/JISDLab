@@ -36,4 +36,19 @@ public final class Name {
     srcPath += ".java";
     return srcPath;
   }
+
+  public static String getMethodNameFromFullMethodName(String fullName) {
+    var names = fullName.split("\\.");
+    boolean isStartMethodName = false;
+    StringBuilder result= new StringBuilder();
+    for (int i = 0; i < names.length; i++) {
+      if (names[i].contains("(")) {
+        isStartMethodName = true;
+      }
+      if (isStartMethodName) {
+        result.append(names[i]);
+      }
+    }
+    return result.toString();
+  }
 }
