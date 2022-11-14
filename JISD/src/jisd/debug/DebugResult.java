@@ -93,10 +93,11 @@ public class DebugResult {
   }
 
   /** Add value to deque */
-  ValueInfo addValue(Value jValue, LocalDateTime date) {
+  ValueInfo addValue(Value jValue, List<Location> stList, LocalDateTime date) {
     ArrayDeque<ValueInfo> valueExpansionQue = new ArrayDeque<>();
     String name = location.getVarName();
     ValueInfo value = ValueInfoFactory.create(name, 0, jValue, "", date);
+    value.setStackTraceList(stList);
     valueExpansionQue.add(value);
     while (true) {
       ValueInfo v = valueExpansionQue.pop();

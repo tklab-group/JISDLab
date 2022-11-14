@@ -155,6 +155,7 @@ class PointManager {
       List<ReferenceType> rts = currentTRef.virtualMachine().classesByName(bpClassName);
       var rt = rts.get(0);
       var date = LocalDateTime.now();
+      var stList = getStackTrace();
       // get variable data from target VM
       List<LocalVariable> vars;
       var obj = stackFrame.thisObject();
@@ -167,7 +168,7 @@ class PointManager {
                 new Location(
                   bpClassName, bpMethodName, bpLineNumber, varName);
               var dr = new DebugResult(loc);
-              dr.addValue(v, date);
+              dr.addValue(v, stList, date);
               drs.put(varName, dr);
             });
       } else {
@@ -180,7 +181,7 @@ class PointManager {
                 new Location(
                   bpClassName, bpMethodName, bpLineNumber, varName);
               var dr = new DebugResult(loc);
-              dr.addValue(rt.getValue(f), date);
+              dr.addValue(rt.getValue(f), stList, date);
               drs.put(varName, dr);
             });
       }
@@ -192,7 +193,7 @@ class PointManager {
         Value jValue = entry.getValue();
         Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
         var dr = new DebugResult(loc);
-        dr.addValue(jValue, date);
+        dr.addValue(jValue, stList, date);
         drs.put(varName, dr);
       }
     } catch (IncompatibleThreadStateException e) {

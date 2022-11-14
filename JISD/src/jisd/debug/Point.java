@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -19,8 +18,6 @@ public abstract class Point {
   @Getter String className;
   @Getter int lineNumber;
   @Getter String methodName;
-  @Getter
-  List<Location> stackTraceList = new ArrayList<>();
   /** varNames and debug result */
   HashMap<String, DebugResult> drs = new HashMap<>();
 

@@ -28,7 +28,7 @@ public class FaultFinder {
   @Getter @Setter String projectId = "";
   @Getter @Setter String flCmdName = "fl";
   @Getter @Setter Granularity contextGranularity = Granularity.CLASS;
-  @Getter @Setter String flRankingPath;
+  @Getter @Setter String flRankingPath = "";
   @Getter @Setter(AccessLevel.PACKAGE) List<FlResult> flResults=new ArrayList<>();
   @Setter(AccessLevel.PACKAGE) List<String> flResultLines=new ArrayList<>();
   @Getter @Setter(AccessLevel.PACKAGE) Integer generation = 0;
@@ -101,10 +101,13 @@ public class FaultFinder {
       var isClassNameSame = res.className.equals(removedItem.className);
       var isMethodNameSame = res.methodName.equals(removedItem.methodName);
       var isLineNumberSame = res.line == removedItem.line;
-      if (contextGranularity == Granularity.LINE || (isClassNameSame && isMethodNameSame && isLineNumberSame)) {
+      if (isClassNameSame && isMethodNameSame && isLineNumberSame) {
         continue;
       }
-      if (contextGranularity == Granularity.METHOD) {
+      if (contextGranularity == Granularity.LINE) {
+        newRes = new FlResult(res.className, res.methodName, res.line, res.score);
+      }
+      else if (contextGranularity == Granularity.METHOD) {
         if (isClassNameSame && isMethodNameSame) {
           newRes = new FlResult(res.className, res.methodName, res.line, res.score+contextConstValue);
         } else {
@@ -170,6 +173,9 @@ public class FaultFinder {
 
   void updateScoreByStackTrace(Set<String> methodList) {
     for (var method: methodList) {
+      if (method.contains("test")) {
+        //println(method);
+      }
       for (var flResult: flResults) {
         if (method.equals(flResult.className+"."+flResult.methodName)) {
           flResult.setScore(flResult.score+contextConstValue);
@@ -206,8 +212,13 @@ public class FaultFinder {
     DebuggerInfo.setVerbose(true);
     Set<String> methodList = new HashSet<>();
     var p = pOpt.get();
-    var stackTraceList = p.getStackTraceList();
-    stackTraceList.stream().map(s->methodList.add(s.getClassName()+"."+s.getMethodName())).collect(Collectors.toList());
+    //Print.out(p.getResults().get("this.numDigits").getValues().size());
+    //p.getResults().forEach((k,v)->Print.out(v.lv()));
+    p.getResults().forEach((k,v)->v.getValues().stream()
+      .map(val->val.getStackTraceList().stream()
+        .map(s->methodList.add(s.getClassName()+"."+s.getMethodName()))
+        .collect(Collectors.toList()))
+      .collect(Collectors.toList()));
     return methodList;
   }
 

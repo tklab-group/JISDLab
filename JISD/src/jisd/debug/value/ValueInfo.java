@@ -3,10 +3,13 @@ package jisd.debug.value;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
+import jisd.debug.Location;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Observed value information.
@@ -24,6 +27,8 @@ public abstract class ValueInfo {
   @Getter long number;
   /** Get a time stamp */
   @Getter LocalDateTime createdAt;
+  @Getter @Setter
+  List<Location> stackTraceList = new ArrayList<>();
   /** Get the current number of variable expansion strata */
   @Getter int stratum;
   /** Get a jdi value */

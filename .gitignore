@@ -14,3 +14,4 @@ sample/.jisd_static_data*
 *.log
 JISD/src/jisd/demo/LoopN2.java
 .jisd_static_data/
+JISD/test/src/jisd/analysis/out

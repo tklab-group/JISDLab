@@ -96,17 +96,17 @@ public class BreakPoint extends Point {
     setRequested(false);
   }
 
-  ValueInfo addValue(Location loc, Value jValue, LocalDateTime date) {
+  ValueInfo addValue(Location loc, Value jValue, List<Location> stList, LocalDateTime date) {
     String varName = loc.getVarName();
     synchronized (this) {
       Optional<DebugResult> res_opt = Optional.ofNullable(drs.get(varName));
       if (res_opt.isPresent()) {
         var res = res_opt.get();
-        var valueInfo = res.addValue(jValue, date);
+        var valueInfo = res.addValue(jValue, stList, date);
         return valueInfo;
       }
       DebugResult dr = new DebugResult(loc);
-      var valueInfo = dr.addValue(jValue, date);
+      var valueInfo = dr.addValue(jValue, stList, date);
       addDebugResult(varName, dr);
       return valueInfo;
     }
@@ -137,7 +137,7 @@ public class BreakPoint extends Point {
         if (isNotSuspended) {
           bpm.setCurrentTRef(be.thread());
         }
-        stackTraceList = bpm.getStackTrace();
+        var stList = bpm.getStackTrace();
         try {
           // search the breakpoint which caused this event.
           int bpLineNumber = be.location().lineNumber();
@@ -157,7 +157,7 @@ public class BreakPoint extends Point {
                     Location loc =
                       new Location(
                         bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                    var valueInfo = addValue(loc, v, date);
+                    var valueInfo = addValue(loc, v, stList, date);
                     // update metrics
                     int sleepTime = dbg.notifyExporters(valueInfo);
                     if (sleepTime > sleepTimeMax.get()) {
@@ -172,7 +172,7 @@ public class BreakPoint extends Point {
                     Location loc =
                       new Location(
                         bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                    var valueInfo = addValue(loc, rt.getValue(f), date);
+                    var valueInfo = addValue(loc, rt.getValue(f), stList, date);
                     // update metrics
                     int sleepTime = dbg.notifyExporters(valueInfo);
                     if (sleepTime > sleepTimeMax.get()) {
@@ -193,14 +193,14 @@ public class BreakPoint extends Point {
                         Location loc =
                           new Location(bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
                         if (obj != null) {
-                          var valueInfo = addValue(loc, obj.getValue(f), date);
+                          var valueInfo = addValue(loc, obj.getValue(f), stList, date);
                           // update metrics
                           int sleepTime = dbg.notifyExporters(valueInfo);
                           if (sleepTime > sleepTimeMax.get()) {
                             sleepTimeMax.set(sleepTime);
                           }
                         } else if (rt.isStatic()) {
-                          var valueInfo = addValue(loc, rt.getValue(f), date);
+                          var valueInfo = addValue(loc, rt.getValue(f), stList, date);
                           // update metrics
                           int sleepTime = dbg.notifyExporters(valueInfo);
                           if (sleepTime > sleepTimeMax.get()) {
@@ -222,7 +222,7 @@ public class BreakPoint extends Point {
           for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
             String varName = entry.getKey().name();
             Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
-            var valueInfo = addValue(loc, entry.getValue(), date);
+            var valueInfo = addValue(loc, entry.getValue(), stList, date);
             // update metrics
             int sleepTime = dbg.notifyExporters(valueInfo);
             if (sleepTime > sleepTimeMax.get()) {
