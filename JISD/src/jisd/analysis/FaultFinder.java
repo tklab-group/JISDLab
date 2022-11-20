@@ -458,7 +458,7 @@ public class FaultFinder {
       return;
     }
     flResults.stream().limit(topN).forEach(flResult-> {
-      Print.out(flResult.rank + ". " + flResult.getClassName()+"#"+flResult.getMethodName() + ":" + flResult.line + " (score=" + flResult.score + ")");
+      Print.out(flResult.rank + ". " + flResult.getClassName()+"#"+flResult.getMethodNameWithParameters() + ":" + flResult.line + " (score=" + flResult.score + ")");
     });
   }
 
