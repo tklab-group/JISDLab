@@ -88,8 +88,10 @@ class PointManager {
       .map(f->f.location())
       .map(loc->{
         var method =loc.method();
-        String methodName = Name.getMethodNameFromFullMethodName(method.toString().replace(" ", ""));//method.name() +"("+method.argumentTypeNames().stream().reduce((String l, String r)->l+","+r)+")";
-        return new Location(loc.declaringType().name(), methodName, loc.lineNumber(), "");
+        String methodName = method.name();
+        List<String> parameters = method.argumentTypeNames();
+        //Name.getMethodNameFromFullMethodName(method.toString().replace(" ", ""));//method.name() +"("+method.argumentTypeNames().stream().reduce((String l, String r)->l+","+r)+")";
+        return new Location(loc.declaringType().name(), methodName, parameters, loc.lineNumber(), "");
       })
       .collect(Collectors.toList());
     return stackTraceList;
@@ -470,6 +472,9 @@ class PointManager {
   void printSrcAtCurrentLocation(String prefix, List<String> srcDirs) throws VMNotSuspendedException {
     if (!checkCurrentTRef(false)) {
       throw new VMNotSuspendedException("");
+    }
+    if (!DebuggerInfo.isVerbose()) {
+      return;
     }
     srcDirs.add(".");
     try {

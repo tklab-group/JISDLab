@@ -90,6 +90,9 @@ dependencies {
   // flacoco
   implementation 'com.github.spoonlabs:flacoco:1.0.5'
 
+  // https://mvnrepository.com/artifact/fr.inria.gforge.spoon/spoon-core
+  implementation 'fr.inria.gforge.spoon:spoon-core:10.2.0'
+
   // jisdvis
   implementation 'io.prometheus:simpleclient:0.11.0'
   implementation 'io.prometheus:simpleclient_hotspot:0.11.0'

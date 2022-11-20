@@ -148,88 +148,92 @@ public class BreakPoint extends Point {
           // get variable data from target VM
           List<LocalVariable> vars;
           StackFrame stackFrame = be.thread().frame(0);
-          if (varNames.size() == 0) {
-            var obj = stackFrame.thisObject();
-            if (obj != null) {
-              obj.getValues(rt.visibleFields())
-                .forEach(
-                  (f, v) -> {
-                    Location loc =
-                      new Location(
-                        bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                    var valueInfo = addValue(loc, v, stList, date);
-                    // update metrics
-                    int sleepTime = dbg.notifyExporters(valueInfo);
-                    if (sleepTime > sleepTimeMax.get()) {
-                      sleepTimeMax.set(sleepTime);
-                    }
-                  });
-            } else {
-              rt.allFields().stream()
-                .filter(f -> f.isStatic())
-                .forEach(
-                  f -> {
-                    Location loc =
-                      new Location(
-                        bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                    var valueInfo = addValue(loc, rt.getValue(f), stList, date);
-                    // update metrics
-                    int sleepTime = dbg.notifyExporters(valueInfo);
-                    if (sleepTime > sleepTimeMax.get()) {
-                      sleepTimeMax.set(sleepTime);
-                    }
-                  });
-            }
+          try {
+            if (varNames.size() == 0) {
+              var obj = stackFrame.thisObject();
+              if (obj != null) {
+                obj.getValues(rt.visibleFields())
+                  .forEach(
+                    (f, v) -> {
+                      Location loc =
+                        new Location(
+                          bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                      var valueInfo = addValue(loc, v, stList, date);
+                      // update metrics
+                      int sleepTime = dbg.notifyExporters(valueInfo);
+                      if (sleepTime > sleepTimeMax.get()) {
+                        sleepTimeMax.set(sleepTime);
+                      }
+                    });
+              } else {
+                rt.allFields().stream()
+                  .filter(f -> f.isStatic())
+                  .forEach(
+                    f -> {
+                      Location loc =
+                        new Location(
+                          bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                      var valueInfo = addValue(loc, rt.getValue(f), stList, date);
+                      // update metrics
+                      int sleepTime = dbg.notifyExporters(valueInfo);
+                      if (sleepTime > sleepTimeMax.get()) {
+                        sleepTimeMax.set(sleepTime);
+                      }
+                    });
+              }
               vars = stackFrame.visibleVariables();
-          } else {
-            vars =
-              varNames.stream()
-                .map(
-                  name -> {
-                    try {
-                      if (name.startsWith("this.")) {
-                        var obj = stackFrame.thisObject();
-                        var f = rt.fieldByName(name.substring(5));
-                        Location loc =
-                          new Location(bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
-                        if (obj != null) {
-                          var valueInfo = addValue(loc, obj.getValue(f), stList, date);
-                          // update metrics
-                          int sleepTime = dbg.notifyExporters(valueInfo);
-                          if (sleepTime > sleepTimeMax.get()) {
-                            sleepTimeMax.set(sleepTime);
-                          }
-                        } else if (rt.isStatic()) {
-                          var valueInfo = addValue(loc, rt.getValue(f), stList, date);
-                          // update metrics
-                          int sleepTime = dbg.notifyExporters(valueInfo);
-                          if (sleepTime > sleepTimeMax.get()) {
-                            sleepTimeMax.set(sleepTime);
+            } else {
+              vars =
+                varNames.stream()
+                  .map(
+                    name -> {
+                      try {
+                        if (name.startsWith("this.")) {
+                          var obj = stackFrame.thisObject();
+                          var f = rt.fieldByName(name.substring(5));
+                          Location loc =
+                            new Location(bpClassName, bpMethodName, bpLineNumber, "this." + f.name());
+                          if (obj != null) {
+                            var valueInfo = addValue(loc, obj.getValue(f), stList, date);
+                            // update metrics
+                            int sleepTime = dbg.notifyExporters(valueInfo);
+                            if (sleepTime > sleepTimeMax.get()) {
+                              sleepTimeMax.set(sleepTime);
+                            }
+                          } else if (rt.isStatic()) {
+                            var valueInfo = addValue(loc, rt.getValue(f), stList, date);
+                            // update metrics
+                            int sleepTime = dbg.notifyExporters(valueInfo);
+                            if (sleepTime > sleepTimeMax.get()) {
+                              sleepTimeMax.set(sleepTime);
+                            }
                           }
                         }
+                        return stackFrame.visibleVariableByName(name);
+                      } catch (AbsentInformationException ee) {
+                        DebuggerInfo.printError("such a variable name not found.");
+                        return null;
                       }
-                      return stackFrame.visibleVariableByName(name);
-                    } catch (AbsentInformationException ee) {
-                      DebuggerInfo.printError("such a variable name not found.");
-                      return null;
-                    }
-                  })
-                .filter(o -> o != null)
-                .collect(Collectors.toList());
-          }
-          Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
-          // add debug result
-          for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
-            String varName = entry.getKey().name();
-            Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
-            var valueInfo = addValue(loc, entry.getValue(), stList, date);
-            // update metrics
-            int sleepTime = dbg.notifyExporters(valueInfo);
-            if (sleepTime > sleepTimeMax.get()) {
-              sleepTimeMax.set(sleepTime);
+                    })
+                  .filter(o -> o != null)
+                  .collect(Collectors.toList());
             }
+            Map<LocalVariable, Value> visibleVariables = stackFrame.getValues(vars);
+            // add debug result
+            for (Map.Entry<LocalVariable, Value> entry : visibleVariables.entrySet()) {
+              String varName = entry.getKey().name();
+              Location loc = new Location(bpClassName, bpMethodName, bpLineNumber, varName);
+              var valueInfo = addValue(loc, entry.getValue(), stList, date);
+              // update metrics
+              int sleepTime = dbg.notifyExporters(valueInfo);
+              if (sleepTime > sleepTimeMax.get()) {
+                sleepTimeMax.set(sleepTime);
+              }
+            }
+            Utility.sleep(sleepTimeMax.get());
+          } catch (InvalidStackFrameException | AbsentInformationException e) {
+            // do nothing
           }
-          Utility.sleep(sleepTimeMax.get());
           // if isBreak is true
           if (bpm.isProcessing()) {
             bpm.completeStep();
@@ -244,12 +248,14 @@ public class BreakPoint extends Point {
           if (isNotSuspended) {
             if (isBreak) {
               ThreadReference currentTRef = bpm.getCurrentTRef();
-              currentTRef.suspend();
+              if (currentTRef != null) {
+                currentTRef.suspend();
+              }
             } else {
               bpm.clearThread();
             }
           }
-        } catch (IncompatibleThreadStateException | AbsentInformationException e) {
+        } catch (InvalidStackFrameException | AbsentInformationException | IncompatibleThreadStateException e) {
           bpm.clearThread();
         }
       };

@@ -554,6 +554,21 @@ public class Debugger {
     return false;
   }
 
+  public boolean sleepUntilBreak() {
+    try {
+      var jdiManager = ((JDIManager)vmManager);
+      isProcessing = true;
+      while (isProcessing) {
+        Thread.sleep(500);
+        isProcessing = jdiManager.isProcessing() && !pm.checkCurrentTRef(false);
+      }
+    } catch (InterruptedException e) {
+      DebuggerInfo.print("Interrupted.");
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Start up the debugger.
    *

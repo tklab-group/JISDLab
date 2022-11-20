@@ -131,6 +131,22 @@ public class Utility {
   public static String createUri(String text, String path) {
     return "["+text+"]("+path+")";
   }
+  public static String createPlainUri(String className, List<String> srcDirs) {
+    var srcRelPath = Name.toSourcePathFromClassName(className);
+    srcDirs.add(".");
+    for (int i = 0; i < srcDirs.size(); i++) {
+      var srcDir = srcDirs.get(i);
+      var srcAbsPathStr = srcDir + File.separator.charAt(0) + srcRelPath;
+      var srcAbsPath = Paths.get(srcAbsPathStr);
+      if (Files.exists(srcAbsPath)) {
+        String path = srcAbsPathStr;
+        return path;
+      }
+    }
+    DebuggerInfo.printError(srcRelPath+" not found. Set srcDir by Debugger.setSrcDir(String... srcDir))");
+    return null;
+  }
+
 
   public static String uri(Location loc, List<String> srcDirs) {
     var lineNumber = loc.lineNumber;
